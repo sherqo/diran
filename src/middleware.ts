@@ -22,13 +22,14 @@ export function middleware(req: NextRequest) {
         return NextResponse.next();
     }
 
-    const isProduction = process.env.NEXT_PUBLIC_ENVIRONMENT === 'production';
+    const isDev = process.env.NEXT_PUBLIC_ENVIRONMENT === 'development';
 
-    if (isProduction) {
-        return NextResponse.redirect(new URL('/wait', req.url));
+    if (isDev) {
+        console.log('Development mode - allowing all routes');
+        return NextResponse.next();
     }
 
-    return NextResponse.next();
+    return NextResponse.redirect(new URL('/wait', req.url));
 }
 
 // Apply middleware to all routes; internal exclusions are handled above.
