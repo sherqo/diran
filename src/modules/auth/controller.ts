@@ -5,15 +5,19 @@ import { AuthenticatedRequest } from '../../shared/middleware/index.js';
 import { SignupInput, LoginInput, ForgotPasswordInput, ResetPasswordInput, UpdateProfileInput, ChangePasswordInput } from './validation.js';
 
 export const signup = async (req: Request, res: Response): Promise<void> => {
-    try {
-        const { email, password, name, photo }: SignupInput = req.body;
+  try {
+    console.log('🔍 SIGNUP: Starting signup process');
+    console.log('🔍 SIGNUP: Request body:', req.body);
+    
+    const { email, password, name, photo }: SignupInput = req.body;
+    console.log('🔍 SIGNUP: Extracted data:', { email, name, photo, passwordLength: password?.length });
 
-        // Check if user already exists
-        const existingUser = await db.user.findUnique({
-            where: { email },
-        });
-
-        if (existingUser) {
+    console.log('🔍 SIGNUP: Checking if user exists...');
+    // Check if user already exists
+    const existingUser = await db.user.findUnique({
+      where: { email },
+    });
+    console.log('🔍 SIGNUP: Existing user check result:', existingUser ? 'User exists' : 'User does not exist');        if (existingUser) {
             res.status(400).json({
                 success: false,
                 message: 'User already exists with this email',
@@ -21,9 +25,12 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
+        console.log('🔍 SIGNUP: Hashing password...');
         // Hash password
         const hashedPassword = await hashPassword(password);
+        console.log('🔍 SIGNUP: Password hashed successfully');
 
+        console.log('🔍 SIGNUP: Creating user in database...');
         // Create user
         const user = await db.user.create({
             data: {
@@ -41,9 +48,14 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
             },
         });
 
+        console.log('🔍 SIGNUP: User created successfully:', user.id);
+
+        console.log('🔍 SIGNUP: Generating JWT token...');
         // Generate token
         const token = generateToken(user.id);
+        console.log('🔍 SIGNUP: Token generated successfully');
 
+        console.log('🔍 SIGNUP: Sending success response');
         res.status(201).json({
             success: true,
             message: 'User created successfully',
@@ -53,10 +65,19 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
             },
         });
     } catch (error: any) {
-        console.error('Signup error:', error);
+        console.error('🚨 SIGNUP ERROR:', {
+            message: error.message,
+            stack: error.stack,
+            name: error.name,
+            code: error.code,
+        });
         res.status(500).json({
             success: false,
             message: 'Internal server error',
+            ...(process.env.NODE_ENV === 'development' && { 
+                error: error.message,
+                stack: error.stack,
+            }),
         });
     }
 };

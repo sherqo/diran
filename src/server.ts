@@ -29,14 +29,30 @@ app.use('/api/health', healthRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 
+// Request debugging middleware
+app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
+    console.log(`🔍 ${req.method} ${req.path}`, {
+        body: req.body,
+        headers: req.headers['content-type'],
+    });
+    next();
+});
+
 // Global error handler
 app.use((error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-    console.error('Global Error:', error);
+    console.error('🚨 Global Error:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+    });
 
     res.status(error.status || 500).json({
         success: false,
         message: error.message || 'Internal server error',
-        ...(process.env.NODE_ENV === 'development' && { stack: error.stack }),
+        ...(process.env.NODE_ENV === 'development' && { 
+            stack: error.stack,
+            errorName: error.name,
+        }),
     });
 });
 
