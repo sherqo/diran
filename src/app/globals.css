@@ -1,4 +1,6 @@
 @import 'tailwindcss';
+@import 'tw-animate-css';
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -89,7 +91,7 @@
     --destructive: #dc2626;
     --destructive-foreground: #ffffff;
     --border: #e8e8e8;
-    --input: #f7f7f7;
+    --input: #e8e8e8;
     --ring: #ff6a00;
     --chart-1: #ff6a00;
     --chart-2: #ff8c2b;
@@ -141,7 +143,7 @@
     --destructive: #dc2626;
     --destructive-foreground: #ffffff;
     --border: #3a3a3a;
-    --input: #2b2b2b;
+    --input: #3a3a3a;
     --ring: #ff6a00;
     --chart-1: #ff6a00;
     --chart-2: #ff8c2b;
