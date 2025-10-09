@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { db } from '../../shared/database/index.js';
-import { generateToken, hashPassword, comparePassword, generateResetToken, hashResetToken } from '../../shared/utils/index.js';
-import { AuthenticatedRequest } from '../../shared/middleware/index.js';
+import { db } from '../../shared/database';
+import { generateToken, hashPassword, comparePassword, generateResetToken, hashResetToken } from '../../shared/utils';
+import { AuthenticatedRequest } from '../../shared/middleware';
 import { SignupInput, LoginInput, ForgotPasswordInput, ResetPasswordInput } from './validation.js';
 import { sendSuccess, sendConflict, sendUnauthorized } from '../../shared/utils/response.js';
 import { asyncHandler } from '../../shared/middleware/errorHandler.js';

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { AuthenticatedRequest } from '../../shared/middleware/index.js';
+import { AuthenticatedRequest } from '../../shared/middleware';
 import { CreateExampleInput } from './validation.js';
 
 // Example controller - shows how to structure controllers

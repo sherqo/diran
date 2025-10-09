@@ -2,8 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
-import { db } from './shared/database/index.js';
-import apiRouter from './shared/routes/index.js';
+import { db } from './shared/database';
+import apiRouter from './shared/routes';
 import { errorHandler, notFoundHandler } from './shared/middleware/errorHandler.js';
 
 // Load environment variables

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { db } from '../../shared/database/index.js';
-import { hashPassword, comparePassword } from '../../shared/utils/index.js';
-import { AuthenticatedRequest } from '../../shared/middleware/index.js';
+import { db } from '../../shared/database';
+import { hashPassword, comparePassword } from '../../shared/utils';
+import { AuthenticatedRequest } from '../../shared/middleware';
 import { UpdateProfileInput, ChangePasswordInput } from '../auth/validation.js';
 
 export const getProfile = async (req: AuthenticatedRequest, res: Response): Promise<void> => {

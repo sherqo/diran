@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { signup, login, logout, forgotPassword, resetPassword } from './controller.js';
-import { authenticate, validateRequest } from '../../shared/middleware/index.js';
+import { authenticate, validateRequest } from '../../shared/middleware';
 import { signupSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema } from './validation.js';
 
 const router = Router();

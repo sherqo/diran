@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { db } from '../../shared/database/index.js';
+import { db } from '../../shared/database';
 
 const router = Router();
 
