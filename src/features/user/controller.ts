@@ -3,114 +3,76 @@ import { UpdateProfileInput, ChangePasswordInput } from './validation';
 import { AuthenticatedRequest } from '#lib/middleware/auth';
 import { db } from '#lib/database/connection';
 import { comparePassword, hashPassword } from '#lib/utils/auth';
+import { sendSuccess, sendNotFound, sendUnauthorized } from '#lib/utils/response';
+import { asyncHandler } from '#lib/middleware/errorHandler';
 
-export const getProfile = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    try {
-        const user = await db.user.findUnique({
-            where: { id: req.user!.id },
-            select: {
-                id: true,
-                email: true,
-                name: true,
-                photo: true,
-                createdAt: true,
-                updatedAt: true,
-            },
-        });
+export const getProfile = asyncHandler(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const user = await db.user.findUnique({
+        where: { id: req.user!.id },
+        select: {
+            id: true,
+            email: true,
+            name: true,
+            photo: true,
+            createdAt: true,
+            updatedAt: true,
+        },
+    });
 
-        res.json({
-            success: true,
-            data: { user },
-        });
-    } catch (error: any) {
-        console.error('Get profile error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Internal server error',
-        });
+    sendSuccess(res, { user });
+});
+
+export const updateProfile = asyncHandler(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const { name, photo }: UpdateProfileInput = req.body;
+
+    const user = await db.user.update({
+        where: { id: req.user!.id },
+        data: {
+            ...(name && { name }),
+            ...(photo && { photo }),
+        },
+        select: {
+            id: true,
+            email: true,
+            name: true,
+            photo: true,
+            createdAt: true,
+            updatedAt: true,
+        },
+    });
+
+    sendSuccess(res, { user }, 'Profile updated successfully');
+});
+
+export const changePassword = asyncHandler(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    const { currentPassword, newPassword }: ChangePasswordInput = req.body;
+
+    // Get user with password
+    const user = await db.user.findUnique({
+        where: { id: req.user!.id },
+    });
+
+    if (!user) {
+        sendNotFound(res, 'User not found');
+        return;
     }
-};
 
-export const updateProfile = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    try {
-        const { name, photo }: UpdateProfileInput = req.body;
+    // Verify current password
+    const isCurrentPasswordValid = await comparePassword(currentPassword, user.password);
 
-        const user = await db.user.update({
-            where: { id: req.user!.id },
-            data: {
-                ...(name && { name }),
-                ...(photo && { photo }),
-            },
-            select: {
-                id: true,
-                email: true,
-                name: true,
-                photo: true,
-                createdAt: true,
-                updatedAt: true,
-            },
-        });
-
-        res.json({
-            success: true,
-            message: 'Profile updated successfully',
-            data: { user },
-        });
-    } catch (error: any) {
-        console.error('Update profile error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Internal server error',
-        });
+    if (!isCurrentPasswordValid) {
+        sendUnauthorized(res, 'Current password is incorrect');
+        return;
     }
-};
 
-export const changePassword = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    try {
-        const { currentPassword, newPassword }: ChangePasswordInput = req.body;
+    // Hash new password
+    const hashedNewPassword = await hashPassword(newPassword);
 
-        // Get user with password
-        const user = await db.user.findUnique({
-            where: { id: req.user!.id },
-        });
+    // Update password
+    await db.user.update({
+        where: { id: req.user!.id },
+        data: { password: hashedNewPassword },
+    });
 
-        if (!user) {
-            res.status(404).json({
-                success: false,
-                message: 'User not found',
-            });
-            return;
-        }
-
-        // Verify current password
-        const isCurrentPasswordValid = await comparePassword(currentPassword, user.password);
-
-        if (!isCurrentPasswordValid) {
-            res.status(400).json({
-                success: false,
-                message: 'Current password is incorrect',
-            });
-            return;
-        }
-
-        // Hash new password
-        const hashedNewPassword = await hashPassword(newPassword);
-
-        // Update password
-        await db.user.update({
-            where: { id: req.user!.id },
-            data: { password: hashedNewPassword },
-        });
-
-        res.json({
-            success: true,
-            message: 'Password changed successfully',
-        });
-    } catch (error: any) {
-        console.error('Change password error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Internal server error',
-        });
-    }
-};
+    sendSuccess(res, null, 'Password changed successfully');
+});

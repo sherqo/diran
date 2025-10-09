@@ -1,6 +1,7 @@
 import { db } from '#lib/database/connection';
 import { verifyToken } from '#lib/utils/auth';
 import { Request, Response, NextFunction } from 'express';
+import { sendUnauthorized } from '../utils/response';
 
 export interface AuthenticatedRequest extends Request {
     user?: {
@@ -15,10 +16,7 @@ export const authenticate = async (req: AuthenticatedRequest, res: Response, nex
         const authHeader = req.headers.authorization;
 
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            res.status(401).json({
-                success: false,
-                message: 'Access token required',
-            });
+            sendUnauthorized(res, 'Access token required');
             return;
         }
 
@@ -31,19 +29,13 @@ export const authenticate = async (req: AuthenticatedRequest, res: Response, nex
         });
 
         if (!user) {
-            res.status(401).json({
-                success: false,
-                message: 'Invalid token',
-            });
+            sendUnauthorized(res, 'Invalid token');
             return;
         }
 
         req.user = user;
         next();
     } catch (error) {
-        res.status(401).json({
-            success: false,
-            message: 'Invalid token',
-        });
+        sendUnauthorized(res, 'Invalid token');
     }
 };
