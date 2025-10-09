@@ -12,6 +12,17 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 4003;
 
+// Request logger middleware (only in development)
+if (process.env.NODE_ENV === 'development') {
+    app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
+        console.log(`🔍 ${req.method} ${req.path}`, {
+            body: req.body && Object.keys(req.body).length > 0 ? req.body : undefined,
+            headers: req.headers['content-type'],
+        });
+        next();
+    });
+}
+
 // Middleware
 app.use(helmet()); // Security headers
 app.use(
@@ -26,19 +37,9 @@ app.use(express.urlencoded({ extended: true }));
 // Routes with automatic /v1 prefix, it will be hosted on api.diran.app/v1
 app.use('/v1', apiRouter);
 
-// Request debugging middleware (only in development)
-if (process.env.NODE_ENV === 'development') {
-    app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
-        console.log(`🔍 ${req.method} ${req.path}`, {
-            body: Object.keys(req.body).length > 0 ? req.body : undefined,
-            headers: req.headers['content-type'],
-        });
-        next();
-    });
-}
-
 // Error handling middleware
-app.use('*', notFoundHandler); // 404 handler for unknown routes
+
+app.use('/{*splat}', notFoundHandler); // 404 handler for unknown routes
 app.use(errorHandler); // Global error handler
 
 // Graceful shutdown
