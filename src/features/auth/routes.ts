@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { signup, login, forgotPassword, resetPassword } from './controller.js';
-import { validateRequest } from '../../shared/middleware/index.js';
 import { signupSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema } from './validation.js';
+import { validateRequest } from '#lib/middleware/validation.js';
 
 const router = Router();
 

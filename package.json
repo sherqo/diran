@@ -4,6 +4,9 @@
     "private": true,
     "description": "Diran AI Backend - Express.js + PostgreSQL with Prisma ORM",
     "type": "module",
+    "imports": {
+        "#*": "./src/*"
+    },
     "main": "dist/server.js",
     "scripts": {
         "build": "tsc",

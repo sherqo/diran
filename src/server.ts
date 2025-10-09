@@ -2,9 +2,9 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
-import { db } from './lib/database';
-import apiRouter from './shared/routes';
-import { errorHandler, notFoundHandler } from './shared/middleware/errorHandler.js';
+import apiRouter from '#routes';
+import { errorHandler, notFoundHandler } from '#lib/middleware/errorHandler';
+import { db } from '#lib/database';
 
 // Load environment variables
 dotenv.config();

@@ -1,7 +1,5 @@
+import { healthRoutes, authRoutes, userRoutes } from '#features';
 import express from 'express';
-import { authRoutes } from '../../features/auth';
-import { userRoutes } from '../../features/user';
-import healthRoutes from './health.js';
 
 // Create API router with all v1 routes
 const apiRouter = express.Router();

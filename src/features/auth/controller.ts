@@ -1,10 +1,9 @@
 import { Request, Response } from 'express';
 import { db } from '../../lib/database';
-import { generateToken, hashPassword, comparePassword, generateResetToken, hashResetToken } from '../../lib/utils';
-import { AuthenticatedRequest } from '../../shared/middleware';
 import { SignupInput, LoginInput, ForgotPasswordInput, ResetPasswordInput } from './validation.js';
-import { sendSuccess, sendConflict, sendUnauthorized } from '../../lib/utils/response.js';
-import { asyncHandler } from '../../shared/middleware/errorHandler.js';
+import { asyncHandler } from '#lib/middleware/errorHandler';
+import { hashPassword, generateToken, comparePassword, generateResetToken, hashResetToken } from '#lib/utils';
+import { sendConflict, sendSuccess, sendUnauthorized } from '#lib/utils/response';
 
 export const signup = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { email, password, name, photo }: SignupInput = req.body;

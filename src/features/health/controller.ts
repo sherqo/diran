@@ -1,7 +1,7 @@
+import { db } from '#lib/database';
+import { asyncHandler } from '#lib/middleware/errorHandler';
+import { sendSuccess, sendInternalError } from '#lib/utils/response';
 import { Request, Response } from 'express';
-import { db } from '../../lib/database';
-import { sendSuccess, sendInternalError } from '../../lib/utils/response';
-import { asyncHandler } from '../../shared/middleware/errorHandler';
 
 export const getHealth = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     try {
