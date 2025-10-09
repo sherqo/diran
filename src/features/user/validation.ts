@@ -3,7 +3,7 @@ import { z } from 'zod';
 // Update profile schema
 export const updateProfileSchema = z.object({
     name: z.string().min(2, 'Name must be at least 2 characters').optional(),
-    photo: z.string().url().optional(),
+    photo: z.url().optional(),
 });
 
 // Change password schema
