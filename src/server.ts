@@ -4,7 +4,7 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import apiRouter from '#routes';
 import { errorHandler, notFoundHandler } from '#lib/middleware/errorHandler';
-import { db } from '#lib/database';
+import { db } from '#lib/database/connection';
 
 // Load environment variables
 dotenv.config();

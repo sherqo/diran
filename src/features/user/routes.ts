@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { getProfile, updateProfile, changePassword } from './controller.js';
 import { updateProfileSchema, changePasswordSchema } from './validation.js';
 import { authenticate } from '#lib/middleware/auth.js';
-import { validateRequest } from '#lib/middleware';
+import { validateRequest } from '#lib/middleware/validation.js';
 
 const router = Router();
 

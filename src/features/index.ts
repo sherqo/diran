@@ -1,10 +1,4 @@
 // Export all modules from here for easy imports
-export * from './health';
-export * from './auth';
-export * from './user';
-
-// Future modules can be added here:
-// export * from './blocks';
-// export * from './ai';
-// export * from './files';
-// etc...
+export { default as healthRoutes } from './health/routes';
+export { default as authRoutes } from './auth/routes';
+export { default as userRoutes } from './user/routes';

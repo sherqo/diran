@@ -1,5 +1,5 @@
-import { db } from '#lib/database';
-import { verifyToken } from '#lib/utils';
+import { db } from '#lib/database/connection';
+import { verifyToken } from '#lib/utils/auth';
 import { Request, Response, NextFunction } from 'express';
 
 export interface AuthenticatedRequest extends Request {
