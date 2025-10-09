@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { AuthenticatedRequest } from '../../shared/middleware';
 import { CreateExampleInput } from './validation.js';
+import { AuthenticatedRequest } from '#lib/middleware';
 
 // Example controller - shows how to structure controllers
 export const createExample = async (req: AuthenticatedRequest, res: Response): Promise<void> => {

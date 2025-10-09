@@ -1,6 +1,6 @@
+import { db } from '#lib/database';
+import { verifyToken } from '#lib/utils';
 import { Request, Response, NextFunction } from 'express';
-import { verifyToken } from '../../lib/utils/auth.js';
-import { db } from '../../lib/database/index.js';
 
 export interface AuthenticatedRequest extends Request {
     user?: {

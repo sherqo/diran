@@ -1,5 +1,5 @@
+import { sendInternalError } from '#lib/utils/response';
 import { Request, Response, NextFunction } from 'express';
-import { sendInternalError } from '../../lib/utils/response.js';
 
 // Custom error class for API errors
 export class ApiError extends Error {
