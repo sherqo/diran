@@ -13,7 +13,7 @@ const app = express();
 const PORT = process.env.PORT || 4003;
 
 // Middleware
-app.use(helmet());
+app.use(helmet()); // Security headers
 app.use(
     cors({
         origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
@@ -23,8 +23,8 @@ app.use(
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Routes with automatic /api/v1 prefix
-app.use('/api/v1', apiRouter);
+// Routes with automatic /v1 prefix, it will be hosted on api.diran.app/v1
+app.use('/v1', apiRouter);
 
 // Request debugging middleware (only in development)
 if (process.env.NODE_ENV === 'development') {
