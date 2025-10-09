@@ -1,6 +1,6 @@
 import express from 'express';
-import { authRoutes } from '../../modules/auth';
-import { userRoutes } from '../../modules/user';
+import { authRoutes } from '../../features/auth';
+import { userRoutes } from '../../features/user';
 import healthRoutes from './health.js';
 
 // Create API router with all v1 routes

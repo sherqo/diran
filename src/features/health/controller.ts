@@ -1,28 +1,25 @@
-import { Router, Request, Response } from 'express';
-import { db } from '../../shared/database';
+import { Request, Response } from 'express';
+import { db } from '../../lib/database';
+import { sendSuccess, sendInternalError } from '../../lib/utils/response';
+import { asyncHandler } from '../../shared/middleware/errorHandler';
 
-const router = Router();
-
-router.get('/', async (req: Request, res: Response) => {
+export const getHealth = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     try {
         // Check database connection
         await db.$queryRaw`SELECT 1`;
 
-        res.json({
+        sendSuccess(res, {
             status: 'ok',
             timestamp: new Date().toISOString(),
             uptime: process.uptime(),
             database: 'connected',
         });
     } catch (error) {
-        res.status(503).json({
+        sendInternalError(res, 'Database connection failed', {
             status: 'error',
             timestamp: new Date().toISOString(),
             uptime: process.uptime(),
             database: 'disconnected',
-            error: 'Database connection failed',
         });
     }
 });
-
-export default router;

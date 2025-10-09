@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
-import { db } from './shared/database';
+import { db } from './lib/database';
 import apiRouter from './shared/routes';
 import { errorHandler, notFoundHandler } from './shared/middleware/errorHandler.js';
 

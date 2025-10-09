@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
-import { db } from '../../shared/database';
-import { generateToken, hashPassword, comparePassword, generateResetToken, hashResetToken } from '../../shared/utils';
+import { db } from '../../lib/database';
+import { generateToken, hashPassword, comparePassword, generateResetToken, hashResetToken } from '../../lib/utils';
 import { AuthenticatedRequest } from '../../shared/middleware';
 import { SignupInput, LoginInput, ForgotPasswordInput, ResetPasswordInput } from './validation.js';
-import { sendSuccess, sendConflict, sendUnauthorized } from '../../shared/utils/response.js';
+import { sendSuccess, sendConflict, sendUnauthorized } from '../../lib/utils/response.js';
 import { asyncHandler } from '../../shared/middleware/errorHandler.js';
 
 export const signup = asyncHandler(async (req: Request, res: Response): Promise<void> => {
