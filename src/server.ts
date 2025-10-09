@@ -3,9 +3,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import { db } from './shared/database/index.js';
-import { authRoutes } from './modules/auth/index.js';
-import { userRoutes } from './modules/user/index.js';
-import healthRoutes from './shared/routes/health.js';
+import apiRouter from './shared/routes/index.js';
+import { errorHandler, notFoundHandler } from './shared/middleware/errorHandler.js';
 
 // Load environment variables
 dotenv.config();
@@ -24,45 +23,25 @@ app.use(
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
-app.use('/api/health', healthRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/user', userRoutes);
+// Routes with automatic /api/v1 prefix
+app.use('/api/v1', apiRouter);
 
-// Request debugging middleware
-app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
-    console.log(`🔍 ${req.method} ${req.path}`, {
-        body: req.body,
-        headers: req.headers['content-type'],
+// Request debugging middleware (only in development)
+if (process.env.NODE_ENV === 'development') {
+    app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
+        console.log(`🔍 ${req.method} ${req.path}`, {
+            body: Object.keys(req.body).length > 0 ? req.body : undefined,
+            headers: req.headers['content-type'],
+        });
+        next();
     });
-    next();
-});
+}
+
+// 404 handler for unknown routes
+app.use('*', notFoundHandler);
 
 // Global error handler
-app.use((error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-    console.error('🚨 Global Error:', {
-        message: error.message,
-        stack: error.stack,
-        name: error.name,
-    });
-
-    res.status(error.status || 500).json({
-        success: false,
-        message: error.message || 'Internal server error',
-        ...(process.env.NODE_ENV === 'development' && {
-            stack: error.stack,
-            errorName: error.name,
-        }),
-    });
-});
-
-// 404 handler
-app.use('*', (req: express.Request, res: express.Response) => {
-    res.status(404).json({
-        success: false,
-        message: 'Route not found',
-    });
-});
+app.use(errorHandler);
 
 // Graceful shutdown
 const gracefulShutdown = async () => {
