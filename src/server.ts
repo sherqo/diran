@@ -4,7 +4,9 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import apiRouter from '#routes';
 import { errorHandler, notFoundHandler } from '#lib/middleware/errorHandler';
+import { logger } from '#lib/middleware/logger';
 import { db } from '#lib/database/connection';
+import { isDevelopment } from '#lib/utils/common';
 
 // Load environment variables
 dotenv.config();
@@ -13,14 +15,8 @@ const app = express();
 const PORT = process.env.PORT || 4003;
 
 // Request logger middleware (only in development)
-if (process.env.NODE_ENV === 'development') {
-    app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
-        console.log(`🔍 ${req.method} ${req.path}`, {
-            body: req.body && Object.keys(req.body).length > 0 ? req.body : undefined,
-            headers: req.headers['content-type'],
-        });
-        next();
-    });
+if (isDevelopment) {
+    app.use(logger);
 }
 
 // Middleware
@@ -38,8 +34,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/v1', apiRouter);
 
 // Error handling middleware
-
-app.use('/{*splat}', notFoundHandler); // 404 handler for unknown routes
+app.use(notFoundHandler); // 404 handler for unknown routes
 app.use(errorHandler); // Global error handler
 
 // Graceful shutdown

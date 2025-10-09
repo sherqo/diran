@@ -1,6 +1,7 @@
 import { sendError } from '#lib/utils/response';
 import { Request, Response, NextFunction } from 'express';
 import { ErrorCode, HttpStatus } from '#lib/constants/errors';
+import { isDevelopment } from '#lib/utils/common';
 
 // Custom error class for API errors
 export class ApiError extends Error {
@@ -17,10 +18,8 @@ export class ApiError extends Error {
 
 // Error handling middleware
 export const errorHandler = (error: any, req: Request, res: Response, next: NextFunction): void => {
-    const isProduction = process.env.NODE_ENV === 'production';
-
     // Log the error (always log in development, minimal in production)
-    if (!isProduction) {
+    if (isDevelopment) {
         console.error('🚨 API Error:', {
             message: error.message,
             stack: error.stack,

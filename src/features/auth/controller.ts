@@ -5,6 +5,7 @@ import { sendSuccess } from '#lib/utils/response';
 import { db } from '#lib/database/connection.js';
 import { hashPassword, generateToken, comparePassword, generateResetToken, hashResetToken } from '#lib/utils/auth.js';
 import { ErrorCode, HttpStatus } from '#lib/constants/errors';
+import { isDevelopment } from '#lib/utils/common.js';
 
 export const signup = async (req: Request, res: Response): Promise<void> => {
     const { email, password, name, photo }: SignupInput = req.body;
@@ -106,7 +107,7 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
 
     // TODO: Send email with reset token
     // For now, just log the token (remove in production)
-    if (process.env.NODE_ENV === 'development') {
+    if (isDevelopment) {
         console.log('Password reset token:', resetToken);
     }
 
