@@ -3,13 +3,10 @@ import { verifyToken } from '#lib/utils/auth';
 import { Request, Response, NextFunction } from 'express';
 import { ApiError } from './errorHandler';
 import { ErrorCode, HttpStatus } from '#lib/constants/errors';
+import { AuthUser } from '#lib/types/AuthUser';
 
 export interface AuthenticatedRequest extends Request {
-    user?: {
-        id: string;
-        email: string;
-        name: string;
-    };
+    user?: AuthUser;
 }
 
 export const authenticate = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
@@ -21,10 +18,14 @@ export const authenticate = async (req: AuthenticatedRequest, res: Response, nex
     }
 
     const token = authHeader.substring(7);
-    const decoded = verifyToken(token);
+    const decodedUser = verifyToken(token);
+
+    if (!decodedUser || !decodedUser.id) {
+        throw new ApiError('Invalid token', HttpStatus.UNAUTHORIZED, ErrorCode.INVALID_TOKEN);
+    }
 
     const user = await db.user.findUnique({
-        where: { id: decoded.userId },
+        where: { id: decodedUser.id },
         select: { id: true, email: true, name: true },
     });
 

@@ -1,21 +1,22 @@
 import jwt, { SignOptions, Secret } from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
+import { AuthUser } from '#lib/types/AuthUser';
 
 const JWT_SECRET: Secret = process.env.JWT_SECRET!; // Secret type
 const JWT_EXPIRES_IN = '7d'; // string is fine
 
 // Functions for JWT token generation and verification
-export const generateToken = (userId: string): string => {
-    const payload = { userId };
+export const generateToken = (user: AuthUser): string => {
+    const payload = user;
     const options: SignOptions = { expiresIn: JWT_EXPIRES_IN };
 
     const token = jwt.sign(payload, JWT_SECRET, options);
     return token;
 };
 
-export const verifyToken = (token: string): { userId: string } => {
-    return jwt.verify(token, JWT_SECRET) as { userId: string };
+export const verifyToken = (token: string): AuthUser => {
+    return jwt.verify(token, JWT_SECRET) as AuthUser;
 };
 
 // Functions for password hashing and comparison

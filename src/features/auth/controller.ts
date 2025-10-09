@@ -40,7 +40,7 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
     });
 
     // Generate token
-    const token = generateToken(user.id);
+    const token = generateToken(user);
 
     sendSuccess(res, { user, token }, 'User created successfully', 201);
 };
@@ -65,7 +65,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Generate token
-    const token = generateToken(user.id);
+    const token = generateToken(user);
 
     const userData = {
         id: user.id,
