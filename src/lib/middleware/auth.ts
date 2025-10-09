@@ -13,6 +13,7 @@ export interface AuthenticatedRequest extends Request {
 }
 
 export const authenticate = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    // TODO: cache user data to reduce DB calls later
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {

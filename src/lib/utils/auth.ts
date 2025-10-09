@@ -5,6 +5,7 @@ import crypto from 'crypto';
 const JWT_SECRET: Secret = process.env.JWT_SECRET!; // Secret type
 const JWT_EXPIRES_IN = '7d'; // string is fine
 
+// Functions for JWT token generation and verification
 export const generateToken = (userId: string): string => {
     const payload = { userId };
     const options: SignOptions = { expiresIn: JWT_EXPIRES_IN };
@@ -17,6 +18,7 @@ export const verifyToken = (token: string): { userId: string } => {
     return jwt.verify(token, JWT_SECRET) as { userId: string };
 };
 
+// Functions for password hashing and comparison
 export const hashPassword = async (password: string): Promise<string> => {
     const hashed = await bcrypt.hash(password, 12);
     return hashed;
@@ -26,6 +28,7 @@ export const comparePassword = async (password: string, hashedPassword: string):
     return await bcrypt.compare(password, hashedPassword);
 };
 
+// Functions for password reset tokens
 export const generateResetToken = (): string => {
     return crypto.randomBytes(32).toString('hex');
 };

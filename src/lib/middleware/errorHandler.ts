@@ -22,6 +22,7 @@ export const errorHandler = (error: any, req: Request, res: Response, next: Next
     if (isDevelopment) {
         console.error('🚨 API Error:', {
             message: error.message,
+            time: new Date().toISOString(),
             stack: error.stack,
             name: error.name,
             url: req.url,
@@ -29,7 +30,7 @@ export const errorHandler = (error: any, req: Request, res: Response, next: Next
             body: req.body,
         });
     } else {
-        console.error('🚨 API Error:', error.message);
+        console.error('🚨 API Error:', { message: error.message, time: new Date().toISOString() });
     }
 
     // Handle different error types
