@@ -6,14 +6,12 @@ import { ErrorCode, HttpStatus } from '#lib/constants/errors';
 export class ApiError extends Error {
     public status: number;
     public code?: string;
-    public details?: any;
 
-    constructor(message: string, status: number = 500, code?: string, details?: any) {
+    constructor(message: string, status: number = 500, code?: string) {
         super(message);
         this.name = 'ApiError';
         this.status = status;
         if (code) this.code = code;
-        if (details) this.details = details;
     }
 }
 
@@ -38,51 +36,38 @@ export const errorHandler = (error: any, req: Request, res: Response, next: Next
     // Handle different error types
     if (error instanceof ApiError) {
         // Custom API errors - use proper response utility based on status
-        sendError(res, error.message, error.status, error.code, error.details);
+        sendError(res, error.message, error.status, error.code);
         return;
     }
 
     // Prisma errors
     if (error.name === 'PrismaClientKnownRequestError') {
-        const message = isProduction ? 'Database error' : error.message;
-        sendError(res, message, HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.DATABASE_ERROR, !isProduction ? error : undefined);
+        sendError(res, 'Database error', HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.DATABASE_ERROR);
         return;
     }
 
     // Validation errors (Zod)
     if (error.name === 'ZodError') {
-        sendError(res, 'Validation failed', HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR, !isProduction ? error.errors : undefined);
+        sendError(res, 'Validation failed', HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR);
         return;
     }
 
     // JWT errors
     if (error.name === 'JsonWebTokenError') {
-        const message = isProduction ? 'Authentication failed' : 'Invalid token';
-        sendError(res, message, HttpStatus.UNAUTHORIZED, ErrorCode.INVALID_TOKEN, !isProduction ? error : undefined);
+        sendError(res, 'Invalid token', HttpStatus.UNAUTHORIZED, ErrorCode.INVALID_TOKEN);
         return;
     }
 
     if (error.name === 'TokenExpiredError') {
-        const message = isProduction ? 'Authentication failed' : 'Token expired';
-        sendError(res, message, HttpStatus.UNAUTHORIZED, ErrorCode.TOKEN_EXPIRED, !isProduction ? error : undefined);
+        sendError(res, 'Token expired', HttpStatus.UNAUTHORIZED, ErrorCode.TOKEN_EXPIRED);
         return;
     }
 
     // Generic errors
-    const message = isProduction ? 'Internal server error' : error.message;
-    const details = !isProduction ? { stack: error.stack, name: error.name } : undefined;
-
-    sendError(res, message, HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.INTERNAL_ERROR, details);
+    sendError(res, 'Internal server error', HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.INTERNAL_ERROR);
 };
 
 // 404 handler
 export const notFoundHandler = (req: Request, res: Response): void => {
     sendError(res, 'Route not found', HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND);
-};
-
-// Async error wrapper to catch async errors in route handlers
-export const asyncHandler = (fn: Function) => {
-    return (req: Request, res: Response, next: NextFunction) => {
-        Promise.resolve(fn(req, res, next)).catch(next);
-    };
 };

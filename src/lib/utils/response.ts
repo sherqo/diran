@@ -12,7 +12,6 @@ export interface ErrorResponse {
     error: {
         message: string;
         code?: string;
-        details?: any; // Only in development
     };
 }
 
@@ -30,22 +29,12 @@ export const sendSuccess = <T>(res: Response, data: T, message?: string, statusC
 };
 
 // Helper to send error responses
-export const sendError = (
-    res: Response,
-    message: string,
-    statusCode: number = 500,
-    code?: string,
-    details?: any
-): Response<ErrorResponse> => {
-    const isProduction = process.env.NODE_ENV === 'production';
-
+export const sendError = (res: Response, message: string, statusCode: number = 500, code?: string): Response<ErrorResponse> => {
     const response: ErrorResponse = {
         success: false,
         error: {
             message,
             ...(code && { code }),
-            // Only include details in development
-            ...(!isProduction && details && { details }),
         },
     };
 

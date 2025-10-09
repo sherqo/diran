@@ -1,9 +1,8 @@
 import { Request, Response } from 'express';
 import { db } from '#lib/database/connection';
-import { asyncHandler } from '#lib/middleware/errorHandler';
 import { sendSuccess } from '#lib/utils/response';
 
-export const getHealth = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+export const getHealth = async (req: Request, res: Response): Promise<void> => {
     // Check database connection
     await db.$queryRaw`SELECT 1`;
 
@@ -13,4 +12,4 @@ export const getHealth = asyncHandler(async (req: Request, res: Response): Promi
         uptime: process.uptime(),
         database: 'connected',
     });
-});
+};

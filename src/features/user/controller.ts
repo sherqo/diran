@@ -4,10 +4,10 @@ import { AuthenticatedRequest } from '#lib/middleware/auth';
 import { db } from '#lib/database/connection';
 import { comparePassword, hashPassword } from '#lib/utils/auth';
 import { sendSuccess } from '#lib/utils/response';
-import { asyncHandler, ApiError } from '#lib/middleware/errorHandler';
+import { ApiError } from '#lib/middleware/errorHandler';
 import { ErrorCode, HttpStatus } from '#lib/constants/errors';
 
-export const getProfile = asyncHandler(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+export const getProfile = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const user = await db.user.findUnique({
         where: { id: req.user!.id },
         select: {
@@ -21,9 +21,9 @@ export const getProfile = asyncHandler(async (req: AuthenticatedRequest, res: Re
     });
 
     sendSuccess(res, { user });
-});
+};
 
-export const updateProfile = asyncHandler(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+export const updateProfile = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const { name, photo }: UpdateProfileInput = req.body;
 
     const user = await db.user.update({
@@ -43,9 +43,9 @@ export const updateProfile = asyncHandler(async (req: AuthenticatedRequest, res:
     });
 
     sendSuccess(res, { user }, 'Profile updated successfully');
-});
+};
 
-export const changePassword = asyncHandler(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+export const changePassword = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const { currentPassword, newPassword }: ChangePasswordInput = req.body;
 
     // Get user with password
@@ -74,4 +74,4 @@ export const changePassword = asyncHandler(async (req: AuthenticatedRequest, res
     });
 
     sendSuccess(res, null, 'Password changed successfully');
-});
+};

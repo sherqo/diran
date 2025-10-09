@@ -1,12 +1,12 @@
 import { Request, Response } from 'express';
 import { SignupInput, LoginInput, ForgotPasswordInput, ResetPasswordInput } from './validation.js';
-import { asyncHandler, ApiError } from '#lib/middleware/errorHandler';
+import { ApiError } from '#lib/middleware/errorHandler';
 import { sendSuccess } from '#lib/utils/response';
 import { db } from '#lib/database/connection.js';
 import { hashPassword, generateToken, comparePassword, generateResetToken, hashResetToken } from '#lib/utils/auth.js';
 import { ErrorCode, HttpStatus } from '#lib/constants/errors';
 
-export const signup = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+export const signup = async (req: Request, res: Response): Promise<void> => {
     const { email, password, name, photo }: SignupInput = req.body;
 
     // Check if user already exists
@@ -42,9 +42,9 @@ export const signup = asyncHandler(async (req: Request, res: Response): Promise<
     const token = generateToken(user.id);
 
     sendSuccess(res, { user, token }, 'User created successfully', 201);
-});
+};
 
-export const login = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+export const login = async (req: Request, res: Response): Promise<void> => {
     const { email, password }: LoginInput = req.body;
 
     // Find user
@@ -75,9 +75,9 @@ export const login = asyncHandler(async (req: Request, res: Response): Promise<v
     };
 
     sendSuccess(res, { user: userData, token }, 'Login successful');
-});
+};
 
-export const forgotPassword = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
     const { email }: ForgotPasswordInput = req.body;
 
     const user = await db.user.findUnique({
@@ -111,9 +111,9 @@ export const forgotPassword = asyncHandler(async (req: Request, res: Response): 
     }
 
     sendSuccess(res, null, 'If an account with that email exists, we have sent a password reset link');
-});
+};
 
-export const resetPassword = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+export const resetPassword = async (req: Request, res: Response): Promise<void> => {
     const { token, password }: ResetPasswordInput = req.body;
 
     // Hash the token to compare with database
@@ -146,4 +146,4 @@ export const resetPassword = asyncHandler(async (req: Request, res: Response): P
         },
     });
     sendSuccess(res, null, 'Password reset successfully');
-});
+};

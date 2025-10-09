@@ -9,12 +9,8 @@ export const generateToken = (userId: string): string => {
     const payload = { userId };
     const options: SignOptions = { expiresIn: JWT_EXPIRES_IN };
 
-    try {
-        const token = jwt.sign(payload, JWT_SECRET, options);
-        return token;
-    } catch (error) {
-        throw error;
-    }
+    const token = jwt.sign(payload, JWT_SECRET, options);
+    return token;
 };
 
 export const verifyToken = (token: string): { userId: string } => {
@@ -22,12 +18,8 @@ export const verifyToken = (token: string): { userId: string } => {
 };
 
 export const hashPassword = async (password: string): Promise<string> => {
-    try {
-        const hashed = await bcrypt.hash(password, 12);
-        return hashed;
-    } catch (error) {
-        throw error;
-    }
+    const hashed = await bcrypt.hash(password, 12);
+    return hashed;
 };
 
 export const comparePassword = async (password: string, hashedPassword: string): Promise<boolean> => {
