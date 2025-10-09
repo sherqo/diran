@@ -40,42 +40,44 @@ prisma/
 
 1. **Install dependencies:**
 
-   ```bash
-   npm install
-   ```
+    ```bash
+    npm install
+    ```
 
 2. **Environment Configuration:**
 
-   ```bash
-   cp .env.example .env
-   # Edit .env with your database credentials and JWT secret
-   ```
+    ```bash
+    cp .env.example .env
+    # Edit .env with your database credentials and JWT secret
+    ```
 
 3. **Database Setup:**
 
-   ```bash
-   # Make sure PostgreSQL is running locally
-   # Update DATABASE_URL in .env with your PostgreSQL credentials
-   npm run migrate
-   npm run generate
-   ```
+    ```bash
+    # Make sure PostgreSQL is running locally
+    # Update DATABASE_URL in .env with your PostgreSQL credentials
+    npm run migrate
+    npm run generate
+    ```
 
 4. **Start Development Server:**
 
-   ```bash
-   npm run dev
-   ```
+    ```bash
+    npm run dev
+    ```
 
 The API will be available at `http://localhost:3000`
 
 ## 📚 API Endpoints
 
 ### Health Check
+
 ```
 GET /api/health
 ```
 
 ### Authentication
+
 ```
 POST /api/auth/signup      # User registration
 POST /api/auth/login       # User login
@@ -85,6 +87,7 @@ POST /api/auth/reset-password     # Reset password with token
 ```
 
 ### User Profile (Authenticated)
+
 ```
 GET /api/auth/profile            # Get user profile
 PUT /api/auth/profile            # Update user profile
@@ -94,6 +97,7 @@ POST /api/auth/change-password   # Change password
 ### Example Requests
 
 **User Signup:**
+
 ```bash
 curl -X POST http://localhost:3000/api/auth/signup \
   -H "Content-Type: application/json" \
@@ -105,6 +109,7 @@ curl -X POST http://localhost:3000/api/auth/signup \
 ```
 
 **User Login:**
+
 ```bash
 curl -X POST http://localhost:3000/api/auth/login \
   -H "Content-Type: application/json" \
@@ -115,6 +120,7 @@ curl -X POST http://localhost:3000/api/auth/login \
 ```
 
 **Access Protected Route:**
+
 ```bash
 curl -X GET http://localhost:3000/api/auth/profile \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
@@ -123,6 +129,7 @@ curl -X GET http://localhost:3000/api/auth/profile \
 ## 🗄️ Database Schema
 
 ### User Model
+
 ```prisma
 model User {
   id        String   @id @default(cuid())
@@ -132,7 +139,7 @@ model User {
   photo     String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   resetPasswordToken   String?
   resetPasswordExpires DateTime?
 }
@@ -188,32 +195,34 @@ CORS_ORIGIN=http://localhost:3000
 ## 🚀 Production Deployment
 
 1. **Set Environment Variables:**
-   - Set strong JWT_SECRET
-   - Configure production database URL
-   - Set NODE_ENV=production
+    - Set strong JWT_SECRET
+    - Configure production database URL
+    - Set NODE_ENV=production
 
 2. **Deploy manually:**
 
-   ```bash
-   npm run build
-   npm run migrate
-   npm start
-   ```
+    ```bash
+    npm run build
+    npm run migrate
+    npm start
+    ```
 
 ## 🧪 Testing the API
 
 Use the health endpoint to verify the API is running:
+
 ```bash
 curl http://localhost:3000/api/health
 ```
 
 Expected response:
+
 ```json
 {
-  "status": "ok",
-  "timestamp": "2025-01-09T10:30:00.000Z",
-  "uptime": 123.456,
-  "database": "connected"
+    "database": "connected",
+    "status": "ok",
+    "timestamp": "2025-01-09T10:30:00.000Z",
+    "uptime": 123.456
 }
 ```
 
@@ -228,15 +237,18 @@ Expected response:
 ## 🛟 Troubleshooting
 
 **Database Connection Issues:**
+
 - Verify PostgreSQL is running
 - Check DATABASE_URL in .env
 - Ensure database exists and migrations are run
 
 **TypeScript Errors:**
+
 - Run `npm run generate` to update Prisma client types
 - Check tsconfig.json configuration
 
 **Build Issues:**
+
 - Run `npm run build` to check for TypeScript compilation errors
 
 ## 📄 License
