@@ -14,9 +14,10 @@
         "format:file": "prettier --write --ignore-unknown",
         "generate": "bunx prisma generate",
         "migrate": "bunx prisma migrate dev",
+        "prisma:pull": "bunx prisma db pull",
+        "prisma:push": "bunx prisma db push",
         "start": "node dist/server.js",
-        "studio": "bunx prisma studio",
-        "test-db": "bun test-db.js"
+        "studio": "bunx prisma studio"
     },
     "dependencies": {
         "@prisma/client": "^5.6.0",

@@ -149,12 +149,5 @@ export const resetPassword = asyncHandler(async (req: Request, res: Response): P
             resetPasswordExpires: null,
         },
     });
-
     sendSuccess(res, null, 'Password reset successfully');
-});
-
-export const logout = asyncHandler(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    // With JWT, logout is handled on the client side by removing the token
-    // Here we just confirm the action
-    sendSuccess(res, null, 'Logged out successfully');
 });

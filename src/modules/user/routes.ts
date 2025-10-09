@@ -9,7 +9,7 @@ const router = Router();
 router.use(authenticate);
 
 router.get('/profile', getProfile);
-router.put('/profile', validateRequest(updateProfileSchema), updateProfile);
+router.patch('/profile', validateRequest(updateProfileSchema), updateProfile);
 router.post('/change-password', validateRequest(changePasswordSchema), changePassword);
 
 export default router;
