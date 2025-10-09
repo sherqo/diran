@@ -1,24 +1,51 @@
 {
-  "name": "diran-backend",
-  "module": "index.ts",
-  "type": "module",
-  "private": true,
-  "devDependencies": {
-    "@types/bun": "latest",
-    "@types/express": "^5.0.3",
-    "@types/node": "^24.7.0"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
-  },
-  "dependencies": {
-    "bcrypt": "^6.0.0",
-    "cors": "^2.8.5",
-    "dotenv": "^17.2.3",
-    "drizzle-orm": "^0.44.6",
-    "express": "^5.1.0",
-    "jsonwebtoken": "^9.0.2",
-    "pg": "^8.16.3",
-    "zod": "^4.1.12"
-  }
+    "name": "diran-ai-backend",
+    "version": "1.0.0",
+    "private": true,
+    "description": "Diran AI Backend - Express.js + PostgreSQL with Prisma ORM",
+    "type": "module",
+    "main": "dist/server.js",
+    "scripts": {
+        "build": "tsc",
+        "dev": "bun --watch src/server.ts",
+        "dev:tsx": "tsx watch src/server.ts",
+        "format": "prettier --write .",
+        "format:check": "prettier --check .",
+        "format:file": "prettier --write --ignore-unknown",
+        "generate": "bunx prisma generate",
+        "migrate": "bunx prisma migrate dev",
+        "start": "node dist/server.js",
+        "studio": "bunx prisma studio",
+        "test-db": "bun test-db.js"
+    },
+    "dependencies": {
+        "@prisma/client": "^5.6.0",
+        "bcryptjs": "^2.4.3",
+        "cors": "^2.8.5",
+        "dotenv": "^16.3.1",
+        "express": "^4.18.2",
+        "helmet": "^7.1.0",
+        "jsonwebtoken": "^9.0.2",
+        "nodemailer": "^6.9.7",
+        "psql": "^0.0.1",
+        "zod": "^3.22.4"
+    },
+    "devDependencies": {
+        "@types/bcryptjs": "^2.4.6",
+        "@types/bun": "latest",
+        "@types/cors": "^2.8.16",
+        "@types/express": "^4.17.21",
+        "@types/jsonwebtoken": "^9.0.5",
+        "@types/node": "^20.9.0",
+        "@types/nodemailer": "^6.4.14",
+        "prettier": "^3.6.2",
+        "prettier-plugin-packagejson": "^2.5.19",
+        "prettier-plugin-sort-json": "^4.1.1",
+        "prisma": "^5.6.0",
+        "tsx": "^4.6.0",
+        "typescript": "^5.2.2"
+    },
+    "peerDependencies": {
+        "typescript": "^5"
+    }
 }

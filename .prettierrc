@@ -1,0 +1,16 @@
+{
+    "arrowParens": "avoid",
+    "bracketSameLine": true,
+    "bracketSpacing": true,
+    "endOfLine": "lf",
+
+    "jsxSingleQuote": false,
+    "plugins": ["prettier-plugin-sort-json", "prettier-plugin-packagejson"],
+    "printWidth": 140,
+    "quoteProps": "as-needed",
+    "semi": true,
+    "singleQuote": true,
+    "tabWidth": 4,
+    "trailingComma": "es5",
+    "useTabs": false
+}

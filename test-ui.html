@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Diran AI Backend Tester</title>
+        <style>
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                max-width: 800px;
+                margin: 0 auto;
+                padding: 20px;
+                background: #f5f5f5;
+            }
+            .container {
+                background: white;
+                padding: 30px;
+                border-radius: 10px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            }
+            h1 {
+                color: #333;
+                text-align: center;
+            }
+            .section {
+                margin: 20px 0;
+                padding: 20px;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                background: #fafafa;
+            }
+            input,
+            button,
+            textarea {
+                width: 100%;
+                padding: 10px;
+                margin: 5px 0;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                font-size: 14px;
+            }
+            button {
+                background: #007cba;
+                color: white;
+                cursor: pointer;
+                border: none;
+            }
+            button:hover {
+                background: #005a87;
+            }
+            .response {
+                background: #f0f8ff;
+                border: 1px solid #b0d4f1;
+                padding: 15px;
+                border-radius: 5px;
+                margin-top: 10px;
+                white-space: pre-wrap;
+                font-family: monospace;
+                font-size: 12px;
+            }
+            .success {
+                background: #f0fff0;
+                border-color: #90ee90;
+            }
+            .error {
+                background: #fff0f0;
+                border-color: #ffb0b0;
+            }
+            .status {
+                padding: 10px;
+                text-align: center;
+                border-radius: 5px;
+                margin: 10px 0;
+            }
+            .status.connected {
+                background: #d4edda;
+                color: #155724;
+            }
+            .status.disconnected {
+                background: #f8d7da;
+                color: #721c24;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>🚀 Diran AI Backend API Tester</h1>
+
+            <div id="status" class="status">Checking connection...</div>
+
+            <div class="section">
+                <h3>1. Health Check</h3>
+                <button onclick="checkHealth()">Check API Health</button>
+                <div id="healthResponse" class="response" style="display: none"></div>
+            </div>
+
+            <div class="section">
+                <h3>2. Sign Up New User</h3>
+                <input type="email" id="signupEmail" placeholder="Enter email" value="test@example.com" />
+                <input type="password" id="signupPassword" placeholder="Enter password" value="password123" />
+                <input type="text" id="signupName" placeholder="Enter name" value="Test User" />
+                <button onclick="signup()">Sign Up</button>
+                <div id="signupResponse" class="response" style="display: none"></div>
+            </div>
+
+            <div class="section">
+                <h3>3. Login</h3>
+                <input type="email" id="loginEmail" placeholder="Enter email" value="test@example.com" />
+                <input type="password" id="loginPassword" placeholder="Enter password" value="password123" />
+                <button onclick="login()">Login</button>
+                <div id="loginResponse" class="response" style="display: none"></div>
+            </div>
+
+            <div class="section">
+                <h3>4. Get Profile (Protected Route)</h3>
+                <p>This requires a token from login</p>
+                <button onclick="getProfile()">Get My Profile</button>
+                <div id="profileResponse" class="response" style="display: none"></div>
+            </div>
+
+            <div class="section">
+                <h3>5. Test Forgot Password</h3>
+                <input type="email" id="forgotEmail" placeholder="Enter email" value="test@example.com" />
+                <button onclick="forgotPassword()">Send Reset Email</button>
+                <div id="forgotResponse" class="response" style="display: none"></div>
+            </div>
+        </div>
+
+        <script>
+            const API_URL = 'http://localhost:3000';
+            let authToken = null;
+
+            // Check initial connection
+            window.onload = () => {
+                checkConnection();
+            };
+
+            async function checkConnection() {
+                try {
+                    const response = await fetch(`${API_URL}/api/health`);
+                    const status = document.getElementById('status');
+                    if (response.ok) {
+                        status.textContent = '✅ Backend is running and connected!';
+                        status.className = 'status connected';
+                    } else {
+                        throw new Error('API not responding');
+                    }
+                } catch (error) {
+                    const status = document.getElementById('status');
+                    status.textContent = '❌ Backend not running. Start it with: npm run dev';
+                    status.className = 'status disconnected';
+                }
+            }
+
+            async function checkHealth() {
+                try {
+                    const response = await fetch(`${API_URL}/api/health`);
+                    const data = await response.json();
+                    showResponse('healthResponse', data, response.ok);
+                } catch (error) {
+                    showResponse('healthResponse', { error: error.message }, false);
+                }
+            }
+
+            async function signup() {
+                const email = document.getElementById('signupEmail').value;
+                const password = document.getElementById('signupPassword').value;
+                const name = document.getElementById('signupName').value;
+
+                try {
+                    const response = await fetch(`${API_URL}/api/auth/signup`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password, name }),
+                    });
+                    const data = await response.json();
+                    showResponse('signupResponse', data, response.ok);
+                } catch (error) {
+                    showResponse('signupResponse', { error: error.message }, false);
+                }
+            }
+
+            async function login() {
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+
+                try {
+                    const response = await fetch(`${API_URL}/api/auth/login`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password }),
+                    });
+                    const data = await response.json();
+
+                    if (response.ok && data.data && data.data.token) {
+                        authToken = data.data.token;
+                        alert('✅ Login successful! Token saved for profile requests.');
+                    }
+
+                    showResponse('loginResponse', data, response.ok);
+                } catch (error) {
+                    showResponse('loginResponse', { error: error.message }, false);
+                }
+            }
+
+            async function getProfile() {
+                if (!authToken) {
+                    alert('❌ Please login first to get a token!');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`${API_URL}/api/auth/profile`, {
+                        headers: { Authorization: `Bearer ${authToken}` },
+                    });
+                    const data = await response.json();
+                    showResponse('profileResponse', data, response.ok);
+                } catch (error) {
+                    showResponse('profileResponse', { error: error.message }, false);
+                }
+            }
+
+            async function forgotPassword() {
+                const email = document.getElementById('forgotEmail').value;
+
+                try {
+                    const response = await fetch(`${API_URL}/api/auth/forgot-password`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email }),
+                    });
+                    const data = await response.json();
+                    showResponse('forgotResponse', data, response.ok);
+                } catch (error) {
+                    showResponse('forgotResponse', { error: error.message }, false);
+                }
+            }
+
+            function showResponse(elementId, data, isSuccess) {
+                const element = document.getElementById(elementId);
+                element.style.display = 'block';
+                element.className = `response ${isSuccess ? 'success' : 'error'}`;
+                element.textContent = JSON.stringify(data, null, 2);
+            }
+        </script>
+    </body>
+</html>
