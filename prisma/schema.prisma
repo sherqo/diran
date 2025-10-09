@@ -29,12 +29,19 @@ model User {
   password  String
   name      String
   photo     String?
+
+  // Timestamps
   createdAt DateTime @default(now()) @db.Timestamptz(3) @map("created_at")
   updatedAt DateTime @updatedAt @db.Timestamptz(3) @map("updated_at")
 
   // Password reset fields
   resetPasswordToken   String? @map("reset_password_token")
   resetPasswordExpires DateTime? @db.Timestamptz(3) @map("reset_password_expires")
+
+  // email verification fields
+  emailVerified   Boolean  @default(false) @map("email_verified")
+  emailVerifyToken String?  @map("email_verify_token")
+  emailVerifyExpires DateTime? @db.Timestamptz(3) @map("email_verify_expires")
 
   @@map("users")
 }

@@ -29,6 +29,7 @@
         "jsonwebtoken": "^9.0.2",
         "nodemailer": "^6.9.7",
         "psql": "^0.0.1",
+        "resend": "^6.1.2",
         "zod": "^3.22.4"
     },
     "devDependencies": {

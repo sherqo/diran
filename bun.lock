@@ -13,6 +13,7 @@
         "jsonwebtoken": "^9.0.2",
         "nodemailer": "^6.9.7",
         "psql": "^0.0.1",
+        "resend": "^6.1.2",
         "zod": "^3.22.4",
       },
       "devDependencies": {
@@ -519,6 +520,8 @@
     "readable-stream": ["readable-stream@2.3.7", "", { "dependencies": { "core-util-is": "~1.0.0", "inherits": "~2.0.3", "isarray": "~1.0.0", "process-nextick-args": "~2.0.0", "safe-buffer": "~5.1.1", "string_decoder": "~1.1.1", "util-deprecate": "~1.0.1" } }, "sha512-Ebho8K4jIbHAxnuxi7o42OrZgF/ZTNcsZj6nRKyUmkhLFq8CHItp/fy6hQZuZmP/n3yZ9VBUbp4zz/mX8hmYPw=="],
 
     "request": ["request@2.16.6", "", { "dependencies": { "aws-sign": "~0.2.0", "cookie-jar": "~0.2.0", "forever-agent": "~0.2.0", "form-data": "~0.0.3", "hawk": "~0.10.2", "json-stringify-safe": "~3.0.0", "mime": "~1.2.7", "node-uuid": "~1.4.0", "oauth-sign": "~0.2.0", "qs": "~0.5.4", "tunnel-agent": "~0.2.0" } }, "sha512-TfD4kMo40kwuOpO7GYfAZpb2wYdw7yvTIglPNgPPSmp2Fz6MKNvPLla40FQ/ypdhy6B2jRNz3VlCjPD6mnzsmA=="],
+
+    "resend": ["resend@6.1.2", "", { "peerDependencies": { "@react-email/render": "*" }, "optionalPeers": ["@react-email/render"] }, "sha512-C9Q+YkRe57P8MQlkHG3yatSR/B6sqBGA06Ri2DveJfkz9Vm16182FC/iHB0K6IAfmqZ4yRrFebFw1EPuktLtSg=="],
 
     "resolve-pkg-maps": ["resolve-pkg-maps@1.0.0", "", {}, "sha512-seS2Tj26TBVOC2NIc2rOe2y2ZO7efxITtLZcGSOnHHNOQ7CkiUBfw0Iw2ck6xkIhPwLhKNLS8BO+hEpngQlqzw=="],
 
