@@ -5,19 +5,20 @@ import { AuthenticatedRequest } from '../../shared/middleware/index.js';
 import { SignupInput, LoginInput, ForgotPasswordInput, ResetPasswordInput, UpdateProfileInput, ChangePasswordInput } from './validation.js';
 
 export const signup = async (req: Request, res: Response): Promise<void> => {
-  try {
-    console.log('🔍 SIGNUP: Starting signup process');
-    console.log('🔍 SIGNUP: Request body:', req.body);
-    
-    const { email, password, name, photo }: SignupInput = req.body;
-    console.log('🔍 SIGNUP: Extracted data:', { email, name, photo, passwordLength: password?.length });
+    try {
+        console.log('🔍 SIGNUP: Starting signup process');
+        console.log('🔍 SIGNUP: Request body:', req.body);
 
-    console.log('🔍 SIGNUP: Checking if user exists...');
-    // Check if user already exists
-    const existingUser = await db.user.findUnique({
-      where: { email },
-    });
-    console.log('🔍 SIGNUP: Existing user check result:', existingUser ? 'User exists' : 'User does not exist');        if (existingUser) {
+        const { email, password, name, photo }: SignupInput = req.body;
+        console.log('🔍 SIGNUP: Extracted data:', { email, name, photo, passwordLength: password?.length });
+
+        console.log('🔍 SIGNUP: Checking if user exists...');
+        // Check if user already exists
+        const existingUser = await db.user.findUnique({
+            where: { email },
+        });
+        console.log('🔍 SIGNUP: Existing user check result:', existingUser ? 'User exists' : 'User does not exist');
+        if (existingUser) {
             res.status(400).json({
                 success: false,
                 message: 'User already exists with this email',
@@ -74,7 +75,7 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
         res.status(500).json({
             success: false,
             message: 'Internal server error',
-            ...(process.env.NODE_ENV === 'development' && { 
+            ...(process.env.NODE_ENV === 'development' && {
                 error: error.message,
                 stack: error.stack,
             }),

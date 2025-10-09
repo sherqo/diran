@@ -49,7 +49,7 @@ app.use((error: any, req: express.Request, res: express.Response, next: express.
     res.status(error.status || 500).json({
         success: false,
         message: error.message || 'Internal server error',
-        ...(process.env.NODE_ENV === 'development' && { 
+        ...(process.env.NODE_ENV === 'development' && {
             stack: error.stack,
             errorName: error.name,
         }),
