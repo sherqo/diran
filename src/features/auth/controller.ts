@@ -1,9 +1,10 @@
 import { Request, Response } from 'express';
 import { SignupInput, LoginInput, ForgotPasswordInput, ResetPasswordInput } from './validation.js';
-import { asyncHandler } from '#lib/middleware/errorHandler';
-import { sendConflict, sendSuccess, sendUnauthorized } from '#lib/utils/response';
+import { asyncHandler, ApiError } from '#lib/middleware/errorHandler';
+import { sendSuccess } from '#lib/utils/response';
 import { db } from '#lib/database/connection.js';
 import { hashPassword, generateToken, comparePassword, generateResetToken, hashResetToken } from '#lib/utils/auth.js';
+import { ErrorCode, HttpStatus } from '#lib/constants/errors';
 
 export const signup = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { email, password, name, photo }: SignupInput = req.body;
@@ -14,8 +15,7 @@ export const signup = asyncHandler(async (req: Request, res: Response): Promise<
     });
 
     if (existingUser) {
-        sendConflict(res, 'User already exists with this email');
-        return;
+        throw new ApiError('User already exists with this email', HttpStatus.CONFLICT, ErrorCode.USER_EXISTS);
     }
 
     // Hash password
@@ -53,16 +53,14 @@ export const login = asyncHandler(async (req: Request, res: Response): Promise<v
     });
 
     if (!user) {
-        sendUnauthorized(res, 'Invalid email or password');
-        return;
+        throw new ApiError('Invalid email or password', HttpStatus.UNAUTHORIZED, ErrorCode.INVALID_CREDENTIALS);
     }
 
     // Check password
     const isPasswordValid = await comparePassword(password, user.password);
 
     if (!isPasswordValid) {
-        sendUnauthorized(res, 'Invalid email or password');
-        return;
+        throw new ApiError('Invalid email or password', HttpStatus.UNAUTHORIZED, ErrorCode.INVALID_CREDENTIALS);
     }
 
     // Generate token
@@ -132,8 +130,7 @@ export const resetPassword = asyncHandler(async (req: Request, res: Response): P
     });
 
     if (!user) {
-        sendUnauthorized(res, 'Invalid or expired reset token');
-        return;
+        throw new ApiError('Invalid or expired reset token', HttpStatus.UNAUTHORIZED, ErrorCode.INVALID_RESET_TOKEN);
     }
 
     // Hash new password

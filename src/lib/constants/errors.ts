@@ -1,0 +1,35 @@
+// Standard HTTP status codes for API errors
+export enum HttpStatus {
+    BAD_REQUEST = 400,
+    UNAUTHORIZED = 401,
+    FORBIDDEN = 403,
+    NOT_FOUND = 404,
+    CONFLICT = 409,
+    UNPROCESSABLE_ENTITY = 422,
+    INTERNAL_SERVER_ERROR = 500,
+}
+
+// Application-specific error codes
+export enum ErrorCode {
+    // Authentication & Authorization
+    INVALID_CREDENTIALS = 'INVALID_CREDENTIALS',
+    ACCESS_TOKEN_REQUIRED = 'ACCESS_TOKEN_REQUIRED',
+    INVALID_TOKEN = 'INVALID_TOKEN',
+    TOKEN_EXPIRED = 'TOKEN_EXPIRED',
+    INVALID_PASSWORD = 'INVALID_PASSWORD',
+    INVALID_RESET_TOKEN = 'INVALID_RESET_TOKEN',
+
+    // User Management
+    USER_EXISTS = 'USER_EXISTS',
+    USER_NOT_FOUND = 'USER_NOT_FOUND',
+
+    // Validation
+    VALIDATION_ERROR = 'VALIDATION_ERROR',
+
+    // Database
+    DATABASE_ERROR = 'DATABASE_ERROR',
+
+    // Generic
+    INTERNAL_ERROR = 'INTERNAL_ERROR',
+    NOT_FOUND = 'NOT_FOUND',
+}

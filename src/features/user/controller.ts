@@ -3,8 +3,9 @@ import { UpdateProfileInput, ChangePasswordInput } from './validation';
 import { AuthenticatedRequest } from '#lib/middleware/auth';
 import { db } from '#lib/database/connection';
 import { comparePassword, hashPassword } from '#lib/utils/auth';
-import { sendSuccess, sendNotFound, sendUnauthorized } from '#lib/utils/response';
-import { asyncHandler } from '#lib/middleware/errorHandler';
+import { sendSuccess } from '#lib/utils/response';
+import { asyncHandler, ApiError } from '#lib/middleware/errorHandler';
+import { ErrorCode, HttpStatus } from '#lib/constants/errors';
 
 export const getProfile = asyncHandler(async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const user = await db.user.findUnique({
@@ -53,16 +54,14 @@ export const changePassword = asyncHandler(async (req: AuthenticatedRequest, res
     });
 
     if (!user) {
-        sendNotFound(res, 'User not found');
-        return;
+        throw new ApiError('User not found', HttpStatus.NOT_FOUND, ErrorCode.USER_NOT_FOUND);
     }
 
     // Verify current password
     const isCurrentPasswordValid = await comparePassword(currentPassword, user.password);
 
     if (!isCurrentPasswordValid) {
-        sendUnauthorized(res, 'Current password is incorrect');
-        return;
+        throw new ApiError('Current password is incorrect', HttpStatus.UNAUTHORIZED, ErrorCode.INVALID_PASSWORD);
     }
 
     // Hash new password

@@ -1,7 +1,8 @@
 import { db } from '#lib/database/connection';
 import { verifyToken } from '#lib/utils/auth';
 import { Request, Response, NextFunction } from 'express';
-import { sendUnauthorized } from '../utils/response';
+import { ApiError } from './errorHandler';
+import { ErrorCode, HttpStatus } from '#lib/constants/errors';
 
 export interface AuthenticatedRequest extends Request {
     user?: {
@@ -16,8 +17,7 @@ export const authenticate = async (req: AuthenticatedRequest, res: Response, nex
         const authHeader = req.headers.authorization;
 
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            sendUnauthorized(res, 'Access token required');
-            return;
+            throw new ApiError('Access token required', HttpStatus.UNAUTHORIZED, ErrorCode.ACCESS_TOKEN_REQUIRED);
         }
 
         const token = authHeader.substring(7);
@@ -29,13 +29,19 @@ export const authenticate = async (req: AuthenticatedRequest, res: Response, nex
         });
 
         if (!user) {
-            sendUnauthorized(res, 'Invalid token');
-            return;
+            throw new ApiError('Invalid token', HttpStatus.UNAUTHORIZED, ErrorCode.INVALID_TOKEN);
         }
 
         req.user = user;
         next();
     } catch (error) {
-        sendUnauthorized(res, 'Invalid token');
+        // If it's already an ApiError, pass it to error handler
+        if (error instanceof ApiError) {
+            next(error);
+            return;
+        }
+        // For JWT errors or other issues, create and pass generic invalid token error
+        const apiError = new ApiError('Invalid token', HttpStatus.UNAUTHORIZED, ErrorCode.INVALID_TOKEN);
+        next(apiError);
     }
 };

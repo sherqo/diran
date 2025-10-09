@@ -51,17 +51,3 @@ export const sendError = (
 
     return res.status(statusCode).json(response);
 };
-
-// Common error responses
-export const sendInternalError = (res: Response, message = 'Internal server error', details?: any) =>
-    sendError(res, message, 500, 'INTERNAL_ERROR', details);
-
-export const sendValidationError = (res: Response, details?: any) => sendError(res, 'Validation failed', 400, 'VALIDATION_ERROR', details);
-
-export const sendUnauthorized = (res: Response, message = 'Unauthorized') => sendError(res, message, 401, 'UNAUTHORIZED');
-
-export const sendForbidden = (res: Response, message = 'Forbidden') => sendError(res, message, 403, 'FORBIDDEN');
-
-export const sendNotFound = (res: Response, message = 'Resource not found') => sendError(res, message, 404, 'NOT_FOUND');
-
-export const sendConflict = (res: Response, message = 'Resource already exists') => sendError(res, message, 409, 'CONFLICT');
