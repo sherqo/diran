@@ -37,11 +37,9 @@ if (process.env.NODE_ENV === 'development') {
     });
 }
 
-// 404 handler for unknown routes
-app.use('*', notFoundHandler);
-
-// Global error handler
-app.use(errorHandler);
+// Error handling middleware
+app.use('*', notFoundHandler); // 404 handler for unknown routes
+app.use(errorHandler); // Global error handler
 
 // Graceful shutdown
 const gracefulShutdown = async () => {
@@ -60,7 +58,7 @@ process.on('SIGTERM', gracefulShutdown);
 process.on('SIGINT', gracefulShutdown);
 
 // Start server
-const server = app.listen(PORT, () => {
+app.listen(PORT, () => {
     console.log(`🚀 Diran AI Backend server running on port ${PORT}`);
     console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
