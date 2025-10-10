@@ -10,6 +10,7 @@ const JWT_REFRESH_EXPIRES_IN = '30d'; // 1 month (30 days)
 const toAuthUser = (user: AuthUser): AuthUser => {
     return {
         id: user.id,
+        emailVerified: user.emailVerified,
     };
 };
 

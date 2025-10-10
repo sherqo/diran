@@ -9,7 +9,6 @@ export interface AuthenticatedRequest extends Request {
 }
 
 export const authenticate = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
-    // TODO: cache user data to reduce DB calls later
     const token = req.cookies.accessToken;
 
     if (!token) {
@@ -18,8 +17,12 @@ export const authenticate = async (req: AuthenticatedRequest, res: Response, nex
 
     const decodedUser = verifyToken(token);
 
-    if (!decodedUser || !decodedUser.id) {
+    if (!decodedUser?.id) {
         throw new ApiError('Invalid token', HttpStatus.UNAUTHORIZED, ErrorCode.INVALID_TOKEN);
+    }
+
+    if (!decodedUser.emailVerified) {
+        throw new ApiError('Email not verified', HttpStatus.UNAUTHORIZED, ErrorCode.EMAIL_NOT_VERIFIED);
     }
 
     req.user = decodedUser;

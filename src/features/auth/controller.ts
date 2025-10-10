@@ -15,7 +15,7 @@ import {
 import { ErrorCode, HttpStatus } from '#lib/constants/errors';
 import { isDevelopment } from '#lib/utils/common.js';
 import { sendMail } from '#lib/services/email.js';
-import { setAccessTokenCookie, setRefreshTokenCookie } from '#lib/services/cookies.js';
+import { setAccessTokenCookie, setRefreshTokenCookie, clearAuthCookies } from '#lib/services/cookies.js';
 
 export const signup = async (req: Request, res: Response): Promise<void> => {
     const { email, password, name, photo }: SignupInput = req.body;
@@ -46,6 +46,7 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
             name: true,
             photo: true,
             createdAt: true,
+            emailVerified: true,
         },
     });
 
@@ -228,10 +229,31 @@ export const refresh = async (req: Request, res: Response): Promise<void> => {
     // Generate new access token
     const accessToken = generateAccessToken({
         id: user.id,
+        emailVerified: user.emailVerified,
     });
 
     // Set new access token cookie
     setAccessTokenCookie(res, accessToken);
 
     sendSuccess(res, {}, 'Token refreshed successfully');
+};
+
+export const logout = async (req: Request, res: Response): Promise<void> => {
+    const refreshToken = req.cookies?.refreshToken;
+
+    // Clear cookies
+    clearAuthCookies(res);
+
+    // If refresh token exists, clear it from DB
+    if (refreshToken) {
+        await db.user.updateMany({
+            where: { refreshToken },
+            data: {
+                refreshToken: null,
+                refreshTokenExpires: null,
+            },
+        });
+    }
+
+    sendSuccess(res, {}, 'Logged out successfully');
 };

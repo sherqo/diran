@@ -48,7 +48,7 @@ export const errorHandler = (error: any, req: Request, res: Response, next: Next
 
     // Validation errors (Zod)
     if (error.name === 'ZodError') {
-        sendError(res, 'Validation failed', HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR);
+        sendError(res, JSON.parse(error.message), HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR);
         return;
     }
 
