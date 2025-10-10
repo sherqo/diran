@@ -1,12 +1,11 @@
-import type { Metadata } from 'next';
 import Image from 'next/image';
-import logo from '@/imgs/logo-192.png';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: 'Diran AI',
-    description: "Login or sign up to access Diran AI's next-generation note-taking and productivity app",
+    title: 'Signup',
+    description: "Create an account to access Diran AI's next-generation note-taking and productivity app",
 };
 
 export default function AuthLayout({
