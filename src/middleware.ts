@@ -19,7 +19,12 @@ export function middleware(req: NextRequest) {
         pathname.endsWith('/favicon.ico') ||
         pathname === '/wait' ||
         pathname === '/' ||
-        pathname === '/privacy'
+        pathname === '/privacy' ||
+        pathname.includes('.png') ||
+        pathname.includes('.jpg') ||
+        pathname.includes('.svg') ||
+        pathname.includes('fonts') ||
+        pathname.includes('identity')
     ) {
         return NextResponse.next();
     }
