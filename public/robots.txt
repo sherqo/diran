@@ -1,0 +1,20 @@
+User-agent: *
+Allow: /
+
+# Block access to API routes
+Disallow: /api/
+
+# Block access to private pages
+Disallow: /admin/
+Disallow: /_next/
+Disallow: /.*
+
+# Allow important files
+Allow: /sitemap.xml
+Allow: /robots.txt
+
+# Sitemap location
+Sitemap: https://www.diran.app/sitemap.xml
+
+# Crawl-delay (optional - be careful with this)
+# Crawl-delay: 1
