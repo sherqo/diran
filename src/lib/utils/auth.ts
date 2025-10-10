@@ -7,15 +7,14 @@ const JWT_SECRET: Secret = process.env.JWT_SECRET!; // Secret type
 const JWT_ACCESS_EXPIRES_IN = '15m'; // 15 minutes
 const JWT_REFRESH_EXPIRES_IN = '30d'; // 1 month (30 days)
 
-const toAuthUser = (user: AuthUser): AuthUser => {
+const toAuthUser = (user: any): AuthUser => {
     return {
         id: user.id,
-        emailVerified: user.emailVerified,
     };
 };
 
 // Functions for JWT token generation and verification
-export const generateAccessToken = (user: AuthUser): string => {
+export const generateAccessToken = (user: any): string => {
     const payload = toAuthUser(user);
     const options: SignOptions = { expiresIn: JWT_ACCESS_EXPIRES_IN };
 
@@ -45,12 +44,34 @@ export const verifyRefreshToken = (token: string): any => {
 
 // Functions for password hashing and comparison
 export const hashPassword = async (password: string): Promise<string> => {
-    const hashed = await bcrypt.hash(password, 12);
-    return hashed;
+    return await bcrypt.hash(password, 12);
 };
 
 export const comparePassword = async (password: string, hashedPassword: string): Promise<boolean> => {
     return await bcrypt.compare(password, hashedPassword);
+};
+
+// Functions for OTP generation and hashing
+export const generateOTP = (length = 6): string => {
+    const digits = '0123456789';
+    let otp = '';
+    while (otp.length < length) {
+        const byte = crypto.randomBytes(1)[0] || 0;
+        if (byte < digits.length * 10) {
+            // reduce bias
+            otp += digits[byte % digits.length];
+        }
+    }
+    return otp;
+};
+
+export const hashOTP = (otp: string): string => {
+    return crypto.createHash('sha256').update(otp).digest('hex');
+};
+
+export const compareOTP = (otp: string, hashedOTP: string): boolean => {
+    const otpHash = crypto.createHash('sha256').update(otp).digest('hex');
+    return otpHash === hashedOTP;
 };
 
 // Functions for password reset tokens

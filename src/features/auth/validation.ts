@@ -25,7 +25,20 @@ export const resetPasswordSchema = z.object({
     password: z.string().min(8, 'Password must be at least 8 characters'),
 });
 
+// Verify email schema
+export const verifyEmailSchema = z.object({
+    email: z.email('Invalid email address'),
+    otp: z.string().length(6, 'OTP must be 6 digits').regex(/^\d+$/, 'OTP must contain only digits'),
+});
+
+// Resend OTP schema
+export const resendOTPSchema = z.object({
+    email: z.email('Invalid email address'),
+});
+
 export type SignupInput = z.infer<typeof signupSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>;
+export type ResendOTPInput = z.infer<typeof resendOTPSchema>;

@@ -1,24 +1,16 @@
 import { Request, Response } from 'express';
-import { SignupInput, LoginInput, ForgotPasswordInput, ResetPasswordInput } from './validation.js';
+import { sendVerificationOTP, sendPasswordResetToken, clearRefreshTokenSession, createUserSession } from '#features/auth/authService.js';
+import { SignupInput, LoginInput, ForgotPasswordInput, ResetPasswordInput, VerifyEmailInput, ResendOTPInput } from './validation.js';
 import { ApiError } from '#lib/middleware/errorHandler';
 import { sendSuccess } from '#lib/utils/response';
 import { db } from '#lib/database/connection.js';
-import {
-    hashPassword,
-    generateAccessToken,
-    comparePassword,
-    generateResetToken,
-    hashResetToken,
-    generateRefreshToken,
-    verifyRefreshToken,
-} from '#lib/utils/auth.js';
+import { hashPassword, generateAccessToken, comparePassword, verifyRefreshToken, compareOTP, hashResetToken } from '#lib/utils/auth.js';
 import { ErrorCode, HttpStatus } from '#lib/constants/errors';
-import { isDevelopment } from '#lib/utils/common.js';
-import { sendMail } from '#lib/services/email.js';
-import { setAccessTokenCookie, setRefreshTokenCookie, clearAuthCookies } from '#lib/services/cookies.js';
+import { setAccessTokenCookie, clearAuthCookies } from '#lib/services/cookies.js';
 
+//? User signup
 export const signup = async (req: Request, res: Response): Promise<void> => {
-    const { email, password, name, photo }: SignupInput = req.body;
+    const { email, password, name }: SignupInput = req.body; // Extract user details from request body
 
     // Check if user already exists
     const existingUser = await db.user.findUnique({
@@ -35,42 +27,26 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
     // Create user
     const user = await db.user.create({
         data: {
+            name,
             email,
             password: hashedPassword,
-            name,
-            photo: photo || null,
         },
         select: {
             id: true,
             email: true,
             name: true,
-            photo: true,
             createdAt: true,
-            emailVerified: true,
+            emailVerified: false,
         },
     });
 
-    // Generate tokens
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user.id);
-    const refreshTokenExpires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+    // Send verification OTP
+    await sendVerificationOTP(user.id, user.email);
 
-    // Update user with refresh token
-    await db.user.update({
-        where: { id: user.id },
-        data: {
-            refreshToken,
-            refreshTokenExpires,
-        },
-    });
-
-    // Set cookies
-    setAccessTokenCookie(res, accessToken);
-    setRefreshTokenCookie(res, refreshToken);
-
-    sendSuccess(res, { user }, 'User created successfully', 201);
+    sendSuccess(res, { user }, 'User created successfully. Check your email for verification code (OTP).', 201);
 };
 
+//? User login
 export const login = async (req: Request, res: Response): Promise<void> => {
     const { email, password }: LoginInput = req.body;
 
@@ -90,23 +66,17 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         throw new ApiError('Invalid email or password', HttpStatus.UNAUTHORIZED, ErrorCode.INVALID_CREDENTIALS);
     }
 
-    // Generate tokens
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user.id);
-    const refreshTokenExpires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+    // Check if email is verified
+    if (!user.emailVerified) {
+        // Send verification OTP
+        await sendVerificationOTP(user.id, user.email);
+        sendSuccess(res, { requiresVerification: true }, 'Email not verified. Check your email for verification code.');
+        return;
+    }
 
-    // Update user with refresh token
-    await db.user.update({
-        where: { id: user.id },
-        data: {
-            refreshToken,
-            refreshTokenExpires,
-        },
-    });
-
-    // Set cookies
-    setAccessTokenCookie(res, accessToken);
-    setRefreshTokenCookie(res, refreshToken);
+    // User is verified, proceed with login
+    // Create user session (tokens + cookies)
+    await createUserSession(user, res);
 
     const userData = {
         id: user.id,
@@ -119,6 +89,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     sendSuccess(res, { user: userData }, 'Login successful');
 };
 
+//? Forgot password - send reset token to email
 export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
     const { email }: ForgotPasswordInput = req.body;
 
@@ -132,34 +103,13 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
         return;
     }
 
-    // Generate reset token
-    const resetToken = generateResetToken();
-    const hashedResetToken = hashResetToken(resetToken);
-    const resetPasswordExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-
-    // Save reset token
-    await db.user.update({
-        where: { id: user.id },
-        data: {
-            resetPasswordToken: hashedResetToken,
-            resetPasswordExpires,
-        },
-    });
-
-    // TODO: Send email with reset token
-    // For now, just log the token (remove in production)
-    await sendMail({
-        to: [email],
-        subject: 'Password Reset',
-        html: `Your reset token is: ${resetToken}`,
-    });
-    if (isDevelopment) {
-        console.log('Password reset token:', resetToken);
-    }
+    // Send password reset token
+    await sendPasswordResetToken(user.id, email);
 
     sendSuccess(res, null, 'If an account with that email exists, we have sent a password reset link');
 };
 
+//? Reset password - with token
 export const resetPassword = async (req: Request, res: Response): Promise<void> => {
     const { token, password }: ResetPasswordInput = req.body;
 
@@ -192,9 +142,58 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
             resetPasswordExpires: null,
         },
     });
+
+    // Create user session (tokens + cookies)
+    await createUserSession(user, res);
+
     sendSuccess(res, null, 'Password reset successfully');
 };
 
+//? Verify email with OTP
+export const verifyEmail = async (req: Request, res: Response): Promise<void> => {
+    const { email, otp }: VerifyEmailInput = req.body;
+
+    // Find user with matching email and valid expiry
+    const user = await db.user.findFirst({
+        where: {
+            email,
+            emailVerifyToken: {
+                not: null,
+            },
+            emailVerifyExpires: {
+                gt: new Date(),
+            },
+        },
+    });
+
+    if (!user || !user.emailVerifyToken) {
+        throw new ApiError('Invalid OTP or email', HttpStatus.UNAUTHORIZED, ErrorCode.INVALID_TOKEN);
+    }
+
+    // Compare OTP with hashed version
+    const isOTPValid = compareOTP(otp, user.emailVerifyToken);
+
+    if (!isOTPValid) {
+        throw new ApiError('Invalid OTP', HttpStatus.UNAUTHORIZED, ErrorCode.INVALID_TOKEN);
+    }
+
+    // Update user as verified and clear OTP
+    await db.user.update({
+        where: { id: user.id },
+        data: {
+            emailVerified: true,
+            emailVerifyToken: null,
+            emailVerifyExpires: null,
+        },
+    });
+
+    // Create user session (tokens + cookies)
+    await createUserSession(user, res);
+
+    sendSuccess(res, null, 'Email verified successfully');
+};
+
+//? Refresh access token
 export const refresh = async (req: Request, res: Response): Promise<void> => {
     const refreshToken = req.cookies?.refreshToken;
 
@@ -202,14 +201,10 @@ export const refresh = async (req: Request, res: Response): Promise<void> => {
         throw new ApiError('Refresh token required', HttpStatus.UNAUTHORIZED, ErrorCode.REFRESH_TOKEN_REQUIRED);
     }
 
-    try {
-        // Verify refresh token
-        const decoded = verifyRefreshToken(refreshToken);
-        if (!decoded.userId) {
-            throw new Error('Invalid token payload');
-        }
-    } catch (error) {
-        throw new ApiError('Invalid refresh token', HttpStatus.UNAUTHORIZED, ErrorCode.INVALID_CREDENTIALS);
+    // Verify refresh token
+    const decoded = verifyRefreshToken(refreshToken);
+    if (!decoded.userId) {
+        throw new Error('Invalid token payload');
     }
 
     // Find user with this refresh token
@@ -238,6 +233,29 @@ export const refresh = async (req: Request, res: Response): Promise<void> => {
     sendSuccess(res, {}, 'Token refreshed successfully');
 };
 
+//? Resend verification OTP - if not verified yet
+export const resendOTP = async (req: Request, res: Response): Promise<void> => {
+    const { email }: ResendOTPInput = req.body;
+
+    const user = await db.user.findUnique({
+        where: { email },
+    });
+
+    if (!user) {
+        throw new ApiError('User not found', HttpStatus.NOT_FOUND, ErrorCode.USER_NOT_FOUND);
+    }
+
+    if (user.emailVerified) {
+        throw new ApiError('Email already verified', HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR);
+    }
+
+    // Send new verification OTP
+    await sendVerificationOTP(user.id, user.email);
+
+    sendSuccess(res, null, 'Verification code sent successfully');
+};
+
+//? Logout user
 export const logout = async (req: Request, res: Response): Promise<void> => {
     const refreshToken = req.cookies?.refreshToken;
 
@@ -246,13 +264,7 @@ export const logout = async (req: Request, res: Response): Promise<void> => {
 
     // If refresh token exists, clear it from DB
     if (refreshToken) {
-        await db.user.updateMany({
-            where: { refreshToken },
-            data: {
-                refreshToken: null,
-                refreshTokenExpires: null,
-            },
-        });
+        await clearRefreshTokenSession(refreshToken);
     }
 
     sendSuccess(res, {}, 'Logged out successfully');
