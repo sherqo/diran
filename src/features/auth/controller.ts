@@ -14,7 +14,8 @@ import {
 } from '#lib/utils/auth.js';
 import { ErrorCode, HttpStatus } from '#lib/constants/errors';
 import { isDevelopment } from '#lib/utils/common.js';
-import { sendMail } from '#lib/services/email/client.js';
+import { sendMail } from '#lib/services/email.js';
+import { setAccessTokenCookie, setRefreshTokenCookie } from '#lib/services/cookies.js';
 
 export const signup = async (req: Request, res: Response): Promise<void> => {
     const { email, password, name, photo }: SignupInput = req.body;
@@ -63,21 +64,8 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
     });
 
     // Set cookies
-    res.cookie('accessToken', accessToken, {
-        httpOnly: true,
-        secure: !isDevelopment,
-        sameSite: 'none',
-        domain: process.env.COOKIE_DOMAIN || undefined,
-        maxAge: 15 * 60 * 1000, // 15 minutes
-    });
-    res.cookie('refreshToken', refreshToken, {
-        httpOnly: true,
-        secure: !isDevelopment,
-        sameSite: 'none',
-        domain: process.env.COOKIE_DOMAIN || undefined,
-        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-        path: '/v1/auth/refresh', // Refresh token only sent to refresh endpoint
-    });
+    setAccessTokenCookie(res, accessToken);
+    setRefreshTokenCookie(res, refreshToken);
 
     sendSuccess(res, { user }, 'User created successfully', 201);
 };
@@ -116,21 +104,8 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     });
 
     // Set cookies
-    res.cookie('accessToken', accessToken, {
-        httpOnly: true,
-        secure: !isDevelopment,
-        sameSite: 'none',
-        domain: process.env.COOKIE_DOMAIN || undefined,
-        maxAge: 15 * 60 * 1000, // 15 minutes
-    });
-    res.cookie('refreshToken', refreshToken, {
-        httpOnly: true,
-        secure: !isDevelopment,
-        sameSite: 'none',
-        domain: process.env.COOKIE_DOMAIN || undefined,
-        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-        path: '/v1/auth/refresh', // Refresh token only sent to refresh endpoint
-    });
+    setAccessTokenCookie(res, accessToken);
+    setRefreshTokenCookie(res, refreshToken);
 
     const userData = {
         id: user.id,
@@ -256,13 +231,7 @@ export const refresh = async (req: Request, res: Response): Promise<void> => {
     });
 
     // Set new access token cookie
-    res.cookie('accessToken', accessToken, {
-        httpOnly: true,
-        secure: !isDevelopment,
-        sameSite: 'none',
-        domain: process.env.COOKIE_DOMAIN || undefined,
-        maxAge: 15 * 60 * 1000, // 15 minutes
-    });
+    setAccessTokenCookie(res, accessToken);
 
     sendSuccess(res, {}, 'Token refreshed successfully');
 };
