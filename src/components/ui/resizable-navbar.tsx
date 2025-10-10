@@ -1,12 +1,7 @@
 'use client';
 import { cn } from '@/lib/utils';
 import { IconMenu2, IconX } from '@tabler/icons-react';
-import {
-    motion,
-    AnimatePresence,
-    useScroll,
-    useMotionValueEvent,
-} from 'motion/react';
+import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'motion/react';
 
 import React, { useRef, useState } from 'react';
 import Image from 'next/image';
@@ -54,7 +49,7 @@ export const Navbar = ({ children, className }: NavbarProps) => {
     const { scrollY } = useScroll();
     const [visible, setVisible] = useState<boolean>(false);
 
-    useMotionValueEvent(scrollY, 'change', (latest) => {
+    useMotionValueEvent(scrollY, 'change', latest => {
         if (latest > 100) {
             setVisible(true);
         } else {
@@ -67,13 +62,8 @@ export const Navbar = ({ children, className }: NavbarProps) => {
             ref={ref}
             // IMPORTANT: Change this to class of `fixed` if you want the navbar to be fixed
             className={cn('sticky inset-x-0 top-0 z-40 w-full', className)}>
-            {React.Children.map(children, (child) =>
-                React.isValidElement(child)
-                    ? React.cloneElement(
-                          child as React.ReactElement<{ visible?: boolean }>,
-                          { visible }
-                      )
-                    : child
+            {React.Children.map(children, child =>
+                React.isValidElement(child) ? React.cloneElement(child as React.ReactElement<{ visible?: boolean }>, { visible }) : child
             )}
         </motion.div>
     );
@@ -122,13 +112,13 @@ export const NavItems = ({ items, className, onItemClick }: NavItemsProps) => {
                 <a
                     onMouseEnter={() => setHovered(idx)}
                     onClick={onItemClick}
-                    className="relative px-4 py-2 text-muted-foreground"
+                    className="text-muted-foreground relative px-4 py-2"
                     key={`link-${idx}`}
                     href={item.link}>
                     {hovered === idx && (
                         <motion.div
                             layoutId="hovered"
-                            className="absolute inset-0 h-full w-full rounded-full bg-secondary dark:bg-secondary"
+                            className="bg-secondary dark:bg-secondary absolute inset-0 h-full w-full rounded-full"
                         />
                     )}
                     <span className="relative z-20">{item.name}</span>
@@ -167,26 +157,11 @@ export const MobileNav = ({ children, className, visible }: MobileNavProps) => {
     );
 };
 
-export const MobileNavHeader = ({
-    children,
-    className,
-}: MobileNavHeaderProps) => {
-    return (
-        <div
-            className={cn(
-                'flex w-full flex-row items-center justify-between',
-                className
-            )}>
-            {children}
-        </div>
-    );
+export const MobileNavHeader = ({ children, className }: MobileNavHeaderProps) => {
+    return <div className={cn('flex w-full flex-row items-center justify-between', className)}>{children}</div>;
 };
 
-export const MobileNavMenu = ({
-    children,
-    className,
-    isOpen,
-}: MobileNavMenuProps) => {
+export const MobileNavMenu = ({ children, className, isOpen }: MobileNavMenuProps) => {
     return (
         <AnimatePresence>
             {isOpen && (
@@ -195,7 +170,7 @@ export const MobileNavMenu = ({
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     className={cn(
-                        'absolute inset-x-0 top-0 z-50 flex w-full flex-col items-start justify-start gap-4 rounded-lg bg-card px-4 py-6 shadow-lg border border-border',
+                        'bg-card border-border absolute inset-x-0 top-0 z-50 flex w-full flex-col items-start justify-start gap-4 rounded-lg border px-4 py-6 shadow-lg',
                         className
                     )}>
                     {children}
@@ -205,15 +180,9 @@ export const MobileNavMenu = ({
     );
 };
 
-export const MobileNavToggle = ({
-    isOpen,
-    onClick,
-}: {
-    isOpen: boolean;
-    onClick: () => void;
-}) => {
+export const MobileNavToggle = ({ isOpen, onClick }: { isOpen: boolean; onClick: () => void }) => {
     return isOpen ? (
-        <IconX className="text-foreground mr-2 z-51" onClick={onClick} />
+        <IconX className="text-foreground z-51 mr-2" onClick={onClick} />
     ) : (
         <IconMenu2 className="text-foreground" onClick={onClick} />
     );
@@ -221,21 +190,9 @@ export const MobileNavToggle = ({
 
 export const NavbarLogo = () => {
     return (
-        <a
-            href="#"
-            className="relative z-20 mr-4 flex items-center space-x-2 px-2 py-1 text-md font-normal text-foreground">
-            <Image
-                src="/identity/logo-512.png"
-                alt="Diran AI logo"
-                width={20}
-                height={20}
-                quality={100}
-                priority
-                className="w-8 h-8"
-            />
-            <span className="font-clash font-medium text-foreground">
-                Diran AI
-            </span>
+        <a href="#" className="text-md text-foreground relative z-20 mr-4 flex items-center space-x-2 px-2 py-1 font-normal">
+            <Image src="/identity/logo-512.png" alt="Diran AI logo" width={20} height={20} quality={100} priority className="h-8 w-8" />
+            <span className="font-clash text-foreground font-medium">Diran AI</span>
         </a>
     );
 };
@@ -253,27 +210,19 @@ export const NavbarButton = ({
     children: React.ReactNode;
     className?: string;
     variant?: 'primary' | 'secondary' | 'dark' | 'gradient';
-} & (
-    | React.ComponentPropsWithoutRef<'a'>
-    | React.ComponentPropsWithoutRef<'button'>
-)) => {
+} & (React.ComponentPropsWithoutRef<'a'> | React.ComponentPropsWithoutRef<'button'>)) => {
     const baseStyles =
         'px-4 py-2 rounded-full bg-white text-primary text-sm font-bold relative cursor-pointer hover:-translate-y-0.5 transition duration-300 inline-block text-center';
 
     const variantStyles = {
         primary: 'shadow-sm border border-border',
-        secondary:
-            'bg-transparent shadow-none text-foreground border border-border',
+        secondary: 'bg-transparent shadow-none text-foreground border border-border',
         dark: 'bg-foreground text-background shadow-lg border border-border',
-        gradient:
-            'bg-gradient-to-b from-primary to-accent text-primary-foreground shadow-lg border border-border',
+        gradient: 'bg-gradient-to-b from-primary to-accent text-primary-foreground shadow-lg border border-border',
     };
 
     return (
-        <Tag
-            href={href || undefined}
-            className={cn(baseStyles, variantStyles[variant], className)}
-            {...props}>
+        <Tag href={href || undefined} className={cn(baseStyles, variantStyles[variant], className)} {...props}>
             {children}
         </Tag>
     );

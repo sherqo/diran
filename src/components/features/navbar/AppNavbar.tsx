@@ -24,8 +24,8 @@ const AppNavbar = () => {
     ];
 
     const navBarBtnData = {
-        href: '#waitlist',
-        label: 'Diran me',
+        href: '/signup',
+        label: 'Sign Up',
     };
 
     return (

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Footer from '@/components/features/footer/Footer';
 import './landing.css';
+import StructuredData from '@/components/seo/StructuredData';
 
 export const metadata: Metadata = {
     title: {
@@ -75,9 +76,22 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <div>
-            {children}
-            <Footer />
-        </div>
+        <>
+            <head>
+                <link rel="manifest" href="/manifest.json" />
+                <link rel="icon" href="/identity/favicon-32x32.png" sizes="32x32" />
+                <link rel="icon" href="/identity/favicon-16x16.png" sizes="16x16" />
+                <link rel="apple-touch-icon" href="/identity/apple-touch-icon.png" />
+                <meta name="theme-color" content="#f97316" />
+                <meta name="mobile-web-app-capable" content="yes" />
+                <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+                <meta name="apple-mobile-web-app-title" content="Diran AI" />
+                <StructuredData />
+            </head>
+            <body className="flex min-h-screen flex-col">
+                {children}
+                <Footer />
+            </body>
+        </>
     );
 }
