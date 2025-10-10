@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { ThemeProvider } from 'next-themes';
 import '@fontsource-variable/inter';
 import StructuredData from '@/components/seo/StructuredData';
 
@@ -27,11 +26,7 @@ export default function RootLayout({
                 <meta name="apple-mobile-web-app-title" content="Diran AI" />
                 <StructuredData />
             </head>
-            <body className="flex min-h-screen flex-col">
-                <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-                    {children}
-                </ThemeProvider>
-            </body>
+            <body className="flex min-h-screen flex-col">{children}</body>
         </html>
     );
 }

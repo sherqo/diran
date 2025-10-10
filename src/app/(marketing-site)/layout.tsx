@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
-
 import Footer from '@/components/features/footer/Footer';
+import './landing.css';
 
 export const metadata: Metadata = {
     title: {
@@ -75,7 +75,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <div>
+        <div style={{}}>
             {children}
             <Footer />
         </div>
