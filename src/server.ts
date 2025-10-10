@@ -7,6 +7,7 @@ import { errorHandler, notFoundHandler } from '#lib/middleware/errorHandler';
 import { logger } from '#lib/middleware/logger';
 import { db } from '#lib/database/connection';
 import { isDevelopment, logStartup } from '#lib/utils/common';
+import { globalRateLimiter } from '#lib/middleware/rateLimiter';
 
 // Load environment variables
 dotenv.config({ debug: isDevelopment });
@@ -18,6 +19,8 @@ const PORT = Number(process.env.PORT) || 4003;
 if (isDevelopment) {
     app.use(logger);
 }
+
+app.use(globalRateLimiter);
 
 // Middleware
 app.use(helmet()); // Security headers
