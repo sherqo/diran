@@ -4,12 +4,31 @@ import crypto from 'crypto';
 import { AuthUser } from '#lib/types/AuthUser';
 
 const JWT_SECRET: Secret = process.env.JWT_SECRET!; // Secret type
-const JWT_EXPIRES_IN = '7d'; // string is fine
+const JWT_ACCESS_EXPIRES_IN = '15m'; // 15 minutes
+const JWT_REFRESH_EXPIRES_IN = '30d'; // 1 month (30 days)
+
+const toAuthUser = (user: AuthUser): AuthUser => {
+    return {
+        id: user.id,
+    };
+};
 
 // Functions for JWT token generation and verification
-export const generateToken = (user: AuthUser): string => {
-    const payload = user;
-    const options: SignOptions = { expiresIn: JWT_EXPIRES_IN };
+export const generateAccessToken = (user: AuthUser): string => {
+    const payload = toAuthUser(user);
+    const options: SignOptions = { expiresIn: JWT_ACCESS_EXPIRES_IN };
+
+    const token = jwt.sign(payload, JWT_SECRET, options);
+    return token;
+};
+
+export const generateRefreshToken = (userId: string): string => {
+    const payload = {
+        userId,
+        type: 'refresh',
+        random: crypto.randomBytes(16).toString('hex'), // Add randomness
+    };
+    const options: SignOptions = { expiresIn: JWT_REFRESH_EXPIRES_IN };
 
     const token = jwt.sign(payload, JWT_SECRET, options);
     return token;
@@ -17,6 +36,10 @@ export const generateToken = (user: AuthUser): string => {
 
 export const verifyToken = (token: string): AuthUser => {
     return jwt.verify(token, JWT_SECRET) as AuthUser;
+};
+
+export const verifyRefreshToken = (token: string): any => {
+    return jwt.verify(token, JWT_SECRET);
 };
 
 // Functions for password hashing and comparison

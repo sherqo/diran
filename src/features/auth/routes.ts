@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { signup, login, forgotPassword, resetPassword } from './controller.js';
+import { signup, login, forgotPassword, resetPassword, refresh } from './controller.js';
 import { signupSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema } from './validation.js';
 import { validateRequest } from '#lib/middleware/validation.js';
 
@@ -10,5 +10,6 @@ router.post('/signup', validateRequest(signupSchema), signup);
 router.post('/login', validateRequest(loginSchema), login);
 router.post('/forgot-password', validateRequest(forgotPasswordSchema), forgotPassword);
 router.post('/reset-password', validateRequest(resetPasswordSchema), resetPassword);
+router.post('/refresh', refresh);
 
 export default router;

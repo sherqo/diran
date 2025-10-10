@@ -3,7 +3,15 @@ import { SignupInput, LoginInput, ForgotPasswordInput, ResetPasswordInput } from
 import { ApiError } from '#lib/middleware/errorHandler';
 import { sendSuccess } from '#lib/utils/response';
 import { db } from '#lib/database/connection.js';
-import { hashPassword, generateToken, comparePassword, generateResetToken, hashResetToken } from '#lib/utils/auth.js';
+import {
+    hashPassword,
+    generateAccessToken,
+    comparePassword,
+    generateResetToken,
+    hashResetToken,
+    generateRefreshToken,
+    verifyRefreshToken,
+} from '#lib/utils/auth.js';
 import { ErrorCode, HttpStatus } from '#lib/constants/errors';
 import { isDevelopment } from '#lib/utils/common.js';
 import { sendMail } from '#lib/services/email/client.js';
@@ -40,10 +48,38 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
         },
     });
 
-    // Generate token
-    const token = generateToken(user);
+    // Generate tokens
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user.id);
+    const refreshTokenExpires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
 
-    sendSuccess(res, { user, token }, 'User created successfully', 201);
+    // Update user with refresh token
+    await db.user.update({
+        where: { id: user.id },
+        data: {
+            refreshToken,
+            refreshTokenExpires,
+        },
+    });
+
+    // Set cookies
+    res.cookie('accessToken', accessToken, {
+        httpOnly: true,
+        secure: !isDevelopment,
+        sameSite: 'none',
+        domain: process.env.COOKIE_DOMAIN || undefined,
+        maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+    res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: !isDevelopment,
+        sameSite: 'none',
+        domain: process.env.COOKIE_DOMAIN || undefined,
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+        path: '/v1/auth/refresh', // Refresh token only sent to refresh endpoint
+    });
+
+    sendSuccess(res, { user }, 'User created successfully', 201);
 };
 
 export const login = async (req: Request, res: Response): Promise<void> => {
@@ -65,8 +101,36 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         throw new ApiError('Invalid email or password', HttpStatus.UNAUTHORIZED, ErrorCode.INVALID_CREDENTIALS);
     }
 
-    // Generate token
-    const token = generateToken(user);
+    // Generate tokens
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user.id);
+    const refreshTokenExpires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+
+    // Update user with refresh token
+    await db.user.update({
+        where: { id: user.id },
+        data: {
+            refreshToken,
+            refreshTokenExpires,
+        },
+    });
+
+    // Set cookies
+    res.cookie('accessToken', accessToken, {
+        httpOnly: true,
+        secure: !isDevelopment,
+        sameSite: 'none',
+        domain: process.env.COOKIE_DOMAIN || undefined,
+        maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+    res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: !isDevelopment,
+        sameSite: 'none',
+        domain: process.env.COOKIE_DOMAIN || undefined,
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+        path: '/v1/auth/refresh', // Refresh token only sent to refresh endpoint
+    });
 
     const userData = {
         id: user.id,
@@ -76,7 +140,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         createdAt: user.createdAt,
     };
 
-    sendSuccess(res, { user: userData, token }, 'Login successful');
+    sendSuccess(res, { user: userData }, 'Login successful');
 };
 
 export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
@@ -153,4 +217,52 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
         },
     });
     sendSuccess(res, null, 'Password reset successfully');
+};
+
+export const refresh = async (req: Request, res: Response): Promise<void> => {
+    const refreshToken = req.cookies?.refreshToken;
+
+    if (!refreshToken) {
+        throw new ApiError('Refresh token required', HttpStatus.UNAUTHORIZED, ErrorCode.REFRESH_TOKEN_REQUIRED);
+    }
+
+    try {
+        // Verify refresh token
+        const decoded = verifyRefreshToken(refreshToken);
+        if (!decoded.userId) {
+            throw new Error('Invalid token payload');
+        }
+    } catch (error) {
+        throw new ApiError('Invalid refresh token', HttpStatus.UNAUTHORIZED, ErrorCode.INVALID_CREDENTIALS);
+    }
+
+    // Find user with this refresh token
+    const user = await db.user.findFirst({
+        where: {
+            refreshToken,
+            refreshTokenExpires: {
+                gt: new Date(),
+            },
+        },
+    });
+
+    if (!user) {
+        throw new ApiError('Invalid or expired refresh token', HttpStatus.UNAUTHORIZED, ErrorCode.INVALID_CREDENTIALS);
+    }
+
+    // Generate new access token
+    const accessToken = generateAccessToken({
+        id: user.id,
+    });
+
+    // Set new access token cookie
+    res.cookie('accessToken', accessToken, {
+        httpOnly: true,
+        secure: !isDevelopment,
+        sameSite: 'none',
+        domain: process.env.COOKIE_DOMAIN || undefined,
+        maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+
+    sendSuccess(res, {}, 'Token refreshed successfully');
 };

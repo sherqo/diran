@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+import cookieParser from 'cookie-parser';
 import apiRouter from '#routes';
 import { errorHandler, notFoundHandler } from '#lib/middleware/errorHandler';
 import { logger } from '#lib/middleware/logger';
@@ -32,6 +33,7 @@ app.use(
 );
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // Routes with automatic /v1 prefix, it will be hosted on api.diran.app/v1
 app.use('/v1', apiRouter);

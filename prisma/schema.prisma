@@ -43,6 +43,10 @@ model User {
   emailVerifyToken String?  @map("email_verify_token")
   emailVerifyExpires DateTime? @db.Timestamptz(3) @map("email_verify_expires")
 
+  // refresh token fields
+  refreshToken   String? @map("refresh_token")
+  refreshTokenExpires DateTime? @db.Timestamptz(3) @map("refresh_token_expires")
+
   @@map("users")
 }
 
