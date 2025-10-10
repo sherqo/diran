@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Footer from '@/components/features/footer/Footer';
 import StructuredData from '@/components/seo/StructuredData';
 import './marketing.css';
 
