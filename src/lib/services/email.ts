@@ -1,4 +1,3 @@
-import { ApiError } from '#lib/middleware/errorHandler';
 import { Resend } from 'resend';
 import { z } from 'zod';
 
@@ -12,7 +11,6 @@ const NAME = process.env.APP_NAME || 'Diran AI';
 
 export const resend = new Resend(API_KEY);
 
-type MailPerson = { name?: string; email: string };
 type SendMailParams = {
     to: string[];
     subject: string;
