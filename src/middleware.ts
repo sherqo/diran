@@ -18,7 +18,8 @@ export function middleware(req: NextRequest) {
         pathname.startsWith('/static') ||
         pathname.endsWith('/favicon.ico') ||
         pathname === '/wait' ||
-        pathname === '/'
+        pathname === '/' ||
+        pathname === '/privacy'
     ) {
         return NextResponse.next();
     }
