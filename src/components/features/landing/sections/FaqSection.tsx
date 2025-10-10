@@ -1,11 +1,6 @@
 'use client';
 
-import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
-} from '@/components/ui/accordion';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { motion } from 'framer-motion';
 
 interface FaqItem {
@@ -47,8 +42,7 @@ const faqData = [
         answer: 'It connects to your tools — Google Calendar, Apple Health, Google Fit, Notion, ClickUp — and monitors your daily patterns. It detects early signs of burnout: sleep drops, calendar overload, meeting chaos, mental fatigue. Tap the button and get personalized actions: reschedule tasks, reorder your day, take a break, refocus. Speak instead of typing — Diran can transcribe, summarize, journal, and even open the right chat or delete a task for you.',
     },
     {
-        question:
-            'What makes Diran different from all the “productivity” tools?',
+        question: 'What makes Diran different from all the “productivity” tools?',
         answer: 'Most tools push you to do more. Diran helps you do what matters — at the right time. It watches your real-life patterns (schedule, sleep, energy) and shows you what’s draining your performance. Less chaos. More clarity.',
     },
     {
@@ -91,7 +85,7 @@ const FaqSection = () => {
 
     return (
         <motion.section
-            className="w-full flex flex-col items-center justify-center min-h-screen"
+            className="flex min-h-screen w-full flex-col items-center justify-center"
             id="faq"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -99,7 +93,7 @@ const FaqSection = () => {
             transition={{ duration: 0.8 }}>
             <div className="container max-w-3xl px-8">
                 <motion.h2
-                    className="text-4xl md:text-5xl text-center font-clash font-medium mb-8 md:mb-12"
+                    className="font-clash mb-8 text-center text-4xl font-medium md:mb-12 md:text-5xl"
                     initial={{ opacity: 0, y: -30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
@@ -107,24 +101,15 @@ const FaqSection = () => {
                     Frequently Asked Questions
                 </motion.h2>
 
-                <motion.div
-                    variants={containerVariants}
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true }}>
+                <motion.div variants={containerVariants} initial="hidden" whileInView="visible" viewport={{ once: true }}>
                     <Accordion type="single" collapsible>
                         {faqData.map((item, index) => (
-                            <motion.div
-                                key={'faq-' + index}
-                                variants={itemVariants}
-                                transition={{ duration: 0.5, ease: 'easeOut' }}>
+                            <motion.div key={'faq-' + index} variants={itemVariants} transition={{ duration: 0.5, ease: 'easeOut' }}>
                                 <AccordionItem value={`item-${index}`}>
-                                    <AccordionTrigger className="font-semibold hover:no-underline hover:text-primary transition-colors duration-200 cursor-pointer">
+                                    <AccordionTrigger className="hover:text-primary cursor-pointer font-semibold transition-colors duration-200 hover:no-underline">
                                         {item.question}
                                     </AccordionTrigger>
-                                    <AccordionContent className="text-muted-foreground">
-                                        {item.answer}
-                                    </AccordionContent>
+                                    <AccordionContent className="text-muted-foreground">{item.answer}</AccordionContent>
                                 </AccordionItem>
                             </motion.div>
                         ))}

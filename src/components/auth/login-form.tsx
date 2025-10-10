@@ -10,7 +10,9 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
             <form>
                 <FieldGroup>
                     <div className="flex flex-col items-center gap-2 text-center">
-                        <h1 className="text-xl font-bold">Welcome to Diran AI</h1>
+                        <h1 className="text-xl font-medium">
+                            Welcome to <span className="font-clash">Diran AI</span>
+                        </h1>
                         <FieldDescription>
                             Don&apos;t have an account? <Link href="/signup">Sign up</Link>
                         </FieldDescription>
