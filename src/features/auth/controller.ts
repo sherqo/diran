@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { sendVerificationOTP, sendPasswordResetToken, clearRefreshTokenSession, createUserSession } from '#features/auth/authService.js';
+import { sendVerificationOTP, sendPasswordResetToken, clearRefreshTokenSession, createUserSession } from '#features/auth/service.js';
 import { SignupInput, LoginInput, ForgotPasswordInput, ResetPasswordInput, VerifyEmailInput, ResendOTPInput } from './validation.js';
 import { ApiError } from '#lib/middleware/errorHandler';
 import { sendSuccess } from '#lib/utils/response';

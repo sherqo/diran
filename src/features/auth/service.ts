@@ -5,12 +5,13 @@ import { ApiError } from '#lib/middleware/errorHandler.js';
 import { ErrorCode, HttpStatus } from '#lib/constants/errors.js';
 import { generateAccessToken, generateRefreshToken } from '#lib/utils/auth.js';
 import { setAccessTokenCookie, setRefreshTokenCookie } from '#lib/services/cookies.js';
+import ms from 'ms';
 
 export const sendVerificationOTP = async (userId: string, email: string): Promise<void> => {
     // Generate OTP
     const otp = generateOTP();
     const hashedOTP = hashOTP(otp);
-    const emailVerifyExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    const emailVerifyExpires = new Date(Date.now() + ms('15m')); // 15 minutes
 
     // Update user with verify OTP
     await db.user.update({
@@ -37,7 +38,7 @@ export const sendPasswordResetToken = async (userId: string, email: string): Pro
     // Generate reset token
     const resetToken = generateResetToken();
     const hashedResetToken = hashResetToken(resetToken);
-    const resetPasswordExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    const resetPasswordExpires = new Date(Date.now() + ms('15m')); // 15 minutes
 
     // Save reset token
     await db.user.update({
@@ -61,25 +62,19 @@ export const sendPasswordResetToken = async (userId: string, email: string): Pro
     }
 };
 
-export const createRefreshTokenSession = async (userId: string, refreshToken: string): Promise<void> => {
-    const refreshTokenExpires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+export const createUserSession = async (user: any, res: any): Promise<void> => {
+    // Generate tokens
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user.id);
+    const refreshTokenExpires = new Date(Date.now() + ms('30d')); // 30 days
 
     await db.user.update({
-        where: { id: userId },
+        where: { id: user.id },
         data: {
             refreshToken,
             refreshTokenExpires,
         },
     });
-};
-
-export const createUserSession = async (user: any, res: any): Promise<void> => {
-    // Generate tokens
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user.id);
-
-    // Create refresh token session
-    await createRefreshTokenSession(user.id, refreshToken);
 
     // Set cookies
     setAccessTokenCookie(res, accessToken);
