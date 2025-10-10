@@ -6,13 +6,13 @@ import apiRouter from '#routes';
 import { errorHandler, notFoundHandler } from '#lib/middleware/errorHandler';
 import { logger } from '#lib/middleware/logger';
 import { db } from '#lib/database/connection';
-import { isDevelopment } from '#lib/utils/common';
+import { isDevelopment, logStartup } from '#lib/utils/common';
 
 // Load environment variables
-dotenv.config();
+dotenv.config({ debug: isDevelopment });
 
 const app = express();
-const PORT = process.env.PORT || 4003;
+const PORT = Number(process.env.PORT) || 4003;
 
 // Request logger middleware (only in development)
 if (isDevelopment) {
@@ -55,8 +55,7 @@ process.on('SIGINT', gracefulShutdown);
 
 // Start server
 app.listen(PORT, () => {
-    console.log(`🚀 Diran AI Backend server running on port ${PORT}`);
-    console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+    logStartup(PORT, !!db);
 });
 
 export default app;
