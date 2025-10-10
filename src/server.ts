@@ -27,7 +27,7 @@ app.use(globalRateLimiter);
 app.use(helmet()); // Security headers
 app.use(
     cors({
-        origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+        origin: process.env.FRONTEND_URL || 'http://localhost:3000',
         credentials: true,
     })
 );

@@ -1,3 +1,5 @@
+import { ErrorCode, HttpStatus } from '#lib/constants/errors';
+import { ApiError } from '#lib/middleware/errorHandler';
 import { Resend } from 'resend';
 import { z } from 'zod';
 
@@ -13,16 +15,13 @@ export const resend = new Resend(API_KEY);
 
 // Email templates
 export const emailTemplates = {
-    verifyEmail: (otp: string) => `
-        <h1>Verify Your Email</h1>
+    verifyEmail: (otp: string) => `<h1>Verify Your Email</h1>
         <p>Your verification code is: <strong>${otp}</strong></p>
-        <p>This code expires in 10 minutes.</p>
-    `,
-    resetPassword: (token: string) => `
-        <h1>Reset Your Password</h1>
+        <p>This code expires in 15 minutes.</p>`,
+    resetPassword: (token: string) => `<h1>Reset Your Password</h1>
         <p>Click the link below to reset your password:</p>
         <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${token}">Reset Password</a>
-        <p>This link expires in 10 minutes.</p>
+        <p>This link expires in 15 minutes.</p>
     `,
 };
 
@@ -53,13 +52,12 @@ export const sendMail = async ({ to, subject, html }: SendMailParams, retries = 
             });
             return result;
         } catch (error) {
-            console.error(`Email send attempt ${attempt} failed:`, error);
             if (attempt === retries) {
-                throw new Error(`Failed to send email after ${retries} attempts`);
+                throw new ApiError('Failed to send email after retries', HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.EMAIL_SEND_FAILED);
             }
-            // Wait before retry (exponential backoff)
+            // Wait before retry
             await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
         }
     }
-    throw new Error('Unexpected error in sendMail');
+    throw new ApiError('Unexpected error in sendMail', HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.UNEXPECTED_ERROR);
 };

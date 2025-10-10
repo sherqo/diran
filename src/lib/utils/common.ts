@@ -9,7 +9,7 @@ export const logStartup = (port: number, dbConnected: boolean) => {
     const appVersion = process.env.APP_VERSION || '0.1.0';
     const appPrefix = chalk.blue(`${chalk.hex('#FFA500')(`[${appName}@${appVersion}]`)}`);
     const apiBaseUrl = process.env.BASE_URL || `http://localhost`;
-    const corsOrigin = process.env.CORS_ORIGIN || 'http://localhost:3000';
+    const corsOrigin = process.env.FRONTEND_URL || 'http://localhost:3000';
     const nodeVersion = process.version;
     const memoryUsage = Math.round(process.memoryUsage().heapUsed / 1024 / 1024);
 

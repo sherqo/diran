@@ -34,4 +34,10 @@ export enum ErrorCode {
     // Generic
     INTERNAL_ERROR = 'INTERNAL_ERROR',
     NOT_FOUND = 'NOT_FOUND',
+
+    // Email
+    EMAIL_SEND_FAILED = 'EMAIL_SEND_FAILED',
+
+    // Unexpected
+    UNEXPECTED_ERROR = 'UNEXPECTED_ERROR',
 }
