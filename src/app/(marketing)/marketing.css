@@ -1,3 +1,7 @@
+html {
+    scroll-behavior: smooth;
+}
+
 /* Clash Display Font */
 @font-face {
     font-style: normal;
@@ -47,8 +51,4 @@
         url('/fonts/ClashDisplay-Bold.woff') format('woff');
     font-family: 'Clash Display';
     font-display: swap;
-}
-
-html {
-    scroll-behavior: smooth;
 }
