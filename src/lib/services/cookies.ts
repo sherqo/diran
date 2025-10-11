@@ -8,8 +8,8 @@ const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || '30d';
 const COMMON_COOKIE_OPTIONS = {
     httpOnly: true,
     secure: !isDevelopment,
-    sameSite: 'none' as const,
-    domain: process.env.COOKIE_DOMAIN || undefined,
+    sameSite: isDevelopment ? 'lax' as const : 'none' as const,
+    domain: isDevelopment ? undefined : process.env.COOKIE_DOMAIN,
 };
 
 const refreshTokenPath = '/v1/auth/refresh';
