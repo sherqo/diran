@@ -1,3 +1,4 @@
+import { AuthProvider } from '@/contexts/AuthContext';
 import { Metadata } from 'next';
 import { ThemeProvider } from 'next-themes';
 
@@ -13,9 +14,11 @@ export default function RootLayout({
 }>) {
     return (
         <body>
-            <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-                {children}
-            </ThemeProvider>
+            <AuthProvider>
+                <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+                    {children}
+                </ThemeProvider>
+            </AuthProvider>
         </body>
     );
 }

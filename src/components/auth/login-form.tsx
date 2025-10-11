@@ -1,3 +1,7 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Field, FieldDescription, FieldGroup, FieldLabel, FieldSeparator } from '@/components/ui/field';
@@ -5,11 +9,41 @@ import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import AuthFooter from './auth-footer';
 import GoogleBtn from './google-btn';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState('');
+    const { login } = useAuth();
+    const router = useRouter();
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setMessage('');
+
+        const result = await login(email, password);
+
+        if (result.success) {
+            router.push('/profile'); // Redirect to profile page
+        } else {
+            setMessage(result.message || '');
+            // If email verification is required, redirect to OTP page
+            if (result.requiresVerification) {
+                setTimeout(() => {
+                    router.push(`/otp?email=${encodeURIComponent(email)}`);
+                }, 2000);
+            }
+        }
+
+        setLoading(false);
+    };
+
     return (
         <div className={cn('flex flex-col gap-6', className)} {...props}>
-            <form>
+            <form onSubmit={handleSubmit}>
                 <FieldGroup>
                     <div className="flex flex-col items-center gap-2 text-center">
                         <h1 className="text-xl font-medium">
@@ -20,16 +54,44 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                         </FieldDescription>
                     </div>
 
+                    {message && (
+                        <div
+                            className={cn(
+                                'rounded-md p-3 text-sm',
+                                message.includes('successful') || message.includes('verification')
+                                    ? 'border border-green-200 bg-green-50 text-green-700'
+                                    : 'border border-red-200 bg-red-50 text-red-700'
+                            )}>
+                            {message}
+                        </div>
+                    )}
+
                     <Field>
                         <FieldLabel htmlFor="email">Email</FieldLabel>
-                        <Input id="email" type="email" placeholder="xx@example.com" required />
+                        <Input
+                            id="email"
+                            type="email"
+                            placeholder="xx@example.com"
+                            value={email}
+                            onChange={e => setEmail(e.target.value)}
+                            required
+                        />
                     </Field>
                     <Field>
                         <FieldLabel htmlFor="password">Password</FieldLabel>
-                        <Input id="password" type="password" placeholder="••••••••" required />
+                        <Input
+                            id="password"
+                            type="password"
+                            placeholder="••••••••"
+                            value={password}
+                            onChange={e => setPassword(e.target.value)}
+                            required
+                        />
                     </Field>
                     <Field>
-                        <Button type="submit">Login</Button>
+                        <Button type="submit" disabled={loading}>
+                            {loading ? 'Logging in...' : 'Login'}
+                        </Button>
                     </Field>
                     <FieldSeparator>Or</FieldSeparator>
 
