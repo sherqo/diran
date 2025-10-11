@@ -99,14 +99,14 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
 
     if (!user) {
         // Don't reveal if user exists or not
-        sendSuccess(res, null, 'If an account with that email exists, we have sent a password reset link');
+        sendSuccess(res, {}, 'If an account with that email exists, we have sent a password reset link');
         return;
     }
 
     // Send password reset token
     await sendPasswordResetToken(user.id, email);
 
-    sendSuccess(res, null, 'If an account with that email exists, we have sent a password reset link');
+    sendSuccess(res, {}, 'If an account with that email exists, we have sent a password reset link');
 };
 
 //? Reset password - with token
@@ -146,7 +146,7 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
     // Create user session (tokens + cookies)
     await createUserSession(user, res);
 
-    sendSuccess(res, null, 'Password reset successfully');
+    sendSuccess(res, {}, 'Password reset successfully');
 };
 
 //? Verify email with OTP
@@ -190,7 +190,7 @@ export const verifyEmail = async (req: Request, res: Response): Promise<void> =>
     // Create user session (tokens + cookies)
     await createUserSession(user, res);
 
-    sendSuccess(res, null, 'Email verified successfully');
+    sendSuccess(res, {}, 'Email verified successfully');
 };
 
 //? Refresh access token
@@ -252,7 +252,7 @@ export const resendOTP = async (req: Request, res: Response): Promise<void> => {
     // Send new verification OTP
     await sendVerificationOTP(user.id, user.email);
 
-    sendSuccess(res, null, 'Verification code sent successfully');
+    sendSuccess(res, {}, 'Verification code sent successfully');
 };
 
 //? Logout user

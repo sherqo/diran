@@ -73,5 +73,5 @@ export const changePassword = async (req: AuthenticatedRequest, res: Response): 
         data: { password: hashedNewPassword },
     });
 
-    sendSuccess(res, null, 'Password changed successfully');
+    sendSuccess(res, {}, 'Password changed successfully');
 };
