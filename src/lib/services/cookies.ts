@@ -8,7 +8,7 @@ const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || '30d';
 const COMMON_COOKIE_OPTIONS = {
     httpOnly: true,
     secure: !isDevelopment,
-    sameSite: isDevelopment ? 'lax' as const : 'none' as const,
+    sameSite: isDevelopment ? ('lax' as const) : ('none' as const),
     domain: isDevelopment ? undefined : process.env.COOKIE_DOMAIN,
 };
 
