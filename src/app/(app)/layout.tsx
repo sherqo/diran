@@ -15,7 +15,7 @@ export default function RootLayout({
     return (
         <body>
             <AuthProvider>
-                <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+                <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
                     {children}
                 </ThemeProvider>
             </AuthProvider>

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import StructuredData from '@/components/seo/StructuredData';
 import './marketing.css';
+import Footer from '@/components/features/footer/Footer';
 
 export const metadata: Metadata = {
     title: {
@@ -87,7 +88,12 @@ export default function RootLayout({
                 <meta name="apple-mobile-web-app-title" content="Diran AI" />
                 <StructuredData />
             </head>
-            <body className="flex min-h-screen flex-col">{children}</body>
+            <body className="light flex min-h-screen flex-col">
+                <div className="light">
+                    {children}
+                    <Footer />
+                </div>
+            </body>
         </>
     );
 }
