@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { SITE_NAME } from '@/lib/site';
 import React from 'react';
 
 const Footer = () => {
@@ -25,7 +26,7 @@ const Footer = () => {
                 {/* Second row - Copyright and Social */}
                 <div className="flex items-center justify-between">
                     <p className="text-muted-foreground text-sm">
-                        © 2025 <span className="font-clash">Diran AI</span>
+                        © 2025 <span className="font-clash">{SITE_NAME}</span>
                     </p>
 
                     <div className="flex items-center space-x-4">

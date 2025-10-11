@@ -3,8 +3,10 @@ import { Metadata } from 'next';
 import { ThemeProvider } from 'next-themes';
 
 export const metadata: Metadata = {
-    title: 'Diran AI',
-    description: 'Your AI-powered next-generation note-taking and productivity app',
+    robots: {
+        index: false,
+        follow: false,
+    },
 };
 
 export default function RootLayout({

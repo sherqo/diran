@@ -1,13 +1,9 @@
 import { Metadata } from 'next';
-import { generateSEO } from '@/lib/seo';
 
-export const metadata: Metadata = generateSEO({
-    title: 'Privacy Policy - Diran AI',
-    description:
-        "Learn how Diran AI protects your privacy and handles your data. We don't sell your data and you control all integrations.",
-    canonical: '/privacy',
-    noIndex: false,
-});
+export const metadata: Metadata = {
+    title: 'Privacy Policy',
+    description: "Learn how Diran protects your privacy and handles your data. We don't sell your data and you control all integrations.",
+};
 
 export default function PrivacyPage() {
     return (

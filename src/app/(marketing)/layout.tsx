@@ -1,44 +1,33 @@
 import type { Metadata } from 'next';
-import StructuredData from '@/components/seo/StructuredData';
+
 import './marketing.css';
 import Footer from '@/components/features/footer/Footer';
+import { SITE_NAME, SITE_URL, MARKETING_DESCRIPTION, MARKETING_KEYWORDS, PUBLISHER_NAME, TWITTER_HANDLE } from '@/lib/site';
 
 export const metadata: Metadata = {
     title: {
-        default: 'Diran AI - Better Decisions.',
-        template: '%s | Diran AI',
+        default: `${SITE_NAME} | Better Decisions.`,
+        template: `${SITE_NAME} | %s`,
     },
-    description:
-        'Diran AI watches your life patterns, predicts burnout, and helps you make better decisions before you crash. Connect your tools, get smart warnings, and fix things fast. No fluff, just action.',
-    keywords: [
-        'burnout prevention',
-        'AI assistant',
-        'productivity',
-        'mental health',
-        'stress management',
-        'calendar optimization',
-        'work-life balance',
-        'decision making',
-        'smart notifications',
-        'pattern recognition',
-    ],
-    authors: [{ name: 'Diran AI' }],
-    creator: 'Diran AI',
-    publisher: 'Diran AI',
+    description: MARKETING_DESCRIPTION,
+    keywords: MARKETING_KEYWORDS,
+    authors: [{ name: PUBLISHER_NAME }],
+    creator: PUBLISHER_NAME,
+    publisher: PUBLISHER_NAME,
     formatDetection: {
         email: false,
         address: false,
         telephone: false,
     },
-    metadataBase: new URL('https://www.diran.app'),
+    metadataBase: new URL(SITE_URL),
     alternates: {
         canonical: '/',
     },
     openGraph: {
-        title: 'Diran AI - Better Decisions.',
-        description: 'AI that watches your life patterns, predicts burnout, and helps you make better decisions before you crash.',
-        url: 'https://www.diran.app',
-        siteName: 'Diran AI',
+        title: `${SITE_NAME} - Better Decisions.`,
+        description: MARKETING_DESCRIPTION,
+        url: SITE_URL,
+        siteName: SITE_NAME,
         type: 'website',
         locale: 'en_US',
         images: [
@@ -52,10 +41,10 @@ export const metadata: Metadata = {
     },
     twitter: {
         card: 'summary_large_image',
-        title: 'Diran AI - Better Decisions.',
-        description: 'AI that watches your life patterns, predicts burnout, and helps you make better decisions before you crash.',
+        title: `${SITE_NAME} - Better Decisions.`,
+        description: MARKETING_DESCRIPTION,
         images: ['/identity/logo-1080.png'],
-        creator: '@diran_ai',
+        creator: TWITTER_HANDLE,
     },
     robots: {
         index: true,
@@ -86,7 +75,6 @@ export default function RootLayout({
                 <meta name="mobile-web-app-capable" content="yes" />
                 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
                 <meta name="apple-mobile-web-app-title" content="Diran AI" />
-                <StructuredData />
             </head>
             <body className="light flex min-h-screen flex-col">
                 <div className="light">

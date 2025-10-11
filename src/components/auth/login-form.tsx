@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Field, FieldDescription, FieldGroup, FieldLabel, FieldSeparator } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import { SITE_NAME } from '@/lib/site';
 import Link from 'next/link';
 import AuthFooter from './auth-footer';
 import GoogleBtn from './google-btn';
@@ -47,7 +48,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                 <FieldGroup>
                     <div className="flex flex-col items-center gap-2 text-center">
                         <h1 className="text-xl font-medium">
-                            Welcome to <span className="font-clash">Diran AI</span>
+                            Welcome to <span className="font-clash">{SITE_NAME}</span>
                         </h1>
                         <FieldDescription>
                             Don&apos;t have an account? <Link href="/signup">Sign up</Link>

@@ -5,6 +5,7 @@ import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'motion/
 
 import React, { useRef, useState } from 'react';
 import Image from 'next/image';
+import { SITE_NAME } from '@/lib/site';
 
 interface NavbarProps {
     children: React.ReactNode;
@@ -191,8 +192,16 @@ export const MobileNavToggle = ({ isOpen, onClick }: { isOpen: boolean; onClick:
 export const NavbarLogo = () => {
     return (
         <a href="#" className="text-md text-foreground relative z-20 mr-4 flex items-center space-x-2 px-2 py-1 font-normal">
-            <Image src="/identity/logo-512.png" alt="Diran AI logo" width={20} height={20} quality={100} priority className="h-8 w-8" />
-            <span className="font-clash text-foreground font-medium">Diran AI</span>
+            <Image
+                src="/identity/logo-512.png"
+                alt={`${SITE_NAME} logo`}
+                width={20}
+                height={20}
+                quality={100}
+                priority
+                className="h-8 w-8"
+            />
+            <span className="font-clash text-foreground font-medium">{SITE_NAME}</span>
         </a>
     );
 };

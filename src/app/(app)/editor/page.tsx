@@ -1,5 +1,9 @@
 import { ThemeToggle } from '@/components/theme-toggle';
 import Tiptap from '@/components/tiptap/Tiptap';
+export const metadata = {
+    title: 'Editor',
+};
+
 export default function Home() {
     return <Tiptap />;
     return (
