@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Field, FieldDescription, FieldGroup, FieldLabel } from '@/components/ui/field';
@@ -9,17 +9,15 @@ import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '@/comp
 import AuthFooter from './auth-footer';
 import { useAuth } from '@/contexts/AuthContext';
 
-export function OTPForm({ className, ...props }: React.ComponentProps<'div'>) {
+export function OTPForm({ className, email, ...props }: React.ComponentProps<'div'> & { email: string }) {
     const [otp, setOtp] = useState('');
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
     const [resendLoading, setResendLoading] = useState(false);
     const { verifyEmail, resendOTP } = useAuth();
     const router = useRouter();
-    const searchParams = useSearchParams();
 
     // Get email from URL params (passed from signup/login)
-    const email = searchParams.get('email') || '';
 
     useEffect(() => {
         if (!email) {
