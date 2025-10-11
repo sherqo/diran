@@ -32,7 +32,7 @@ export function middleware(req: NextRequest) {
     const isDev = process.env.NEXT_PUBLIC_ENVIRONMENT === 'development';
 
     if (isDev) {
-        console.log('Development mode - allowing all routes');
+        console.log('⚡ Development mode - allowing all routes');
         return NextResponse.next();
     }
 
