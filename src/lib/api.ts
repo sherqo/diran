@@ -90,8 +90,6 @@ export async function apiRequest<T>(endpoint: string, options: RequestInit = {})
             }
         }
 
-        console.log('[apiRequest]', data);
-
         return data;
     } catch {
         return {
