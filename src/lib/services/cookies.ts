@@ -15,6 +15,7 @@ const COMMON_COOKIE_OPTIONS = {
 const refreshTokenPath = '/v1/auth/refresh';
 
 export const setAccessTokenCookie = (res: Response, token: string): void => {
+    console.log('JWT Access Token Expires In:', JWT_ACCESS_EXPIRES_IN, 'JWT Refresh Token Expires In:', JWT_REFRESH_EXPIRES_IN);
     res.cookie('accessToken', token, {
         ...COMMON_COOKIE_OPTIONS,
         maxAge: ms(JWT_ACCESS_EXPIRES_IN as ms.StringValue),

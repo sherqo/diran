@@ -70,8 +70,11 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     if (!user.emailVerified) {
         // Send verification OTP
         await sendVerificationOTP(user.id, user.email);
-        sendSuccess(res, { requiresVerification: true }, 'Email not verified. Check your email for verification code.');
-        return;
+        throw new ApiError(
+            'Email not verified. A new verification code has been sent to your email.',
+            HttpStatus.FORBIDDEN,
+            ErrorCode.EMAIL_NOT_VERIFIED
+        );
     }
 
     // User is verified, proceed with login
@@ -219,6 +222,10 @@ export const refresh = async (req: Request, res: Response): Promise<void> => {
 
     if (!user) {
         throw new ApiError('Invalid or expired refresh token', HttpStatus.UNAUTHORIZED, ErrorCode.INVALID_CREDENTIALS);
+    }
+
+    if (!user.emailVerified) {
+        throw new ApiError('Email not verified', HttpStatus.FORBIDDEN, ErrorCode.EMAIL_NOT_VERIFIED);
     }
 
     // Generate new access token
