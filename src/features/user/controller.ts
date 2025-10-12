@@ -7,6 +7,10 @@ import { sendSuccess } from '#lib/utils/response';
 import { ApiError } from '#lib/middleware/errorHandler';
 import { ErrorCode, HttpStatus } from '#lib/constants/errors';
 
+export const hasSession = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    sendSuccess(res, { id: req.user!.id });
+};
+
 export const getProfile = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const user = await db.user.findUnique({
         where: { id: req.user!.id },
