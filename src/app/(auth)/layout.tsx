@@ -21,9 +21,9 @@ export default function AuthLayout({
 }>) {
     return (
         <body>
-            <AuthProvider>
-                <AuthRedirect>
-                    <ThemeProvider attribute="class" defaultTheme="light" forcedTheme="light" enableSystem={false}>
+            <ThemeProvider attribute="class" defaultTheme="light" forcedTheme="light" enableSystem={false}>
+                <AuthProvider>
+                    <AuthRedirect>
                         <div className="bg-background container mx-auto flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
                             <Button variant="ghost" className="absolute top-2 left-4 flex items-center gap-2 rounded-lg px-2">
                                 <Link href="/" className="flex items-center gap-2">
@@ -33,9 +33,9 @@ export default function AuthLayout({
                             </Button>
                             <div className="w-full max-w-sm">{children}</div>
                         </div>
-                    </ThemeProvider>
-                </AuthRedirect>
-            </AuthProvider>
+                    </AuthRedirect>
+                </AuthProvider>
+            </ThemeProvider>
         </body>
     );
 }

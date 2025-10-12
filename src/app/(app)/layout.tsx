@@ -17,13 +17,11 @@ export default function RootLayout({
 }>) {
     return (
         <body>
-            <AuthProvider>
-                <ProtectedRoute>
-                    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-                        {children}
-                    </ThemeProvider>
-                </ProtectedRoute>
-            </AuthProvider>
+            <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+                <AuthProvider>
+                    <ProtectedRoute>{children}</ProtectedRoute>
+                </AuthProvider>
+            </ThemeProvider>
         </body>
     );
 }
