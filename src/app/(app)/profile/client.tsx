@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 
 export default function ProfileClientPage() {
-    const { user, loading, logout } = useAuth();
+    const { user, loading, logout, checkAuth } = useAuth();
     const router = useRouter();
 
     const handleLogout = async () => {
@@ -21,10 +21,6 @@ export default function ProfileClientPage() {
         );
     }
 
-    if (!user) {
-        return null; // Will redirect to login
-    }
-
     return (
         <div className="bg-background min-h-screen py-16">
             <div className="mx-auto max-w-2xl px-6">
@@ -32,42 +28,48 @@ export default function ProfileClientPage() {
                     <div className="mb-8 text-center">
                         <div className="bg-sidebar-primary mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full">
                             <span className="text-sidebar-primary-foreground text-2xl font-bold">
-                                {user.name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}
+                                {user?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase()}
                             </span>
                         </div>
-                        <h1 className="text-foreground mb-2 text-2xl font-bold">Welcome, {user.name}!</h1>
+
+                        <Button
+                            onClick={checkAuth}
+                            variant="ghost"
+                            className="absolute top-2 left-4 flex items-center gap-2 rounded-lg px-2">
+                            HELLO HELLO
+                        </Button>
+
+                        <h1 className="text-foreground mb-2 text-2xl font-bold">Welcome, {user?.name}!</h1>
                         <p className="text-muted-foreground">Your profile information</p>
                     </div>
 
                     <div className="space-y-6">
                         <div>
                             <label className="text-muted-foreground mb-1 block text-sm font-medium">Name</label>
-                            <div className="border-border bg-popover text-card-foreground rounded-md border p-3">{user.name}</div>
+                            <div className="border-border bg-popover text-card-foreground rounded-md border p-3">{user?.name}</div>
                         </div>
-
                         <div>
                             <label className="text-muted-foreground mb-1 block text-sm font-medium">Email</label>
-                            <div className="border-border bg-popover text-card-foreground rounded-md border p-3">{user.email}</div>
+                            <div className="border-border bg-popover text-card-foreground rounded-md border p-3">{user?.email}</div>
                         </div>
-
                         <div>
                             <label className="text-muted-foreground mb-1 block text-sm font-medium">User ID</label>
                             <div className="border-border bg-popover text-card-foreground rounded-md border p-3 font-mono text-sm">
-                                {user.id}
+                                {user?.id}
                             </div>
                         </div>
-
-                        <div>
-                            <label className="text-muted-foreground mb-1 block text-sm font-medium">Member Since</label>
-                            <div className="border-border bg-popover text-card-foreground rounded-md border p-3">
-                                {new Date(user.createdAt).toLocaleDateString('en-US', {
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric',
-                                })}
+                        {user && (
+                            <div>
+                                <label className="text-muted-foreground mb-1 block text-sm font-medium">Member Since</label>
+                                <div className="border-border bg-popover text-card-foreground rounded-md border p-3">
+                                    {new Date(user.createdAt).toLocaleDateString('en-US', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric',
+                                    })}
+                                </div>
                             </div>
-                        </div>
-
+                        )}
                         <div className="border-t pt-6">
                             <Button onClick={handleLogout} className="w-full" variant="destructive">
                                 Logout

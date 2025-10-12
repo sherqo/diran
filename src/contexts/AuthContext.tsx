@@ -6,7 +6,7 @@ import { authApi, User, ApiResult } from '@/lib/api';
 interface AuthContextType {
     user: User | null;
     loading: boolean;
-    login: (email: string, password: string) => Promise<ApiResult & { requiresVerification?: boolean }>;
+    login: (email: string, password: string) => Promise<ApiResult>;
     signup: (email: string, password: string, name: string) => Promise<ApiResult>;
     verifyEmail: (email: string, otp: string) => Promise<ApiResult>;
     resendOTP: (email: string) => Promise<ApiResult>;
@@ -29,8 +29,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setLoading(true);
         const result = await authApi.getProfile();
 
-        if (result.success && result.data?.data.user) {
-            setUser(result.data.data.user);
+        if (result.success && result.data?.user) {
+            setUser(result.data.user);
         } else {
             setUser(null);
         }
@@ -41,18 +41,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const login = async (email: string, password: string) => {
         const result = await authApi.login(email, password);
 
-        // Check if email verification is required
-        if (result.success && result.data?.data.requiresVerification) {
-            return {
-                success: false,
-                requiresVerification: true,
-                message: result.message,
-            };
-        }
-
         // Handle successful login
-        if (result.success && result.data?.data.user) {
-            setUser(result.data.data.user);
+        if (result.success && result.data?.user) {
+            setUser(result.data.user);
         }
 
         return result;

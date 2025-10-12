@@ -45,7 +45,7 @@ export function OTPForm({ className, email, ...props }: React.ComponentProps<'di
                 router.push('/profile');
             }, 1500);
         } else {
-            setMessage(result.message || '');
+            setMessage(result.error.message || '');
         }
 
         setLoading(false);
@@ -56,7 +56,11 @@ export function OTPForm({ className, email, ...props }: React.ComponentProps<'di
         setMessage('');
 
         const result = await resendOTP(email);
-        setMessage(result.message || '');
+        if (result.success) {
+            setMessage(result.message || 'OTP has been resent successfully, please check your email.');
+        } else {
+            setMessage(result.error.message || '');
+        }
 
         setResendLoading(false);
     };

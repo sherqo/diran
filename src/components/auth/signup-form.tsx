@@ -30,12 +30,10 @@ export function SignupForm({ className, ...props }: React.ComponentProps<'div'>)
 
         if (result.success) {
             setMessage(result.message || '');
-            // Redirect to OTP page with email parameter
-            setTimeout(() => {
-                router.push(`/otp?email=${encodeURIComponent(email)}`);
-            }, 1500);
+
+            router.push(`/otp?email=${encodeURIComponent(email)}`);
         } else {
-            setMessage(result.message || '');
+            setMessage(result.error.message || '');
         }
 
         setLoading(false);

@@ -11,7 +11,7 @@ export interface ErrorResponse {
     success: false;
     error: {
         message: string;
-        code?: string;
+        code: string;
     };
 }
 
@@ -25,7 +25,7 @@ export interface User {
 
 export interface LoginData {
     user: User;
-    requiresVerification?: boolean;
+    requiresVerification?: boolean; // DO NOT REMOVE THIS - i (Sharqawy) removed it many times
 }
 
 export interface SignupData {
@@ -36,112 +36,98 @@ export interface VerifyEmailData {
     message: string;
 }
 
-// Standardized API result interface
-export interface ApiResult<T = unknown> {
-    success: boolean;
-    data?: T;
-    message?: string;
-    requiresVerification?: boolean;
+// ApiResult is either a SuccessResponse<T> or an ErrorResponse from the backend
+export type ApiResult<T = unknown> = SuccessResponse<T> | ErrorResponse;
+
+// --- Helpers ---
+async function doFetch(endpoint: string, options: RequestInit = {}): Promise<Response> {
+    const url = `${API_BASE_URL}${endpoint}`;
+    return fetch(url, {
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+            ...options.headers,
+        },
+        ...options,
+    });
 }
 
-export class AuthApiError extends Error {
-    constructor(
-        message: string,
-        public code: string,
-        public statusCode: number
-    ) {
-        super(message);
-        this.name = 'AuthApiError';
-    }
-}
-
-// Generic API request function with centralized error handling
-async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResult<T>> {
+async function parseJsonSafe<T>(res: Response): Promise<ApiResult<T>> {
     try {
-        const url = `${API_BASE_URL}${endpoint}`;
-        const response = await fetch(url, {
-            credentials: 'include', // Important: includes cookies
-            headers: {
-                'Content-Type': 'application/json',
-                ...options.headers,
-            },
-            ...options,
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            return {
-                success: false,
-                message: data.error?.message || 'Something went wrong',
-            };
-        }
-
-        // Success - return backend data with normalized structure
-        return {
-            success: true,
-            data,
-            message: data.message,
-        };
+        const data = await res.json();
+        return data as ApiResult<T>;
     } catch {
-        // Network or other unexpected errors
         return {
             success: false,
-            message: 'Network error occurred',
+            error: { message: 'Invalid JSON from server', code: 'INVALID_JSON' },
         };
     }
 }
 
-// Auth API functions - all return ApiResult
+export async function refreshAccessToken(headers?: HeadersInit): Promise<boolean> {
+    // Forward headers (e.g. Cookie) when attempting refresh - important on server/middleware
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const res = await doFetch('/auth/refresh', { method: 'POST', headers: { ...(headers as any) } });
+    if (!res.ok) return false;
+
+    const data = await parseJsonSafe<null>(res);
+    return (data as SuccessResponse<null>).success === true;
+}
+
+// --- Core API Request ---
+export async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResult<T>> {
+    try {
+        let res = await doFetch(endpoint, options);
+        let data = await parseJsonSafe<T>(res);
+
+        if (!res.ok) {
+            const error = data as ErrorResponse;
+            const needsRefresh = endpoint !== '/auth/refresh' && error.error?.code === 'ACCESS_TOKEN_REQUIRED';
+
+            if (needsRefresh && (await refreshAccessToken())) {
+                res = await doFetch(endpoint, options);
+                data = await parseJsonSafe<T>(res);
+            }
+        }
+
+        console.log('[apiRequest]', data);
+
+        return data;
+    } catch {
+        return {
+            success: false,
+            error: { message: 'Network error occurred', code: 'NETWORK_ERROR' },
+        };
+    }
+}
+
+// --- Auth API Wrapper ---
 export const authApi = {
-    // Login user
-    async login(email: string, password: string): Promise<ApiResult<SuccessResponse<LoginData>>> {
-        return await apiRequest<SuccessResponse<LoginData>>('/auth/login', {
+    login: (email: string, password: string) =>
+        apiRequest<LoginData>('/auth/login', {
             method: 'POST',
             body: JSON.stringify({ email, password }),
-        });
-    },
+        }),
 
-    // Signup user
-    async signup(email: string, password: string, name: string): Promise<ApiResult<SuccessResponse<SignupData>>> {
-        return await apiRequest<SuccessResponse<SignupData>>('/auth/signup', {
+    signup: (email: string, password: string, name: string) =>
+        apiRequest<SignupData>('/auth/signup', {
             method: 'POST',
             body: JSON.stringify({ email, password, name }),
-        });
-    },
+        }),
 
-    // Verify email with OTP
-    async verifyEmail(email: string, otp: string): Promise<ApiResult<SuccessResponse<null>>> {
-        return await apiRequest<SuccessResponse<null>>('/auth/verify-email', {
+    verifyEmail: (email: string, otp: string) =>
+        apiRequest<null>('/auth/verify-email', {
             method: 'POST',
             body: JSON.stringify({ email, otp }),
-        });
-    },
+        }),
 
-    // Resend OTP
-    async resendOTP(email: string): Promise<ApiResult<SuccessResponse<null>>> {
-        return await apiRequest<SuccessResponse<null>>('/auth/resend-otp', {
+    resendOTP: (email: string) =>
+        apiRequest<null>('/auth/resend-otp', {
             method: 'POST',
             body: JSON.stringify({ email }),
-        });
-    },
+        }),
 
-    // Logout user
-    async logout(): Promise<ApiResult<SuccessResponse<Record<string, never>>>> {
-        return await apiRequest<SuccessResponse<Record<string, never>>>('/auth/logout', {
-            method: 'POST',
-        });
-    },
+    logout: () => apiRequest<Record<string, never>>('/auth/logout', { method: 'POST' }),
 
-    // Get current user profile
-    async getProfile(): Promise<ApiResult<SuccessResponse<{ user: User }>>> {
-        return await apiRequest<SuccessResponse<{ user: User }>>('/user/profile');
-    },
-
-    // Refresh access token
-    async refresh(): Promise<ApiResult<SuccessResponse<Record<string, never>>>> {
-        return await apiRequest<SuccessResponse<Record<string, never>>>('/auth/refresh', {
-            method: 'POST',
-        });
-    },
+    getProfile: () => apiRequest<{ user: User }>('/user/profile'),
 };
