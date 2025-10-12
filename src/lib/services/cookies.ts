@@ -2,8 +2,8 @@ import { Response } from 'express';
 import { isDevelopment } from '#lib/utils/common.js';
 import ms from 'ms';
 
-const JWT_ACCESS_EXPIRES_IN = process.env.JWT_ACCESS_EXPIRES_IN || '15m';
-const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || '30d';
+const JWT_ACCESS_EXPIRES_IN = process.env.JWT_ACCESS_EXPIRES_IN || '5m';
+const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
 
 const COMMON_COOKIE_OPTIONS = {
     httpOnly: true,
