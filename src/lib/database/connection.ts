@@ -1,0 +1,10 @@
+import { isDevelopment } from '#lib/utils/common';
+import { PrismaClient } from '@prisma/client';
+
+const globalForPrisma = globalThis as unknown as {
+    prisma: PrismaClient | undefined;
+};
+
+export const db = globalForPrisma.prisma ?? new PrismaClient();
+
+if (isDevelopment) globalForPrisma.prisma = db;

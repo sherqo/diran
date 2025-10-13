@@ -1,0 +1,59 @@
+// docs: https://pris.ly/d/prisma-schema
+
+// Some notes:
+//  - We use Supabase as our Postgres provider.
+//
+//  - We use `@default(dbgenerated("gen_random_uuid()"))` for UUIDs because its postgres function
+//    and works well with Supabase.
+//
+//  - We use `@map` to customize the names of the fields in the database
+//    to write in camelCase in the Prisma schema but snake_case in the database
+//
+//  - We use `@db.Timestamptz(3)` for timestamps to store the timezone information
+//    and to match the precision of Supabase's `now()` function — it defaults to 3 decimal places. 
+
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_DIRECT_URL")
+}
+
+model User {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email     String   @unique
+  password  String
+  name      String
+  photo     String?
+
+  // Timestamps
+  createdAt DateTime @default(now()) @db.Timestamptz(3) @map("created_at")
+  updatedAt DateTime @updatedAt @db.Timestamptz(3) @map("updated_at")
+
+  // Password reset fields
+  resetPasswordToken   String? @map("reset_password_token")
+  resetPasswordExpires DateTime? @db.Timestamptz(3) @map("reset_password_expires")
+
+  // email verification fields
+  emailVerified   Boolean  @default(false) @map("email_verified")
+  emailVerifyToken String?  @map("email_verify_token")
+  emailVerifyExpires DateTime? @db.Timestamptz(3) @map("email_verify_expires")
+
+  // refresh token fields
+  refreshToken   String? @map("refresh_token")
+  refreshTokenExpires DateTime? @db.Timestamptz(3) @map("refresh_token_expires")
+
+  @@map("users")
+}
+
+// idc about this db and never use it in this project, it's for the waitlist in the landing page
+model waitlist {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email      String    @unique
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+}
+
