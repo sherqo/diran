@@ -1,7 +1,14 @@
 import { Router } from 'express';
 import { signup, login, forgotPassword, resetPassword, refresh, logout, verifyEmail, resendOTP } from './controller.js';
-import { signupSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema, verifyEmailSchema, resendOTPSchema } from '@diran/shared';
 import { validateRequest } from '#lib/middleware/validation.js';
+import {
+    forgotPasswordSchema,
+    loginSchema,
+    resendOTPSchema,
+    resetPasswordSchema,
+    signupSchema,
+    verifyEmailSchema,
+} from '@diran/shared/validation/auth.js';
 
 const router: Router = Router();
 

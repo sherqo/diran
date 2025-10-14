@@ -1,17 +1,14 @@
 {
   "name": "diran-app",
   "private": true,
-  "packageManager": "bun@1.3.0",
   "workspaces": [
     "apps/*",
     "packages/*"
   ],
-  "devDependencies": {
-    "turbo": "^2.5.8",
-    "typescript": "^5"
-  },
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev"
-  }
+    "dev": "bun run --parallel frontend:dev backend:dev",
+    "build": "bun run frontend:build && bun run backend:build",
+    "start": "bun run --parallel frontend:start backend:start"
+  },
+  "packageManager": "bun@1.3.0"
 }

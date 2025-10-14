@@ -2,15 +2,19 @@
     "compilerOptions": {
         "baseUrl": ".",
         "paths": {
-            "#*": ["src/*"]
+            "#*": ["src/*"],
+            "@diran/shared": ["../../packages/shared/dist"],
+            "@diran/shared/*": ["../../packages/shared/dist/*"]
         },
-        "target": "ES2022",
-        "module": "ESNext",
+
         "moduleResolution": "node",
         "lib": ["ES2022"],
 
-        "rootDir": "./src",
+        "rootDir": "src",
         "outDir": "dist",
+
+        "module": "esnext",
+        "target": "esnext",
 
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
@@ -37,8 +41,8 @@
         "types": ["node"]
     },
     "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"],
-    "extends": "../../tsconfig.base.json",
 
-    "include": ["src"],
-    "references": [{ "path": "../../packages/shared" }]
+    "include": ["src"]
+
+    // "references": [{ "path": "../../packages/shared" }]
 }

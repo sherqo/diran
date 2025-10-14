@@ -1,6 +1,13 @@
 import { Request, Response } from 'express';
 import { sendVerificationOTP, sendPasswordResetToken, clearRefreshTokenSession, createUserSession } from '#features/auth/service.js';
-import type { SignupInput, LoginInput, ForgotPasswordInput, ResetPasswordInput, VerifyEmailInput, ResendOTPInput } from '@diran/shared';
+import type {
+    SignupInput,
+    LoginInput,
+    ForgotPasswordInput,
+    ResetPasswordInput,
+    VerifyEmailInput,
+    ResendOTPInput,
+} from '@diran/shared/validation/auth';
 import { ApiError } from '#lib/middleware/errorHandler';
 import { sendSuccess } from '#lib/utils/response';
 import { db } from '#lib/database/connection.js';

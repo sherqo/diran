@@ -1,7 +1,7 @@
 import jwt, { SignOptions, Secret } from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
-import { AuthUser } from '#lib/types/AuthUser';
+import { AuthUser } from '@diran/shared/types/auth';
 
 const JWT_SECRET: Secret = process.env.JWT_SECRET!; // Secret type
 const JWT_ACCESS_EXPIRES_IN = '15m'; // 15 minutes

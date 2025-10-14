@@ -2,7 +2,7 @@ import { verifyToken } from '#lib/utils/auth';
 import { Request, Response, NextFunction } from 'express';
 import { ApiError } from './errorHandler';
 import { ErrorCode, HttpStatus } from '#lib/constants/errors';
-import { AuthUser } from '#lib/types/AuthUser';
+import { AuthUser } from '@diran/shared/types/auth';
 
 export interface AuthenticatedRequest extends Request {
     user?: AuthUser;
