@@ -2,9 +2,7 @@
     "compilerOptions": {
         "baseUrl": ".",
         "paths": {
-            "#*": ["src/*"],
-            "#shared": ["../shared/dist/src/index.d.ts"],
-            "#shared/*": ["../shared/dist/src/*"]
+            "#*": ["src/*"]
         },
         "target": "ES2022",
         "module": "ESNext",

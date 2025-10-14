@@ -4,7 +4,7 @@ import { updateProfileSchema, changePasswordSchema } from '@diran/shared';
 import { authenticate } from '#lib/middleware/auth.js';
 import { validateRequest } from '#lib/middleware/validation.js';
 
-const router = Router();
+const router: Router = Router();
 
 // All user routes require authentication
 router.use(authenticate);
