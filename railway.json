@@ -1,6 +1,6 @@
 {
   "build": {
-    "buildCommand": "bun install && cd packages/shared && bun run build && cd ../apps/backend && bunx prisma generate"
+    "buildCommand": "bun install && cd packages/shared && bun run build && cd ../../apps/backend && bunx prisma generate"
   },
   "deploy": {
     "startCommand": "cd apps/backend && bun run src/server.ts"
