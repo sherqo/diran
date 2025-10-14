@@ -1,8 +1,10 @@
 {
   "build": {
-    "buildCommand": "npm install && npm run build",
+    "buildCommand": "bun install && bun run build",
     "watchPatterns": ["apps/backend/**"],
-    "ignorePatterns": ["apps/frontend/**"],
-    "root": "apps/backend"
+    "ignorePatterns": ["apps/frontend/**"]
+  },
+  "deploy": {
+    "startCommand": "cd apps/backend && bun run start"
   }
 }
