@@ -1,8 +1,8 @@
 {
   "build": {
-    "buildCommand": "bun install && cd packages/shared && bun run build && cd ../../apps/backend && bunx prisma generate"
+    "buildCommand": "bun install && cd packages/shared && bun run build && cd ../../apps/backend && bun run build && bunx prisma generate"
   },
   "deploy": {
-    "startCommand": "cd apps/backend && bun run dist/server.js"
+    "startCommand": "cd apps/backend && bun run start"
   }
 }

@@ -6,7 +6,7 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "bun run --parallel frontend:dev backend:dev",
+    "dev": "bun run --parallel workspaces:apps/frontend:dev workspace:backend:dev workspace:shared:dev",
     "build": "bun run frontend:build && bun run backend:build",
     "start": "bun run --parallel frontend:start backend:start"
   },
