@@ -1,8 +1,8 @@
 {
   "build": {
     "buildCommand": "npm install && npm run build",
-    "watchPatterns": ["backend/**"],
-    "ignorePatterns": ["frontend/**"],
-    "root": "backend"
+    "watchPatterns": ["apps/backend/**"],
+    "ignorePatterns": ["apps/frontend/**"],
+    "root": "apps/backend"
   }
 }
