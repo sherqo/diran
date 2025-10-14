@@ -20,9 +20,9 @@
         "migrate": "bunx prisma migrate dev",
         "prisma:pull": "bunx prisma db pull",
         "prisma:push": "bunx prisma db push",
-        "start": "node dist/server.js",
+        "start": "npm run build && node dist/server.js",
         "studio": "bunx prisma studio"
-    },
+},
     "dependencies": {
         "@app/shared": "file:../shared",
         "@prisma/client": "^6.17.0",
