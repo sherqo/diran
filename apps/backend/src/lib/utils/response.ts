@@ -1,19 +1,5 @@
+import { ErrorResponse, SuccessResponse } from '@diran/shared/types/api';
 import { Response } from 'express';
-
-// Standard API response types
-export interface SuccessResponse<T = any> {
-    success: true;
-    data: T;
-    message?: string;
-}
-
-export interface ErrorResponse {
-    success: false;
-    error: {
-        message: string;
-        code?: string;
-    };
-}
 
 export type ApiResponse<T = any> = SuccessResponse<T> | ErrorResponse;
 

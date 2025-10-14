@@ -156,7 +156,7 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
     // Create user session (tokens + cookies)
     await createUserSession(user, res);
 
-    sendSuccess(res, {}, 'Password reset successfully');
+    sendSuccess(res, { email: user.email }, 'Password reset successfully');
 };
 
 //? Verify email with OTP

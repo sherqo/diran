@@ -18,10 +18,12 @@ export const emailTemplates = {
     verifyEmail: (otp: string) => `<h1>Verify Your Email</h1>
         <p>Your verification code is: <strong>${otp}</strong></p>
         <p>This code expires in 15 minutes.</p>`,
-    resetPassword: (token: string) => `<h1>Reset Your Password</h1>
+    resetPassword: (token: string, email: string) => `<h1>Reset Your Password</h1>
+        <p>We received a request to reset the password for your account: <strong>${email}</strong></p>
         <p>Click the link below to reset your password:</p>
         <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${token}">Reset Password</a>
         <p>This link expires in 15 minutes.</p>
+        <p>If you didn't request this, please ignore this email.</p>
     `,
 };
 

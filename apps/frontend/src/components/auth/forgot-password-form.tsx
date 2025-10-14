@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Field, FieldDescription, FieldGroup, FieldLabel } from '@/components/ui/field';
@@ -14,6 +14,14 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
+    const [countdown, setCountdown] = useState(0);
+
+    useEffect(() => {
+        if (countdown > 0) {
+            const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [countdown]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -23,13 +31,16 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
         const result = await authApi.forgotPassword(email);
 
         if (result.success) {
-            setMessage('Password reset link sent to your email.');
+            setMessage(`Password reset link sent to ${email}.`);
+            setCountdown(60); // 1 minute
         } else {
             setMessage(result.error?.message || 'Something went wrong.');
         }
 
         setLoading(false);
     };
+
+    const isDisabled = loading || countdown > 0;
 
     return (
         <div className={cn('flex flex-col gap-6', className)} {...props}>
@@ -68,8 +79,8 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
                         />
                     </Field>
                     <Field>
-                        <Button type="submit" disabled={loading}>
-                            {loading ? 'Sending...' : 'Send Reset Link'}
+                        <Button type="submit" disabled={isDisabled}>
+                            {loading ? 'Sending...' : countdown > 0 ? `Send again in ${countdown}s` : 'Send Reset Link'}
                         </Button>
                     </Field>
                 </FieldGroup>

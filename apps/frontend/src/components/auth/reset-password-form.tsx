@@ -49,8 +49,9 @@ export function ResetPasswordForm({ className, ...props }: React.ComponentProps<
         const result = await authApi.resetPassword(token, password);
 
         if (result.success) {
-            setMessage('Password reset successfully. Redirecting to login...');
-            setTimeout(() => router.push('/login'), 2000);
+            const userEmail = result.data?.email || 'your email';
+            setMessage(`Password reset successfully for ${userEmail}. Redirecting to your profile...`);
+            router.push('/profile');
         } else {
             setMessage(result.error?.message || 'Something went wrong.');
         }

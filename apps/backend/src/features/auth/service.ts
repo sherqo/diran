@@ -54,7 +54,7 @@ export const sendPasswordResetToken = async (userId: string, email: string): Pro
         await sendMail({
             to: [email],
             subject: 'Password Reset',
-            html: emailTemplates.resetPassword(resetToken),
+            html: emailTemplates.resetPassword(resetToken, email),
         });
     } catch (error) {
         console.error('Failed to send reset email:', error);
