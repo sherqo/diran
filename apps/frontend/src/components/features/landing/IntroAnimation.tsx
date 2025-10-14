@@ -14,7 +14,7 @@ const IntroAnimation = ({ children }: IntroAnimationProps) => {
     const [buttonClicked, setButtonClicked] = useState(false);
 
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setAnimationStage('cursor');
     }, []);
 
