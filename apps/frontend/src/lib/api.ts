@@ -1,6 +1,8 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4003/v1';
+import { ErrorCode } from '@/shared/constants/errors';
+import { ApiResult, ErrorResponse, SuccessResponse } from '@/shared/types/api';
+import { LoginData, SignupData, User } from '@/shared/types/user';
 
-import type { ApiResult, SuccessResponse, ErrorResponse, User, LoginData, SignupData } from '@diran/shared';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4003/v1';
 
 // --- Helpers ---
 async function doFetch(endpoint: string, options: RequestInit = {}): Promise<Response> {
@@ -22,7 +24,7 @@ async function parseJsonSafe<T>(res: Response): Promise<ApiResult<T>> {
     } catch {
         return {
             success: false,
-            error: { message: 'Invalid JSON from server', code: 'INVALID_JSON' },
+            error: { message: 'Invalid JSON from server', code: ErrorCode.INVALID_JSON },
         };
     }
 }
@@ -45,7 +47,7 @@ export async function apiRequest<T>(endpoint: string, options: RequestInit = {})
 
         if (!res.ok) {
             const error = data as ErrorResponse;
-            const needsRefresh = endpoint !== '/auth/refresh' && error.error?.code === 'ACCESS_TOKEN_REQUIRED';
+            const needsRefresh = endpoint !== '/auth/refresh' && error.error?.code === ErrorCode.TOKEN_EXPIRED;
 
             if (needsRefresh && (await refreshAccessToken())) {
                 res = await doFetch(endpoint, options);
@@ -57,7 +59,7 @@ export async function apiRequest<T>(endpoint: string, options: RequestInit = {})
     } catch {
         return {
             success: false,
-            error: { message: 'Network error occurred', code: 'NETWORK_ERROR' },
+            error: { message: 'Network error occurred', code: ErrorCode.NETWORK_ERROR },
         };
     }
 }

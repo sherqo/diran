@@ -1,8 +1,9 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import type { User, ApiResult } from '@diran/shared';
 import { authApi } from '@/lib/api';
+import { ApiResult } from '@/shared/types/api';
+import { User } from '@/shared/types/user';
 
 interface AuthContextType {
     user: User | null;
@@ -36,7 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         checkAuth();
     }, []);
 
