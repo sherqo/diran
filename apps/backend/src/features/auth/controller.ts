@@ -1,5 +1,11 @@
 import { Request, Response } from 'express';
-import { sendVerificationOTP, sendPasswordResetToken, clearRefreshTokenSession, createUserSession } from '#features/auth/service.js';
+import {
+    sendVerificationOTP,
+    sendPasswordResetToken,
+    clearRefreshTokenSession,
+    createUserSession,
+    sendSignupAttemptNotification,
+} from '#features/auth/service.js';
 import { ApiError } from '#lib/middleware/errorHandler';
 import { sendSuccess } from '#lib/utils/response';
 import { db } from '#lib/database/connection.js';
@@ -27,7 +33,9 @@ const signup = async (req: Request, res: Response): Promise<void> => {
     });
 
     if (existingUser) {
-        throw new ApiError('User already exists with this email', HttpStatus.CONFLICT, ErrorCode.USER_EXISTS);
+        await sendSignupAttemptNotification(existingUser.email);
+        sendSuccess(res, {}, 'Check your email for verification code.', 201);
+        return;
     }
 
     // Hash password
@@ -52,7 +60,7 @@ const signup = async (req: Request, res: Response): Promise<void> => {
     // Send verification OTP
     await sendVerificationOTP(user.id, user.email);
 
-    sendSuccess(res, { user }, 'User created successfully. Check your email for verification code (OTP).', 201);
+    sendSuccess(res, {}, 'Check your email for verification code.', 201);
 };
 
 //? User login
@@ -88,7 +96,7 @@ const login = async (req: Request, res: Response): Promise<void> => {
 
     // User is verified, proceed with login
     // Create user session (tokens + cookies)
-    await createUserSession(user, res);
+    await createUserSession(user, req, res);
 
     const userData = {
         id: user.id,
@@ -156,7 +164,7 @@ const resetPassword = async (req: Request, res: Response): Promise<void> => {
     });
 
     // Create user session (tokens + cookies)
-    await createUserSession(user, res);
+    await createUserSession(user, req, res);
 
     sendSuccess(res, { email: user.email }, 'Password reset successfully');
 };
@@ -200,7 +208,7 @@ const verifyEmail = async (req: Request, res: Response): Promise<void> => {
     });
 
     // Create user session (tokens + cookies)
-    await createUserSession(user, res);
+    await createUserSession(user, req, res);
 
     sendSuccess(res, {}, 'Email verified successfully');
 };

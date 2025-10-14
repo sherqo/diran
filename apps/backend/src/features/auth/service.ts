@@ -1,3 +1,4 @@
+import { Request, Response } from 'express';
 import { db } from '#lib/database/connection.js';
 import { generateOTP, hashOTP, generateResetToken, hashResetToken } from '#lib/utils/auth.js';
 import { sendMail, emailTemplates } from '#lib/services/email.js';
@@ -62,7 +63,7 @@ const sendPasswordResetToken = async (userId: string, email: string): Promise<vo
     }
 };
 
-const createUserSession = async (user: any, res: any): Promise<void> => {
+const createUserSession = async (user: any, req: Request, res: Response): Promise<void> => {
     // Generate tokens
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user.id);
@@ -79,6 +80,8 @@ const createUserSession = async (user: any, res: any): Promise<void> => {
     // Set cookies
     setAccessTokenCookie(res, accessToken);
     setRefreshTokenCookie(res, refreshToken);
+
+    sendSessionCreatedNotification(user.email, req);
 };
 
 const clearRefreshTokenSession = async (refreshToken: string): Promise<void> => {
@@ -91,4 +94,39 @@ const clearRefreshTokenSession = async (refreshToken: string): Promise<void> => 
     });
 };
 
-export { sendVerificationOTP, sendPasswordResetToken, createUserSession, clearRefreshTokenSession };
+const sendSessionCreatedNotification = async (email: string, req: Request): Promise<void> => {
+    const userAgent = req.headers['user-agent'] || 'Unknown';
+    const ip = req.headers['x-forwarded-for'] || 'Unknown';
+    // Send friendly notification email (no OTP, just info)
+    try {
+        await sendMail({
+            to: [email],
+            subject: 'New Sign-in to Your Diran AI Account',
+            html: emailTemplates.newSession(email, userAgent, ip),
+        });
+    } catch (error) {
+        console.error('Failed to send session created notification:', error);
+    }
+};
+
+const sendSignupAttemptNotification = async (email: string): Promise<void> => {
+    // Send friendly notification email for signup attempts on existing account
+    try {
+        await sendMail({
+            to: [email],
+            subject: 'Account Creation Attempt Detected',
+            html: emailTemplates.signupAttempt(email),
+        });
+    } catch (error) {
+        console.error('Failed to send signup attempt notification:', error);
+    }
+};
+
+export {
+    sendVerificationOTP,
+    sendPasswordResetToken,
+    createUserSession,
+    clearRefreshTokenSession,
+    sendSessionCreatedNotification,
+    sendSignupAttemptNotification,
+};

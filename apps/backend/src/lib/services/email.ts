@@ -25,6 +25,19 @@ export const emailTemplates = {
         <p>This link expires in 15 minutes.</p>
         <p>If you didn't request this, please ignore this email.</p>
     `,
+    newSession: (email: string, userAgent: string, ip: string | string[]) => `<h1>New Sign-in to Your Diran AI Account</h1>
+        <p>Someone just signed in to your account: <strong>${email}</strong></p>
+        <p>User Agent: <strong>${userAgent}</strong></p>
+        <p>IP Address: <strong>${Array.isArray(ip) ? ip.join(', ') : ip}</strong></p>
+        <p>If this was you, no action is required.</p>
+        <p>If this wasn't you, please consider changing your password.</p>
+    `,
+    signupAttempt: (email: string) => `<h1>Account Creation Attempt Detected</h1>
+        <p>Someone tried to create an account with your email: <strong>${email}</strong></p>
+        <p>You already have an account with us. If this was you, you can <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/login">sign in here</a>.</p>
+        <p>If this wasn't you, please ignore this email. No new account was created.</p>
+        <p>This is just a notification - your existing account is safe.</p>
+    `,
 };
 
 type SendMailParams = {
