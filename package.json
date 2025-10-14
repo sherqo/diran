@@ -2,13 +2,22 @@
   "name": "diran-app",
   "private": true,
   "workspaces": [
-    "frontend",
+    "shared",
     "backend",
-    "shared"
+    "frontend"
   ],
   "scripts": {
-    "dev:frontend": "bun --cwd frontend dev",
+    "build": "bun run build:shared && bun run build:backend && bun run build:frontend",
+    "build:shared": "bun --cwd shared run build",
+    "build:backend": "bun --cwd backend run build",
+    "build:frontend": "bun --cwd frontend run build",
+    "dev": "bun run dev:shared & bun run dev:backend & bun run dev:frontend",
+    "dev:shared": "bun --cwd shared run dev",
     "dev:backend": "bun --cwd backend dev",
-    "dev": "bun run dev:frontend & bun run dev:backend"
+    "dev:frontend": "bun --cwd frontend dev",
+    "clean": "rm -rf shared/dist backend/dist frontend/.next"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2"
   }
 }

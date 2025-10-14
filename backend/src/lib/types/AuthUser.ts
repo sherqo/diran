@@ -1,3 +1,1 @@
-export interface AuthUser {
-    id: string;
-}
+export type { AuthUser } from '@app/shared';

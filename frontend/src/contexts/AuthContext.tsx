@@ -1,7 +1,9 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
-import { authApi, User, ApiResult } from '@/lib/api';
+import type { User } from '@app/shared';
+import type { ApiResult } from '@app/shared';
+import { authApi } from '@/lib/api';
 
 interface AuthContextType {
     user: User | null;

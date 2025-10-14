@@ -3,7 +3,7 @@ import { signup, login, forgotPassword, resetPassword, refresh, logout, verifyEm
 import { signupSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema, verifyEmailSchema, resendOTPSchema } from './validation.js';
 import { validateRequest } from '#lib/middleware/validation.js';
 
-const router = Router();
+const router: Router = Router();
 
 // Public routes
 router.post('/refresh', refresh);

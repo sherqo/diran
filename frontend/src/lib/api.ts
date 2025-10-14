@@ -1,43 +1,8 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4003/v1';
 
-// Backend response types (matching your backend exactly)
-export interface SuccessResponse<T = unknown> {
-    success: true;
-    data: T;
-    message?: string;
-}
+import type { ApiResult, SuccessResponse, ErrorResponse } from '@app/shared';
 
-export interface ErrorResponse {
-    success: false;
-    error: {
-        message: string;
-        code: string;
-    };
-}
-
-export interface User {
-    id: string;
-    email: string;
-    name: string;
-    photo?: string;
-    createdAt: string;
-}
-
-export interface LoginData {
-    user: User;
-    requiresVerification?: boolean; // DO NOT REMOVE THIS - i (Sharqawy) removed it many times
-}
-
-export interface SignupData {
-    user: User;
-}
-
-export interface VerifyEmailData {
-    message: string;
-}
-
-// ApiResult is either a SuccessResponse<T> or an ErrorResponse from the backend
-export type ApiResult<T = unknown> = SuccessResponse<T> | ErrorResponse;
+import type { User, LoginData, SignupData } from '@app/shared';
 
 // --- Helpers ---
 async function doFetch(endpoint: string, options: RequestInit = {}): Promise<Response> {

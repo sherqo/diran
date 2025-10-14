@@ -3,6 +3,9 @@
   "workspaces": {
     "": {
       "name": "diran-app",
+      "devDependencies": {
+        "typescript": "^5.2.2",
+      },
     },
     "backend": {
       "name": "@app/backend",
@@ -96,6 +99,15 @@
     "shared": {
       "name": "@app/shared",
       "version": "1.0.0",
+      "dependencies": {
+        "zod": "^4.1.12",
+      },
+      "devDependencies": {
+        "typescript": "^5.2.2",
+      },
+      "peerDependencies": {
+        "typescript": "^5",
+      },
     },
   },
   "packages": {

@@ -62,5 +62,3 @@ process.on('SIGINT', gracefulShutdown);
 app.listen(PORT, () => {
     logStartup(PORT, !!db);
 });
-
-export default app;
