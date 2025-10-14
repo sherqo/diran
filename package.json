@@ -1,0 +1,14 @@
+{
+  "name": "diran-app",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend",
+    "shared"
+  ],
+  "scripts": {
+    "dev:frontend": "bun --cwd frontend dev",
+    "dev:backend": "bun --cwd backend dev",
+    "dev": "bun run dev:frontend & bun run dev:backend"
+  }
+}
