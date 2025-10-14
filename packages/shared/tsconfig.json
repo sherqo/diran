@@ -3,7 +3,6 @@
     "composite": true,
     "declaration": true,
     "declarationMap": true,
-    "outDir": "dist",
     "rootDir": "src",
     "module": "ES2020",
     "target": "ES2020",
@@ -12,7 +11,9 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
-    "isolatedModules": false
+    "isolatedModules": false,
+    "outDir": "dist"
   },
-  "include": ["src/**/*"]
+  "include": ["src"],
+  "extends": "../../tsconfig.base.json"
 }

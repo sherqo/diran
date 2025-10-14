@@ -43,3 +43,5 @@ Thumbs.db
 
 # Misc
 *.tsbuildinfo
+
+.turbo
