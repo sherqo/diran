@@ -1,7 +1,7 @@
 import { verifyToken } from '#lib/utils/auth';
 import { Request, Response, NextFunction } from 'express';
 import { ApiError } from './errorHandler';
-import { ErrorCode, HttpStatus } from '#lib/constants/errors';
+import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors';
 import { AuthUser } from '@diran/shared/types/auth';
 
 export interface AuthenticatedRequest extends Request {
@@ -18,7 +18,7 @@ export const authenticate = async (req: AuthenticatedRequest, res: Response, nex
     const decodedUser = verifyToken(token);
 
     if (!decodedUser?.id) {
-        throw new ApiError('Invalid token', HttpStatus.UNAUTHORIZED, ErrorCode.INVALID_TOKEN);
+        throw new ApiError('Invalid token', HttpStatus.UNAUTHORIZED, ErrorCode.INVALID_ACCESS_TOKEN);
     }
 
     // TODO: fix deleted users by them in a small datastructure for short time

@@ -1,40 +1,31 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Field, FieldDescription, FieldGroup, FieldLabel, FieldSeparator } from '@/components/ui/field';
+import { Field, FieldDescription, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { SITE_NAME } from '@/lib/site';
 import Link from 'next/link';
 import AuthFooter from './auth-footer';
-import GoogleBtn from './google-btn';
-import { useAuth } from '@/contexts/AuthContext';
+import { authApi } from '@/lib/api';
 
-export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) {
+export function ForgotPasswordForm({ className, ...props }: React.ComponentProps<'div'>) {
     const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
-    const { login } = useAuth();
-    const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setMessage('');
 
-        const result = await login(email, password);
+        const result = await authApi.forgotPassword(email);
 
         if (result.success) {
-            router.push('/profile'); // Redirect to profile page
+            setMessage('Password reset link sent to your email.');
         } else {
-            // If email verification is required, redirect to OTP page
-            if (result.error?.code === 'EMAIL_NOT_VERIFIED') {
-                router.push(`/otp?email=${encodeURIComponent(email)}`);
-            }
-            setMessage(result.error.message || '');
+            setMessage(result.error?.message || 'Something went wrong.');
         }
 
         setLoading(false);
@@ -46,10 +37,10 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                 <FieldGroup>
                     <div className="flex flex-col items-center gap-2 text-center">
                         <h1 className="text-xl font-medium">
-                            Welcome to <span className="font-clash">{SITE_NAME}</span>
+                            Forgot Password for <span className="font-clash">{SITE_NAME}</span>
                         </h1>
                         <FieldDescription>
-                            Don&apos;t have an account? <Link href="/signup">Sign up</Link>
+                            Enter your email to receive a reset link. <Link href="/login">Back to login</Link>
                         </FieldDescription>
                     </div>
 
@@ -57,7 +48,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                         <div
                             className={cn(
                                 'rounded-md p-3 text-sm',
-                                message.includes('successful') || message.includes('verification')
+                                message.includes('sent')
                                     ? 'border border-green-200 bg-green-50 text-green-700'
                                     : 'border border-red-200 bg-red-50 text-red-700'
                             )}>
@@ -77,27 +68,10 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                         />
                     </Field>
                     <Field>
-                        <FieldLabel htmlFor="password">Password</FieldLabel>
-                        <Input
-                            id="password"
-                            type="password"
-                            placeholder="••••••••"
-                            value={password}
-                            onChange={e => setPassword(e.target.value)}
-                            required
-                        />
-                        <FieldDescription className="text-right">
-                            <Link href="/forgot-password">Forgot password?</Link>
-                        </FieldDescription>
-                    </Field>
-                    <Field>
                         <Button type="submit" disabled={loading}>
-                            {loading ? 'Logging in...' : 'Login'}
+                            {loading ? 'Sending...' : 'Send Reset Link'}
                         </Button>
                     </Field>
-                    <FieldSeparator>Or</FieldSeparator>
-
-                    <GoogleBtn />
                 </FieldGroup>
             </form>
             <AuthFooter />

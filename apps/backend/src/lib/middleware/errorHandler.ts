@@ -1,6 +1,6 @@
 import { sendError } from '#lib/utils/response';
 import { Request, Response, NextFunction } from 'express';
-import { ErrorCode, HttpStatus } from '#lib/constants/errors';
+import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors';
 import { isDevelopment } from '#lib/utils/common';
 
 // Custom error class for API errors

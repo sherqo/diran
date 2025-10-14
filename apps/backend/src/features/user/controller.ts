@@ -5,7 +5,7 @@ import { db } from '#lib/database/connection';
 import { comparePassword, hashPassword } from '#lib/utils/auth';
 import { sendSuccess } from '#lib/utils/response';
 import { ApiError } from '#lib/middleware/errorHandler';
-import { ErrorCode, HttpStatus } from '#lib/constants/errors';
+import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors';
 
 export const getProfile = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const user = await db.user.findUnique({

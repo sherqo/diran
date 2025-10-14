@@ -12,7 +12,7 @@ import { ApiError } from '#lib/middleware/errorHandler';
 import { sendSuccess } from '#lib/utils/response';
 import { db } from '#lib/database/connection.js';
 import { hashPassword, generateAccessToken, comparePassword, verifyRefreshToken, compareOTP, hashResetToken } from '#lib/utils/auth.js';
-import { ErrorCode, HttpStatus } from '#lib/constants/errors';
+import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors';
 import { setAccessTokenCookie, clearAuthCookies } from '#lib/services/cookies.js';
 
 //? User signup

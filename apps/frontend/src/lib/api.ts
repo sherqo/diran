@@ -50,7 +50,7 @@ export async function apiRequest<T>(endpoint: string, options: RequestInit = {})
             const needsRefresh =
                 endpoint !== '/auth/refresh' &&
                 (error.error?.code === ErrorCode.TOKEN_EXPIRED ||
-                    error.error?.code === ErrorCode.INVALID_TOKEN ||
+                    error.error?.code === ErrorCode.INVALID_ACCESS_TOKEN ||
                     error.error?.code === ErrorCode.ACCESS_TOKEN_REQUIRED);
 
             if (needsRefresh && (await refreshAccessToken())) {
@@ -92,6 +92,18 @@ export const authApi = {
         apiRequest<null>('/auth/resend-otp', {
             method: 'POST',
             body: JSON.stringify({ email }),
+        }),
+
+    forgotPassword: (email: string) =>
+        apiRequest<null>('/auth/forgot-password', {
+            method: 'POST',
+            body: JSON.stringify({ email }),
+        }),
+
+    resetPassword: (token: string, password: string) =>
+        apiRequest<null>('/auth/reset-password', {
+            method: 'POST',
+            body: JSON.stringify({ token, password }),
         }),
 
     logout: () => apiRequest<Record<string, never>>('/auth/logout', { method: 'POST' }),
