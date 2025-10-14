@@ -22,14 +22,12 @@ const HeroSection = () => {
     };
 
     return (
-        <section
-            id="hero"
-            className="w-full flex flex-col items-center justify-center min-h-screen relative">
+        <section id="hero" className="relative flex min-h-screen w-full flex-col items-center justify-center">
             {/* TEXTS */}
-            <div className="text-center px-4 max-w-lg md:max-w-3xl">
+            <div className="max-w-lg px-4 text-center md:max-w-3xl">
                 <TextGenerateEffect
                     words="The missing button in your life"
-                    className="font-clash font-medium text-5xl md:text-7xl leading-tight tracking-tight text-foreground mb-6"
+                    className="font-clash text-foreground mb-6 text-5xl leading-tight font-medium tracking-tight md:text-7xl"
                     onComplete={handleTextComplete}
                 />
 
@@ -41,9 +39,8 @@ const HeroSection = () => {
                         y: showParagraph ? 0 : 20,
                     }}
                     transition={{ duration: 0.8, ease: 'easeOut' }}
-                    className="text-md md:text-xl text-muted-foreground max-w-xl px-10 mx-auto">
-                    It knows when you&#39;re not okay - faster than your
-                    burnout.
+                    className="text-md text-muted-foreground mx-auto max-w-xl px-10 md:text-xl">
+                    It knows when you&#39;re not okay - faster than your burnout.
                 </motion.p>
             </div>
 
@@ -55,7 +52,7 @@ const HeroSection = () => {
                     y: showWaitlist ? 0 : 30,
                 }}
                 transition={{ duration: 0.8, ease: 'easeOut' }}
-                className="w-full max-w-sm md:max-w-xl mt-20 px-4 md:px-8">
+                className="mt-20 w-full max-w-sm px-4 md:max-w-xl md:px-8">
                 <WaitlistInput />
             </motion.div>
         </section>

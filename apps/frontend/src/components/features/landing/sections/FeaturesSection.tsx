@@ -40,13 +40,13 @@ const FeaturesSection = () => {
     return (
         <motion.section
             id="features"
-            className="w-full flex flex-col items-center justify-center bg-background py-20"
+            className="bg-background flex w-full flex-col items-center justify-center py-20"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}>
             <motion.h2
-                className="font-clash font-medium text-4xl md:text-6xl text-primary text-center mb-4 md:mb-8 px-6"
+                className="font-clash text-primary mb-4 px-6 text-center text-4xl font-medium md:mb-8 md:text-6xl"
                 initial={{ opacity: 0, y: -30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -55,7 +55,7 @@ const FeaturesSection = () => {
             </motion.h2>
 
             <motion.div
-                className="w-full max-w-5xl columns-1 md:columns-2 gap-3 p-6 space-y-3"
+                className="w-full max-w-5xl columns-1 gap-3 space-y-3 p-6 md:columns-2"
                 variants={containerVariants}
                 initial="hidden"
                 whileInView="visible"
@@ -92,7 +92,7 @@ const FeaturesSection = () => {
                         title="When your brain lags, Diran picks."
                         description="Distracted? Diran chooses the one task you should do now — based on your energy, schedule, and past patterns. Everything else disappears till you're done."
                         className="h-110 break-inside-avoid">
-                        <div className="flex items-center justify-center h-full">
+                        <div className="flex h-full items-center justify-center">
                             <Image
                                 src="/todos.png"
                                 alt="An image for busy todo list and Diran AI choose one"

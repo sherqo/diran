@@ -1,12 +1,9 @@
 {
-    "name": "Diran AI - Burnout Prevention Assistant",
-    "short_name": "Diran AI",
-    "description": "AI that watches your life patterns, predicts burnout, and helps you make better decisions before you crash.",
-    "start_url": "/",
-    "display": "standalone",
     "background_color": "#ffffff",
-    "theme_color": "#f97316",
-    "orientation": "portrait-primary",
+    "categories": ["productivity", "health", "lifestyle", "wellness", "AI", "burnout prevention"],
+    "description": "AI that watches your life patterns, predicts burnout, and helps you make better decisions before you crash.",
+    "dir": "ltr",
+    "display": "standalone",
     "icons": [
         {
             "src": "/identity/favicon-16x16.png",
@@ -34,14 +31,10 @@
             "type": "image/png"
         }
     ],
-    "categories": [
-        "productivity",
-        "health",
-        "lifestyle",
-        "wellness",
-        "AI",
-        "burnout prevention"
-    ],
     "lang": "en-US",
-    "dir": "ltr"
+    "name": "Diran AI - Burnout Prevention Assistant",
+    "orientation": "portrait-primary",
+    "short_name": "Diran AI",
+    "start_url": "/",
+    "theme_color": "#f97316"
 }

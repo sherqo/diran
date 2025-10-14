@@ -17,9 +17,7 @@ export function WaitlistInput() {
 
         try {
             // Insert directly into Supabase
-            const { error } = await supabase
-                .from('waitlist')
-                .insert([{ email: value.toLowerCase().trim() }]);
+            const { error } = await supabase.from('waitlist').insert([{ email: value.toLowerCase().trim() }]);
 
             if (error) {
                 // Handle duplicate email error
@@ -46,17 +44,17 @@ export function WaitlistInput() {
     return (
         <>
             <form
-                className="w-full relative mx-auto bg-background rounded-full overflow-hidden shadow-xl border border-border"
+                className="bg-background border-border relative mx-auto w-full overflow-hidden rounded-full border shadow-xl"
                 onSubmit={handleSubmit}>
                 <div className="flex items-center">
                     <input
-                        onChange={(e) => {
+                        onChange={e => {
                             setValue(e.target.value);
                         }}
                         value={value}
                         type="email"
                         placeholder="Enter your email"
-                        className="flex-1 text-sm bg-white text-foreground h-12 focus:outline-none focus:ring-0 px-4"
+                        className="text-foreground h-12 flex-1 bg-white px-4 text-sm focus:ring-0 focus:outline-none"
                         required
                         disabled={loading}
                     />
@@ -64,24 +62,17 @@ export function WaitlistInput() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="bg-primary text-primary-foreground px-4 sm:px-6 py-2 rounded-full font-medium text-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 m-1 cursor-pointer">
+                        className="bg-primary text-primary-foreground text-md hover:bg-primary/90 m-1 cursor-pointer rounded-full px-4 py-2 font-medium transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50 sm:px-6">
                         {loading ? 'Joining...' : 'Join Waitlist'}
                     </button>
                 </div>
             </form>
 
             {/* Success/Error Message */}
-            {message && (
-                <div
-                    className={`text-center text-sm mt-3 ${
-                        isSuccess ? 'text-green-600' : 'text-red-600'
-                    }`}>
-                    {message}
-                </div>
-            )}
+            {message && <div className={`mt-3 text-center text-sm ${isSuccess ? 'text-green-600' : 'text-red-600'}`}>{message}</div>}
 
             {/* Trust Message */}
-            <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground/80 mt-3">
+            <div className="text-muted-foreground/80 mt-3 flex items-center justify-center gap-2 text-xs">
                 <span>
                     By joining, you agree to our{' '}
                     <Link href="/privacy" className="underline">

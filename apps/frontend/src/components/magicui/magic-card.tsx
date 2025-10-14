@@ -82,9 +82,7 @@ export function MagicCard({
     }, [gradientSize, mouseX, mouseY]);
 
     return (
-        <div
-            ref={cardRef}
-            className={cn('group relative rounded-lg', className)}>
+        <div ref={cardRef} className={cn('group relative rounded-lg', className)}>
             <motion.div
                 className="pointer-events-none absolute inset-0 rounded-xl bg-black duration-300 group-hover:opacity-100"
                 style={{
@@ -109,23 +107,15 @@ export function MagicCard({
             />
 
             {/* Card Content Container */}
-            <div className="relative z-10 h-full flex flex-col p-4 sm:p-8">
+            <div className="relative z-10 flex h-full flex-col p-4 sm:p-8">
                 {/* Content */}
                 {children && <div className="flex-1">{children}</div>}
 
                 {/* Title and Description at bottom */}
                 {(title || description) && (
-                    <div className="mt-auto pt-4 ">
-                        {title && (
-                            <h3 className="text-xl font-semibold text-foreground mb-1 text-primary">
-                                {title}
-                            </h3>
-                        )}
-                        {description && (
-                            <p className="text-md font-semibold text-muted-foreground">
-                                {description}
-                            </p>
-                        )}
+                    <div className="mt-auto pt-4">
+                        {title && <h3 className="text-foreground text-primary mb-1 text-xl font-semibold">{title}</h3>}
+                        {description && <p className="text-md text-muted-foreground font-semibold">{description}</p>}
                     </div>
                 )}
             </div>

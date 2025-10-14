@@ -53,9 +53,7 @@ export function OTPForm({ className, email, ...props }: React.ComponentProps<'di
         if (result.success) {
             setMessage(result.message || '');
             // Redirect to profile after verification
-            setTimeout(() => {
-                router.push('/profile');
-            }, 1500);
+            router.push('/profile');
         } else {
             setMessage(result.error.message || '');
         }

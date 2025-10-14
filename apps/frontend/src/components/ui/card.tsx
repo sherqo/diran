@@ -38,18 +38,11 @@ export const Card = ({
     const gradient = `linear-gradient(${angle}, ${colors.join(', ')})`;
 
     return (
-        <div
-            className={cn(
-                'relative rounded-2xl p-8 overflow-hidden flex flex-col',
-                className
-            )}>
+        <div className={cn('relative flex flex-col overflow-hidden rounded-2xl p-8', className)}>
             {/* Gradient Layer */}
-            <div
-                className="absolute inset-0 rounded-2xl"
-                style={{ background: gradient }}
-            />
+            <div className="absolute inset-0 rounded-2xl" style={{ background: gradient }} />
             {/* Glass layer */}
-            <div className="absolute inset-0 rounded-2xl bg-white/25 backdrop-blur-md border border-white/40" />
+            <div className="absolute inset-0 rounded-2xl border border-white/40 bg-white/25 backdrop-blur-md" />
 
             {/* Content */}
             {children && <div className="relative z-10 flex-1">{children}</div>}
@@ -57,16 +50,8 @@ export const Card = ({
             {/* Title and Description at bottom */}
             {(title || description) && (
                 <div className="relative z-10 mt-auto pt-4">
-                    {title && (
-                        <h3 className="text-xl font-semibold text-foreground mb-1">
-                            {title}
-                        </h3>
-                    )}
-                    {description && (
-                        <p className="text-md font-semibold text-muted-foreground">
-                            {description}
-                        </p>
-                    )}
+                    {title && <h3 className="text-foreground mb-1 text-xl font-semibold">{title}</h3>}
+                    {description && <p className="text-md text-muted-foreground font-semibold">{description}</p>}
                 </div>
             )}
         </div>

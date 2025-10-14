@@ -5,19 +5,17 @@ import { WaitlistInput } from '../WaitlistInput';
 
 const CTASection = () => {
     return (
-        <section
-            className="w-full min-h-screen flex flex-col items-center justify-center"
-            id="waitlist">
+        <section className="flex min-h-screen w-full flex-col items-center justify-center" id="waitlist">
             {/* Texts */}
             <motion.div
-                className="text-center px-4 max-w-xl md:max-w-4xl"
+                className="max-w-xl px-4 text-center md:max-w-4xl"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.8 }}>
                 {/* Main Heading */}
                 <motion.h2
-                    className="text-4xl md:text-6xl font-clash font-medium text-primary mb-4"
+                    className="font-clash text-primary mb-4 text-4xl font-medium md:text-6xl"
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
@@ -27,7 +25,7 @@ const CTASection = () => {
 
                 {/* Subheading */}
                 <motion.p
-                    className="text-md md:text-xl text-foreground mb-12 max-w-2xl mx-auto leading-relaxed"
+                    className="text-md text-foreground mx-auto mb-12 max-w-2xl leading-relaxed md:text-xl"
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
@@ -42,7 +40,7 @@ const CTASection = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.8, delay: 0.6 }}
-                className="w-full max-w-sm md:max-w-xl px-4 md:px-8">
+                className="w-full max-w-sm px-4 md:max-w-xl md:px-8">
                 <WaitlistInput />
             </motion.div>
         </section>

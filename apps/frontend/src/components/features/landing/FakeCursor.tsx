@@ -48,25 +48,15 @@ const FakeCursor = ({ onCursorClick, shouldMove }: FakeCursorProps) => {
                     ease: 'easeInOut',
                     scale: { duration: 0.2 },
                 }}
-                className="fixed z-50 pointer-events-none"
+                className="pointer-events-none fixed z-50"
                 style={{
                     width: '20px',
                     height: '20px',
                     filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
                 }}>
                 {/* Cursor SVG */}
-                <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    className="text-foreground">
-                    <path
-                        d="M5 3L19 12L12 14L10 21L5 3Z"
-                        fill="currentColor"
-                        stroke="white"
-                        strokeWidth="1"
-                    />
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-foreground">
+                    <path d="M5 3L19 12L12 14L10 21L5 3Z" fill="currentColor" stroke="white" strokeWidth="1" />
                 </svg>
 
                 {/* Click ripple effect */}
@@ -77,7 +67,7 @@ const FakeCursor = ({ onCursorClick, shouldMove }: FakeCursorProps) => {
                             animate={{ scale: 3, opacity: 0 }}
                             exit={{ opacity: 0 }}
                             transition={{ duration: 0.5, ease: 'easeOut' }}
-                            className="absolute inset-0 border-2 border-primary/50 rounded-full"
+                            className="border-primary/50 absolute inset-0 rounded-full border-2"
                         />
                     )}
                 </AnimatePresence>

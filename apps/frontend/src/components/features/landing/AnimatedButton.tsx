@@ -27,15 +27,12 @@ const AnimatedButton = ({ onButtonClick, isClicked }: AnimatedButtonProps) => {
                     scale: { duration: 0.2 },
                 }}
                 onClick={onButtonClick}
-                className="relative px-8 py-4 bg-gradient-to-r from-primary to-ring text-primary-foreground 
-                          rounded-full font-semibold text-xl border-2 border-primary/20
-                          backdrop-blur-sm overflow-hidden"
+                className="from-primary to-ring text-primary-foreground border-primary/20 relative overflow-hidden rounded-full border-2 bg-gradient-to-r px-8 py-4 text-xl font-semibold backdrop-blur-sm"
                 style={{
-                    background:
-                        'linear-gradient(135deg, #FF6A00 0%, #FF8C42 100%)',
+                    background: 'linear-gradient(135deg, #FF6A00 0%, #FF8C42 100%)',
                 }}>
                 {/* Inner glow */}
-                <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent rounded-full" />
+                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-white/20 to-transparent" />
 
                 {/* Button text */}
                 <span className="relative z-10">Diran me</span>
@@ -48,7 +45,7 @@ const AnimatedButton = ({ onButtonClick, isClicked }: AnimatedButtonProps) => {
                             animate={{ scale: 4, opacity: 0 }}
                             exit={{ opacity: 0 }}
                             transition={{ duration: 0.6, ease: 'easeOut' }}
-                            className="absolute inset-0 bg-white/30 rounded-full"
+                            className="absolute inset-0 rounded-full bg-white/30"
                         />
                     )}
                 </AnimatePresence>
@@ -62,7 +59,7 @@ const AnimatedButton = ({ onButtonClick, isClicked }: AnimatedButtonProps) => {
                         animate={{ scale: 8, opacity: 0 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 1.5, ease: 'easeOut' }}
-                        className="absolute inset-0 border-2 border-primary/30 rounded-full"
+                        className="border-primary/30 absolute inset-0 rounded-full border-2"
                         style={{ pointerEvents: 'none' }}
                     />
                 )}
