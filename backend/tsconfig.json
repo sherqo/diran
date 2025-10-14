@@ -12,6 +12,8 @@
         "lib": ["ES2022"],
 
         "rootDir": "./src",
+        "outDir": "dist",
+
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
         "skipLibCheck": true,
