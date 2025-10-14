@@ -1,1 +1,1 @@
-export type { AuthUser } from '@app/shared';
+export type { AuthUser } from '#shared';

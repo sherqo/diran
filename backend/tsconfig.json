@@ -1,10 +1,10 @@
 {
     "compilerOptions": {
-        "baseUrl": "src",
+        "baseUrl": ".",
         "paths": {
-            "#*": ["*"],
-            "@app/shared": ["../shared/src/index.ts"],
-            "@app/shared/*": ["../shared/src/*"]
+            "#*": ["src/*"],
+            "#shared": ["../shared/dist/src/index.d.ts"],
+            "#shared/*": ["../shared/dist/src/*"]
         },
         "target": "ES2022",
         "module": "ESNext",
