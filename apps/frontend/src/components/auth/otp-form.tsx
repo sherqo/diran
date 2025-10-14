@@ -12,7 +12,7 @@ import { verifyEmailSchema } from '@/shared/validation/auth';
 import { useFormValidation } from '@/hooks/useFormValidation';
 
 export function OTPForm({ className, email, ...props }: React.ComponentProps<'div'> & { email: string }) {
-    const [formData, setFormData] = useState({ email, otp: '' });
+    const [otp, setOtp] = useState('');
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
     const [resendLoading, setResendLoading] = useState(false);
@@ -21,18 +21,18 @@ export function OTPForm({ className, email, ...props }: React.ComponentProps<'di
 
     const { errorMessage, validate, clearFieldError, hasErrors } = useFormValidation(verifyEmailSchema);
 
+    // Derive formData from current state and props
+    const formData = { email, otp };
+
     useEffect(() => {
         if (!email) {
             // If no email in URL, redirect to login
             router.push('/login');
-        } else {
-            // Update formData when email prop changes
-            setFormData(prev => ({ ...prev, email }));
         }
     }, [email, router]);
 
     const handleOtpChange = (value: string) => {
-        setFormData(prev => ({ ...prev, otp: value }));
+        setOtp(value);
         clearFieldError();
     };
 
@@ -106,13 +106,7 @@ export function OTPForm({ className, email, ...props }: React.ComponentProps<'di
                         <FieldLabel htmlFor="otp" className="sr-only">
                             Verification code
                         </FieldLabel>
-                        <InputOTP
-                            maxLength={6}
-                            id="otp"
-                            value={formData.otp}
-                            onChange={handleOtpChange}
-                            required
-                            containerClassName="gap-4">
+                        <InputOTP maxLength={6} id="otp" value={otp} onChange={handleOtpChange} required containerClassName="gap-4">
                             <InputOTPGroup className="gap-2.5 *:data-[slot=input-otp-slot]:h-16 *:data-[slot=input-otp-slot]:w-12 *:data-[slot=input-otp-slot]:rounded-md *:data-[slot=input-otp-slot]:border *:data-[slot=input-otp-slot]:text-xl">
                                 <InputOTPSlot index={0} />
                                 <InputOTPSlot index={1} />
@@ -136,7 +130,7 @@ export function OTPForm({ className, email, ...props }: React.ComponentProps<'di
                         </FieldDescription>
                     </Field>
                     <Field>
-                        <Button type="submit" disabled={loading || hasErrors || formData.otp.length !== 6}>
+                        <Button type="submit" disabled={loading || hasErrors || otp.length !== 6}>
                             {loading ? 'Verifying...' : 'Verify'}
                         </Button>
                     </Field>

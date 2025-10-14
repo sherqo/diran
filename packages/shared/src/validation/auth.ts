@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 // Reusable field schemas
-const emailSchema = z.string().email('Invalid email address');
+const emailSchema = z.email('Invalid email address').max(100, 'Email must be less than 150 characters');
 
 const basePasswordSchema = z.string().min(1, 'Password is required');
 
@@ -19,7 +19,7 @@ const otpSchema = z.string().length(6, 'OTP must be 6 digits').regex(/^\d+$/, 'O
 export const signupSchema = z.object({
   email: emailSchema,
   password: strongPasswordSchema,
-  name: z.string().min(2, 'Name must be at least 2 characters'),
+  name: z.string().min(2, 'Name must be at least 2 characters').max(30, 'Name must be less than 30 characters'),
 });
 
 export const loginSchema = z.object({

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -14,7 +14,7 @@ import { resetPasswordSchema } from '@/shared/validation/auth';
 import { useFormValidation } from '@/hooks/useFormValidation';
 
 export function ResetPasswordForm({ className, ...props }: React.ComponentProps<'div'>) {
-    const [formData, setFormData] = useState({ token: '', password: '' });
+    const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
     const router = useRouter();
@@ -22,17 +22,18 @@ export function ResetPasswordForm({ className, ...props }: React.ComponentProps<
 
     const { errorMessage, validate, clearFieldError, hasErrors } = useFormValidation(resetPasswordSchema);
 
-    useEffect(() => {
-        const tokenParam = searchParams.get('token');
-        if (tokenParam) {
-            setFormData(prev => ({ ...prev, token: tokenParam }));
-        } else {
-            setMessage('Invalid reset link. No token provided.');
-        }
-    }, [searchParams]);
+    // Derive token from searchParams and formData from current state
+    const token = searchParams.get('token') || '';
+    const formData = { token, password };
 
-    const handleInputChange = (field: string, value: string) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
+    // Derive initial error message for missing token
+    const initialError = !token ? 'Invalid reset link. No token provided.' : '';
+
+    // Use the initial error if no other message is set
+    const displayMessage = message || initialError;
+
+    const handleInputChange = (value: string) => {
+        setPassword(value);
         clearFieldError();
     };
 
@@ -48,7 +49,7 @@ export function ResetPasswordForm({ className, ...props }: React.ComponentProps<
             return;
         }
 
-        if (!formData.token) {
+        if (!token) {
             setMessage('Invalid reset token.');
             setLoading(false);
             return;
@@ -67,7 +68,7 @@ export function ResetPasswordForm({ className, ...props }: React.ComponentProps<
         setLoading(false);
     };
 
-    const isFormValid = !hasErrors && formData.password && formData.token;
+    const isFormValid = !hasErrors && password && token;
 
     return (
         <div className={cn('flex flex-col gap-6', className)} {...props}>
@@ -82,15 +83,15 @@ export function ResetPasswordForm({ className, ...props }: React.ComponentProps<
                         </FieldDescription>
                     </div>
 
-                    {(message || errorMessage) && (
+                    {(displayMessage || errorMessage) && (
                         <div
                             className={cn(
                                 'rounded-md p-3 text-sm',
-                                message && message.includes('successfully')
+                                displayMessage && displayMessage.includes('successfully')
                                     ? 'border border-green-200 bg-green-50 text-green-700'
                                     : 'border border-red-200 bg-red-50 text-red-700'
                             )}>
-                            {message || errorMessage}
+                            {displayMessage || errorMessage}
                         </div>
                     )}
 
@@ -100,8 +101,8 @@ export function ResetPasswordForm({ className, ...props }: React.ComponentProps<
                             id="password"
                             type="password"
                             placeholder="••••••••"
-                            value={formData.password}
-                            onChange={e => handleInputChange('password', e.target.value)}
+                            value={password}
+                            onChange={e => handleInputChange(e.target.value)}
                             required
                         />
                     </Field>
