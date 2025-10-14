@@ -47,7 +47,11 @@ export async function apiRequest<T>(endpoint: string, options: RequestInit = {})
 
         if (!res.ok) {
             const error = data as ErrorResponse;
-            const needsRefresh = endpoint !== '/auth/refresh' && error.error?.code === ErrorCode.TOKEN_EXPIRED;
+            const needsRefresh =
+                endpoint !== '/auth/refresh' &&
+                (error.error?.code === ErrorCode.TOKEN_EXPIRED ||
+                    error.error?.code === ErrorCode.INVALID_TOKEN ||
+                    error.error?.code === ErrorCode.ACCESS_TOKEN_REQUIRED);
 
             if (needsRefresh && (await refreshAccessToken())) {
                 res = await doFetch(endpoint, options);
