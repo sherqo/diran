@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -15,6 +16,7 @@ import { useFormValidation } from '@/hooks/useFormValidation';
 
 export function ResetPasswordForm({ className, ...props }: React.ComponentProps<'div'>) {
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
     const router = useRouter();
@@ -97,14 +99,25 @@ export function ResetPasswordForm({ className, ...props }: React.ComponentProps<
 
                     <Field>
                         <FieldLabel htmlFor="password">New Password</FieldLabel>
-                        <Input
-                            id="password"
-                            type="password"
-                            placeholder="••••••••"
-                            value={password}
-                            onChange={e => handleInputChange(e.target.value)}
-                            required
-                        />
+                        <div className="relative">
+                            <Input
+                                id="password"
+                                type={showPassword ? 'text' : 'password'}
+                                placeholder="••••••••"
+                                value={password}
+                                onChange={e => handleInputChange(e.target.value)}
+                                required
+                                className="pr-12"
+                            />
+                            <button
+                                type="button"
+                                tabIndex={-1}
+                                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                onClick={() => setShowPassword(v => !v)}
+                                className="absolute top-1/2 right-2 -translate-y-1/2 p-2 focus:outline-none">
+                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                            </button>
+                        </div>
                     </Field>
 
                     <Field>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Eye, EyeOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Field, FieldDescription, FieldGroup, FieldLabel, FieldSeparator } from '@/components/ui/field';
@@ -20,6 +21,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<'div'>)
         email: '',
         password: '',
     });
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState(
         'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number.'
@@ -111,14 +113,25 @@ export function SignupForm({ className, ...props }: React.ComponentProps<'div'>)
                     </Field>
                     <Field>
                         <FieldLabel htmlFor="password">Password</FieldLabel>
-                        <Input
-                            id="password"
-                            type="password"
-                            placeholder="••••••••"
-                            value={formData.password}
-                            onChange={e => handleInputChange('password', e.target.value)}
-                            required
-                        />
+                        <div className="relative">
+                            <Input
+                                id="password"
+                                type={showPassword ? 'text' : 'password'}
+                                placeholder="••••••••"
+                                value={formData.password}
+                                onChange={e => handleInputChange('password', e.target.value)}
+                                required
+                                className="pr-12"
+                            />
+                            <button
+                                type="button"
+                                tabIndex={-1}
+                                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                onClick={() => setShowPassword(v => !v)}
+                                className="absolute top-1/2 right-2 -translate-y-1/2 p-2 focus:outline-none">
+                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                            </button>
+                        </div>
                     </Field>
 
                     <Field>
