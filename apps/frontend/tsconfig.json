@@ -25,7 +25,5 @@
         }
     },
     "exclude": ["node_modules"],
-    "extends": "../../tsconfig.base.json",
-    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-    "references": [{ "path": "../../packages/shared" }]
+    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"]
 }

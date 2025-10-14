@@ -6,9 +6,9 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "bun run --parallel workspaces:apps/frontend:dev workspace:backend:dev workspace:shared:dev",
-    "build": "bun run frontend:build && bun run backend:build",
-    "start": "bun run --parallel frontend:start backend:start"
+    "dev": "cd packages/shared && bun run build && cd ../../apps/backend && bun run build && cd ../frontend && bun run build",
+    "build": "cd packages/shared && bun run build && cd ../../apps/backend && bun run build && cd ../frontend && bun run build",
+    "start": "cd apps/backend && bun run start"
   },
   "packageManager": "bun@1.3.0"
 }
