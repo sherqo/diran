@@ -18,7 +18,7 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
     const [message, setMessage] = useState('');
     const [countdown, setCountdown] = useState(0);
 
-    const { errors, validate, clearFieldError, hasErrors } = useFormValidation(forgotPasswordSchema);
+    const { errorMessage, validate, clearFieldError, hasErrors } = useFormValidation(forgotPasswordSchema);
 
     useEffect(() => {
         if (countdown > 0) {
@@ -29,7 +29,7 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
 
     const handleInputChange = (field: string, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));
-        clearFieldError(field);
+        clearFieldError();
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -71,15 +71,15 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
                         </FieldDescription>
                     </div>
 
-                    {message && (
+                    {(message || errorMessage) && (
                         <div
                             className={cn(
                                 'rounded-md p-3 text-sm',
-                                message.includes('sent')
+                                message && message.includes('sent')
                                     ? 'border border-green-200 bg-green-50 text-green-700'
                                     : 'border border-red-200 bg-red-50 text-red-700'
                             )}>
-                            {message}
+                            {message || errorMessage}
                         </div>
                     )}
 
@@ -93,7 +93,6 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
                             onChange={e => handleInputChange('email', e.target.value)}
                             required
                         />
-                        {errors.email && <FieldDescription className="mt-1 text-sm text-red-600">{errors.email}</FieldDescription>}
                     </Field>
                     <Field>
                         <Button type="submit" disabled={isDisabled || hasErrors}>

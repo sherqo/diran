@@ -21,11 +21,11 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
     const { login } = useAuth();
     const router = useRouter();
 
-    const { errors, validate, clearFieldError, hasErrors } = useFormValidation(loginSchema);
+    const { errorMessage, validate, clearFieldError, hasErrors } = useFormValidation(loginSchema);
 
     const handleInputChange = (field: string, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));
-        clearFieldError(field);
+        clearFieldError();
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -68,15 +68,15 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                         </FieldDescription>
                     </div>
 
-                    {message && (
+                    {(message || errorMessage) && (
                         <div
                             className={cn(
                                 'rounded-md p-3 text-sm',
-                                message.includes('successful') || message.includes('verification')
+                                message && (message.includes('successful') || message.includes('verification'))
                                     ? 'border border-green-200 bg-green-50 text-green-700'
                                     : 'border border-red-200 bg-red-50 text-red-700'
                             )}>
-                            {message}
+                            {message || errorMessage}
                         </div>
                     )}
 
@@ -90,7 +90,6 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                             onChange={e => handleInputChange('email', e.target.value)}
                             required
                         />
-                        {errors.email && <FieldDescription className="mt-1 text-sm text-red-600">{errors.email}</FieldDescription>}
                     </Field>
                     <Field>
                         <FieldLabel htmlFor="password">Password</FieldLabel>
@@ -102,7 +101,6 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                             onChange={e => handleInputChange('password', e.target.value)}
                             required
                         />
-                        {errors.password && <FieldDescription className="mt-1 text-sm text-red-600">{errors.password}</FieldDescription>}
                         <FieldDescription className="text-right">
                             <Link href="/forgot-password">Forgot password?</Link>
                         </FieldDescription>

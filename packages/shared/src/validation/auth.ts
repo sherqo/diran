@@ -16,18 +16,11 @@ const strongPasswordSchema = z
 const otpSchema = z.string().length(6, 'OTP must be 6 digits').regex(/^\d+$/, 'OTP must contain only digits');
 
 // Schemas
-export const signupSchema = z
-  .object({
-    email: emailSchema,
-    password: strongPasswordSchema,
-    confirmPassword: z.string(),
-    name: z.string().min(2, 'Name must be at least 2 characters'),
-    photo: z.string().url().optional(),
-  })
-  .refine(data => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ['confirmPassword'],
-  });
+export const signupSchema = z.object({
+  email: emailSchema,
+  password: strongPasswordSchema,
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+});
 
 export const loginSchema = z.object({
   email: emailSchema,

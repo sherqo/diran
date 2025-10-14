@@ -1,5 +1,5 @@
-import { ErrorCode, HttpStatus } from '#lib/constants/errors';
 import { ApiError } from '#lib/middleware/errorHandler';
+import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors';
 import { Resend } from 'resend';
 import { z } from 'zod';
 

@@ -14,13 +14,13 @@ import { resetPasswordSchema } from '@/shared/validation/auth';
 import { useFormValidation } from '@/hooks/useFormValidation';
 
 export function ResetPasswordForm({ className, ...props }: React.ComponentProps<'div'>) {
-    const [formData, setFormData] = useState({ token: '', password: '', confirmPassword: '' });
+    const [formData, setFormData] = useState({ token: '', password: '' });
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
     const router = useRouter();
     const searchParams = useSearchParams();
 
-    const { errors, validate, clearFieldError, hasErrors } = useFormValidation(resetPasswordSchema);
+    const { errorMessage, validate, clearFieldError, hasErrors } = useFormValidation(resetPasswordSchema);
 
     useEffect(() => {
         const tokenParam = searchParams.get('token');
@@ -33,7 +33,7 @@ export function ResetPasswordForm({ className, ...props }: React.ComponentProps<
 
     const handleInputChange = (field: string, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));
-        clearFieldError(field);
+        clearFieldError();
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -67,7 +67,7 @@ export function ResetPasswordForm({ className, ...props }: React.ComponentProps<
         setLoading(false);
     };
 
-    const isFormValid = !hasErrors && formData.password && formData.confirmPassword && formData.token;
+    const isFormValid = !hasErrors && formData.password && formData.token;
 
     return (
         <div className={cn('flex flex-col gap-6', className)} {...props}>
@@ -82,15 +82,15 @@ export function ResetPasswordForm({ className, ...props }: React.ComponentProps<
                         </FieldDescription>
                     </div>
 
-                    {message && (
+                    {(message || errorMessage) && (
                         <div
                             className={cn(
                                 'rounded-md p-3 text-sm',
-                                message.includes('successfully')
+                                message && message.includes('successfully')
                                     ? 'border border-green-200 bg-green-50 text-green-700'
                                     : 'border border-red-200 bg-red-50 text-red-700'
                             )}>
-                            {message}
+                            {message || errorMessage}
                         </div>
                     )}
 
@@ -104,22 +104,8 @@ export function ResetPasswordForm({ className, ...props }: React.ComponentProps<
                             onChange={e => handleInputChange('password', e.target.value)}
                             required
                         />
-                        {errors.password && <FieldDescription className="mt-1 text-sm text-red-600">{errors.password}</FieldDescription>}
                     </Field>
-                    <Field>
-                        <FieldLabel htmlFor="confirmPassword">Confirm Password</FieldLabel>
-                        <Input
-                            id="confirmPassword"
-                            type="password"
-                            placeholder="••••••••"
-                            value={formData.confirmPassword}
-                            onChange={e => handleInputChange('confirmPassword', e.target.value)}
-                            required
-                        />
-                        {errors.confirmPassword && (
-                            <FieldDescription className="mt-1 text-sm text-red-600">{errors.confirmPassword}</FieldDescription>
-                        )}
-                    </Field>
+
                     <Field>
                         <Button type="submit" disabled={loading || !isFormValid}>
                             {loading ? 'Resetting...' : 'Reset Password'}

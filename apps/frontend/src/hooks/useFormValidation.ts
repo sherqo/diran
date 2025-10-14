@@ -1,40 +1,36 @@
 import React from 'react';
 import { z } from 'zod';
-import { validateData, ValidationResult } from '@/shared/lib/validation';
+import { validateData } from '@/shared/lib/validation';
+import { ApiResult } from '@/shared/types/api';
 
 /**
  * React hook for form validation using Zod schemas
+ * Returns consistent ApiResult format
  */
 export function useFormValidation<T>(schema: z.ZodSchema<T>) {
-    const [errors, setErrors] = React.useState<Record<string, string>>({});
+    const [errorMessage, setErrorMessage] = React.useState<string>('');
 
-    const validate = (data: unknown) => {
+    const validate = (data: unknown): ApiResult<T> => {
         const result = validateData(schema, data);
 
         if (!result.success) {
-            setErrors(result.errors);
+            setErrorMessage(result.error.message);
         } else {
-            setErrors({});
+            setErrorMessage('');
         }
 
         return result;
     };
 
-    const clearErrors = () => setErrors({});
+    const clearErrors = () => setErrorMessage('');
 
-    const clearFieldError = (field: string) => {
-        setErrors(prev => {
-            const newErrors = { ...prev };
-            delete newErrors[field];
-            return newErrors;
-        });
-    };
+    const clearFieldError = () => setErrorMessage(''); // Simplified since we only have one error message
 
     return {
-        errors,
+        errorMessage,
         validate,
         clearErrors,
         clearFieldError,
-        hasErrors: Object.keys(errors).length > 0,
+        hasErrors: errorMessage.length > 0,
     };
 }

@@ -2,10 +2,10 @@ import { db } from '#lib/database/connection.js';
 import { generateOTP, hashOTP, generateResetToken, hashResetToken } from '#lib/utils/auth.js';
 import { sendMail, emailTemplates } from '#lib/services/email.js';
 import { ApiError } from '#lib/middleware/errorHandler.js';
-import { ErrorCode, HttpStatus } from '#lib/constants/errors.js';
 import { generateAccessToken, generateRefreshToken } from '#lib/utils/auth.js';
 import { setAccessTokenCookie, setRefreshTokenCookie } from '#lib/services/cookies.js';
 import ms from 'ms';
+import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors';
 
 const sendVerificationOTP = async (userId: string, email: string): Promise<void> => {
     // Generate OTP

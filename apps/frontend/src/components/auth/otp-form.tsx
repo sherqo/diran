@@ -19,7 +19,7 @@ export function OTPForm({ className, email, ...props }: React.ComponentProps<'di
     const { verifyEmail, resendOTP } = useAuth();
     const router = useRouter();
 
-    const { errors, validate, clearFieldError, hasErrors } = useFormValidation(verifyEmailSchema);
+    const { errorMessage, validate, clearFieldError, hasErrors } = useFormValidation(verifyEmailSchema);
 
     useEffect(() => {
         if (!email) {
@@ -33,7 +33,7 @@ export function OTPForm({ className, email, ...props }: React.ComponentProps<'di
 
     const handleOtpChange = (value: string) => {
         setFormData(prev => ({ ...prev, otp: value }));
-        clearFieldError('otp');
+        clearFieldError();
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -127,7 +127,9 @@ export function OTPForm({ className, email, ...props }: React.ComponentProps<'di
                                 <InputOTPSlot index={5} />
                             </InputOTPGroup>
                         </InputOTP>
-                        {errors.otp && <FieldDescription className="mt-1 text-center text-sm text-red-600">{errors.otp}</FieldDescription>}
+                        {errorMessage && (
+                            <FieldDescription className="mt-1 text-center text-sm text-red-600">{errorMessage}</FieldDescription>
+                        )}
                         <FieldDescription className="text-center">
                             Didn&apos;t receive the code?{' '}
                             <button type="button" onClick={handleResend} disabled={resendLoading} className="underline hover:no-underline">

@@ -19,24 +19,27 @@ export function SignupForm({ className, ...props }: React.ComponentProps<'div'>)
         name: '',
         email: '',
         password: '',
-        confirmPassword: '',
     });
     const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState('');
+    const [message, setMessage] = useState(
+        'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number.'
+    );
+    const [isError, setIsError] = useState(false);
     const { signup } = useAuth();
     const router = useRouter();
 
-    const { errors, validate, clearFieldError, hasErrors } = useFormValidation(signupSchema);
+    const { errorMessage, validate, clearFieldError, hasErrors } = useFormValidation(signupSchema);
 
     const handleInputChange = (field: string, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));
-        clearFieldError(field);
+        clearFieldError();
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setMessage('');
+        setIsError(false);
 
         // Validate form data using shared schema
         const validationResult = validate(formData);
@@ -48,10 +51,12 @@ export function SignupForm({ className, ...props }: React.ComponentProps<'div'>)
         const result = await signup(formData.email, formData.password, formData.name);
 
         if (result.success) {
-            setMessage(result.message || '');
+            setMessage(result.message || 'Account created successfully!');
+            setIsError(false);
             router.push(`/otp?email=${encodeURIComponent(formData.email)}`);
         } else {
-            setMessage(result.error.message || '');
+            setMessage(result.error.message || 'Something went wrong');
+            setIsError(true);
         }
 
         setLoading(false);
@@ -70,15 +75,15 @@ export function SignupForm({ className, ...props }: React.ComponentProps<'div'>)
                         </FieldDescription>
                     </div>
 
-                    {message && (
+                    {(message || errorMessage) && (
                         <div
                             className={cn(
                                 'rounded-md p-3 text-sm',
-                                message.includes('successful') || message.includes('created')
+                                !isError && !errorMessage
                                     ? 'border border-green-200 bg-green-50 text-green-700'
                                     : 'border border-red-200 bg-red-50 text-red-700'
                             )}>
-                            {message}
+                            {message || errorMessage}
                         </div>
                     )}
 
@@ -92,7 +97,6 @@ export function SignupForm({ className, ...props }: React.ComponentProps<'div'>)
                             onChange={e => handleInputChange('name', e.target.value)}
                             required
                         />
-                        {errors.name && <FieldDescription className="mt-1 text-sm text-red-600">{errors.name}</FieldDescription>}
                     </Field>
                     <Field>
                         <FieldLabel htmlFor="email">Email</FieldLabel>
@@ -104,7 +108,6 @@ export function SignupForm({ className, ...props }: React.ComponentProps<'div'>)
                             onChange={e => handleInputChange('email', e.target.value)}
                             required
                         />
-                        {errors.email && <FieldDescription className="mt-1 text-sm text-red-600">{errors.email}</FieldDescription>}
                     </Field>
                     <Field>
                         <FieldLabel htmlFor="password">Password</FieldLabel>
@@ -116,22 +119,8 @@ export function SignupForm({ className, ...props }: React.ComponentProps<'div'>)
                             onChange={e => handleInputChange('password', e.target.value)}
                             required
                         />
-                        {errors.password && <FieldDescription className="mt-1 text-sm text-red-600">{errors.password}</FieldDescription>}
                     </Field>
-                    <Field>
-                        <FieldLabel htmlFor="confirmPassword">Confirm Password</FieldLabel>
-                        <Input
-                            id="confirmPassword"
-                            type="password"
-                            placeholder="••••••••"
-                            value={formData.confirmPassword}
-                            onChange={e => handleInputChange('confirmPassword', e.target.value)}
-                            required
-                        />
-                        {errors.confirmPassword && (
-                            <FieldDescription className="mt-1 text-sm text-red-600">{errors.confirmPassword}</FieldDescription>
-                        )}
-                    </Field>
+
                     <Field>
                         <Button type="submit" disabled={loading || hasErrors}>
                             {loading ? 'Creating account...' : 'Sign up'}
