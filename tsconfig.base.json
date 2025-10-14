@@ -5,9 +5,8 @@
     "moduleResolution": "Node",
     "baseUrl": ".",
     "paths": {
-      "@app/shared": ["shared/dist/index.d.ts", "shared/src/index.ts"],
-      "@app/shared/*": ["shared/dist/*", "shared/src/*"]
+      "@shared": ["shared/src/index.ts"],
+      "@shared/*": ["shared/src/*"]
     }
-    // "references": [{ "path": "./shared" }, { "path": "./backend" }, { "path": "./frontend" }]
   }
 }

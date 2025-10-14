@@ -10,12 +10,11 @@ interface IntroAnimationProps {
 }
 
 const IntroAnimation = ({ children }: IntroAnimationProps) => {
-    const [animationStage, setAnimationStage] = useState<
-        'initial' | 'cursor' | 'clicked' | 'complete'
-    >('initial');
+    const [animationStage, setAnimationStage] = useState<'initial' | 'cursor' | 'clicked' | 'complete'>('initial');
     const [buttonClicked, setButtonClicked] = useState(false);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
         setAnimationStage('cursor');
     }, []);
 
@@ -34,10 +33,10 @@ const IntroAnimation = ({ children }: IntroAnimationProps) => {
     }
 
     return (
-        <div className="min-h-screen w-full relative overflow-hidden">
+        <div className="relative min-h-screen w-full overflow-hidden">
             {/* Clean beige background */}
             <motion.div
-                className="absolute inset-0 bg-gradient-to-br from-background to-accent/10"
+                className="from-background to-accent/10 absolute inset-0 bg-gradient-to-br"
                 initial={{ opacity: 1 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 1 }}
@@ -45,16 +44,11 @@ const IntroAnimation = ({ children }: IntroAnimationProps) => {
 
             {/* Centered button */}
             <div className="absolute inset-0 flex items-center justify-center">
-                {animationStage !== 'initial' && (
-                    <AnimatedButton isClicked={buttonClicked} />
-                )}
+                {animationStage !== 'initial' && <AnimatedButton isClicked={buttonClicked} />}
             </div>
 
             {/* Fake cursor */}
-            <FakeCursor
-                onCursorClick={handleCursorClick}
-                shouldMove={animationStage === 'cursor'}
-            />
+            <FakeCursor onCursorClick={handleCursorClick} shouldMove={animationStage === 'cursor'} />
         </div>
     );
 };

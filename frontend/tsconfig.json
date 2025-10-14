@@ -18,15 +18,15 @@
                 "name": "next"
             }
         ],
-        "baseUrl": "../",
-
+        "baseUrl": ".",
         "paths": {
-            "@/*": ["./frontend/src/*"],
-            "@app/shared/*": ["../../packages/shared/src/*"]
+            "@/*": ["./src/*"],
+            "@shared": ["../shared/src/index.ts"],
+            "@shared/*": ["../shared/src/*"]
         }
     },
     "exclude": ["node_modules"],
-    "extends": "../tsconfig.base.json",
+    // "extends": "../tsconfig.base.json",
     "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
     "references": [{ "path": "../shared" }]
 }

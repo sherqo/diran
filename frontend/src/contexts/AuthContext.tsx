@@ -1,8 +1,7 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
-import type { User } from '@app/shared';
-import type { ApiResult } from '@app/shared';
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import type { User, ApiResult } from '@shared';
 import { authApi } from '@/lib/api';
 
 interface AuthContextType {
@@ -18,15 +17,11 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
 
     // Check authentication status on mount
-    useEffect(() => {
-        checkAuth();
-    }, []);
-
     const checkAuth = async () => {
         setLoading(true);
         const result = await authApi.getProfile();
@@ -39,6 +34,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         setLoading(false);
     };
+
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
+        checkAuth();
+    }, []);
 
     const login = async (email: string, password: string) => {
         const result = await authApi.login(email, password);

@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { UpdateProfileInput, ChangePasswordInput } from './validation';
+import type { UpdateProfileInput, ChangePasswordInput } from '@app/shared';
 import { AuthenticatedRequest } from '#lib/middleware/auth';
 import { db } from '#lib/database/connection';
 import { comparePassword, hashPassword } from '#lib/utils/auth';

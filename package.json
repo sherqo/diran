@@ -1,23 +1,13 @@
 {
   "name": "diran-app",
   "private": true,
-  "workspaces": [
-    "shared",
-    "backend",
-    "frontend"
-  ],
   "scripts": {
-    "build": "bun run build:shared && bun run build:backend && bun run build:frontend",
-    "build:shared": "bun --cwd shared run build",
-    "build:backend": "bun --cwd backend run build",
-    "build:frontend": "bun --cwd frontend run build",
-    "dev": "bun run dev:shared & bun run dev:backend & bun run dev:frontend",
-    "dev:shared": "bun --cwd shared run dev",
-    "dev:backend": "bun --cwd backend dev",
-    "dev:frontend": "bun --cwd frontend dev",
-    "clean": "rm -rf shared/dist backend/dist frontend/.next"
+    "install:all": "cd shared && npm install && cd ../backend && npm install && cd ../frontend && npm install",
+    "build:all": "cd shared && npm run build && cd ../backend && npm run build && cd ../frontend && npm run build",
+    "dev:all": "concurrently \"cd shared && npm run dev\" \"cd backend && npm run dev\" \"cd frontend && npm run dev\"",
+    "clean": "rm -rf shared/dist backend/dist frontend/.next shared/node_modules backend/node_modules frontend/node_modules"
   },
   "devDependencies": {
-    "typescript": "^5.2.2"
+    "concurrently": "^8.2.2"
   }
 }

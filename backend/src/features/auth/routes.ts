@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { signup, login, forgotPassword, resetPassword, refresh, logout, verifyEmail, resendOTP } from './controller.js';
-import { signupSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema, verifyEmailSchema, resendOTPSchema } from './validation.js';
+import { signupSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema, verifyEmailSchema, resendOTPSchema } from '@shared';
 import { validateRequest } from '#lib/middleware/validation.js';
 
 const router: Router = Router();

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { getProfile, updateProfile, changePassword } from './controller.js';
-import { updateProfileSchema, changePasswordSchema } from './validation.js';
+import { updateProfileSchema, changePasswordSchema } from '@shared';
 import { authenticate } from '#lib/middleware/auth.js';
 import { validateRequest } from '#lib/middleware/validation.js';
 

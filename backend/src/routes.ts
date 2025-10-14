@@ -1,8 +1,8 @@
 import { healthRoutes, authRoutes, userRoutes } from '#features';
-import express from 'express';
+import express, { Router } from 'express';
 
 // Create API router with all v1 routes
-const apiRouter = express.Router();
+const apiRouter: Router = express.Router();
 
 // Mount all routes
 apiRouter.use('/health', healthRoutes);

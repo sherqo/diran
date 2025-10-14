@@ -62,7 +62,7 @@ export default function ProfileClientPage() {
                             <div>
                                 <label className="text-muted-foreground mb-1 block text-sm font-medium">Member Since</label>
                                 <div className="border-border bg-popover text-card-foreground rounded-md border p-3">
-                                    {new Date(user.createdAt).toLocaleDateString('en-US', {
+                                    {new Date(user.createdAt as string).toLocaleDateString('en-US', {
                                         year: 'numeric',
                                         month: 'long',
                                         day: 'numeric',
