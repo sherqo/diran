@@ -1,0 +1,8 @@
+{
+  "build": {
+    "buildCommand": "bun install && bun run build",
+    "watchPatterns": ["backend/**"],
+    "ignorePatterns": ["frontend/**"],
+    "root": "backend"
+  }
+}
