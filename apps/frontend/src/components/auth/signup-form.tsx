@@ -5,12 +5,18 @@ import { useRouter } from 'next/navigation';
 import { Eye, EyeOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Field, FieldDescription, FieldGroup, FieldLabel, FieldSeparator } from '@/components/ui/field';
+import {
+    Field,
+    FieldDescription,
+    FieldGroup,
+    FieldLabel,
+    // FieldSeparator
+} from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { SITE_NAME } from '@/lib/site';
 import Link from 'next/link';
 import AuthFooter from './auth-footer';
-import GoogleBtn from './google-btn';
+// import GoogleBtn from './google-btn';
 import { useAuth } from '@/contexts/AuthContext';
 import { signupSchema } from '@/shared/validation/auth';
 import { useFormValidation } from '@/hooks/useFormValidation';
@@ -139,9 +145,9 @@ export function SignupForm({ className, ...props }: React.ComponentProps<'div'>)
                             {loading ? 'Creating account...' : 'Sign up'}
                         </Button>
                     </Field>
-                    <FieldSeparator>Or</FieldSeparator>
+                    {/* <FieldSeparator>Or</FieldSeparator> */}
 
-                    <GoogleBtn />
+                    {/* <GoogleBtn /> */}
                 </FieldGroup>
             </form>
             <AuthFooter />
