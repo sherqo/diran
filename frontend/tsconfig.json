@@ -21,12 +21,11 @@
         "baseUrl": ".",
         "paths": {
             "@/*": ["./src/*"],
-            "@shared": ["../shared/src/index.ts"],
-            "@shared/*": ["../shared/src/*"]
+            "@/shared": ["../shared/src/index.ts"],
+            "@/shared/*": ["../shared/src/*"]
         }
     },
     "exclude": ["node_modules"],
-    // "extends": "../tsconfig.base.json",
     "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
     "references": [{ "path": "../shared" }]
 }

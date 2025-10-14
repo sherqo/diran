@@ -1,6 +1,6 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4003/v1';
 
-import type { ApiResult, SuccessResponse, ErrorResponse, User, LoginData, SignupData } from '@shared';
+import type { ApiResult, SuccessResponse, ErrorResponse, User, LoginData, SignupData } from '@/shared';
 
 // --- Helpers ---
 async function doFetch(endpoint: string, options: RequestInit = {}): Promise<Response> {
