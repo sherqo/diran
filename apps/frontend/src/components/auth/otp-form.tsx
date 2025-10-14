@@ -8,35 +8,47 @@ import { Field, FieldDescription, FieldGroup, FieldLabel } from '@/components/ui
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '@/components/ui/input-otp';
 import AuthFooter from './auth-footer';
 import { useAuth } from '@/contexts/AuthContext';
+import { verifyEmailSchema } from '@/shared/validation/auth';
+import { useFormValidation } from '@/hooks/useFormValidation';
 
 export function OTPForm({ className, email, ...props }: React.ComponentProps<'div'> & { email: string }) {
-    const [otp, setOtp] = useState('');
+    const [formData, setFormData] = useState({ email, otp: '' });
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
     const [resendLoading, setResendLoading] = useState(false);
     const { verifyEmail, resendOTP } = useAuth();
     const router = useRouter();
 
-    // Get email from URL params (passed from signup/login)
+    const { errors, validate, clearFieldError, hasErrors } = useFormValidation(verifyEmailSchema);
 
     useEffect(() => {
         if (!email) {
             // If no email in URL, redirect to login
             router.push('/login');
+        } else {
+            // Update formData when email prop changes
+            setFormData(prev => ({ ...prev, email }));
         }
     }, [email, router]);
 
+    const handleOtpChange = (value: string) => {
+        setFormData(prev => ({ ...prev, otp: value }));
+        clearFieldError('otp');
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (otp.length !== 6) {
-            setMessage('Please enter the complete 6-digit code');
-            return;
-        }
-
         setLoading(true);
         setMessage('');
 
-        const result = await verifyEmail(email, otp);
+        // Validate form data using shared schema
+        const validationResult = validate(formData);
+        if (!validationResult.success) {
+            setLoading(false);
+            return;
+        }
+
+        const result = await verifyEmail(formData.email, formData.otp);
 
         if (result.success) {
             setMessage(result.message || '');
@@ -96,7 +108,13 @@ export function OTPForm({ className, email, ...props }: React.ComponentProps<'di
                         <FieldLabel htmlFor="otp" className="sr-only">
                             Verification code
                         </FieldLabel>
-                        <InputOTP maxLength={6} id="otp" value={otp} onChange={setOtp} required containerClassName="gap-4">
+                        <InputOTP
+                            maxLength={6}
+                            id="otp"
+                            value={formData.otp}
+                            onChange={handleOtpChange}
+                            required
+                            containerClassName="gap-4">
                             <InputOTPGroup className="gap-2.5 *:data-[slot=input-otp-slot]:h-16 *:data-[slot=input-otp-slot]:w-12 *:data-[slot=input-otp-slot]:rounded-md *:data-[slot=input-otp-slot]:border *:data-[slot=input-otp-slot]:text-xl">
                                 <InputOTPSlot index={0} />
                                 <InputOTPSlot index={1} />
@@ -109,6 +127,7 @@ export function OTPForm({ className, email, ...props }: React.ComponentProps<'di
                                 <InputOTPSlot index={5} />
                             </InputOTPGroup>
                         </InputOTP>
+                        {errors.otp && <FieldDescription className="mt-1 text-center text-sm text-red-600">{errors.otp}</FieldDescription>}
                         <FieldDescription className="text-center">
                             Didn&apos;t receive the code?{' '}
                             <button type="button" onClick={handleResend} disabled={resendLoading} className="underline hover:no-underline">
@@ -117,7 +136,7 @@ export function OTPForm({ className, email, ...props }: React.ComponentProps<'di
                         </FieldDescription>
                     </Field>
                     <Field>
-                        <Button type="submit" disabled={loading || otp.length !== 6}>
+                        <Button type="submit" disabled={loading || hasErrors || formData.otp.length !== 6}>
                             {loading ? 'Verifying...' : 'Verify'}
                         </Button>
                     </Field>

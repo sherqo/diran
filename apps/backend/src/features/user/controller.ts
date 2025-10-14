@@ -1,13 +1,13 @@
 import { Response } from 'express';
-import type { UpdateProfileInput, ChangePasswordInput } from '@diran/shared';
 import { AuthenticatedRequest } from '#lib/middleware/auth';
 import { db } from '#lib/database/connection';
 import { comparePassword, hashPassword } from '#lib/utils/auth';
 import { sendSuccess } from '#lib/utils/response';
 import { ApiError } from '#lib/middleware/errorHandler';
 import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors';
+import { ChangePasswordInput, UpdateProfileInput } from '@diran/shared/validation/user';
 
-export const getProfile = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+const getProfile = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const user = await db.user.findUnique({
         where: { id: req.user!.id },
         select: {
@@ -23,7 +23,7 @@ export const getProfile = async (req: AuthenticatedRequest, res: Response): Prom
     sendSuccess(res, { user });
 };
 
-export const updateProfile = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+const updateProfile = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const { name, photo }: UpdateProfileInput = req.body;
 
     const user = await db.user.update({
@@ -45,7 +45,7 @@ export const updateProfile = async (req: AuthenticatedRequest, res: Response): P
     sendSuccess(res, { user }, 'Profile updated successfully');
 };
 
-export const changePassword = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+const changePassword = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const { currentPassword, newPassword }: ChangePasswordInput = req.body;
 
     // Get user with password
@@ -75,3 +75,5 @@ export const changePassword = async (req: AuthenticatedRequest, res: Response): 
 
     sendSuccess(res, {}, 'Password changed successfully');
 };
+
+export { getProfile, updateProfile, changePassword };

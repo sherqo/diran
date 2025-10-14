@@ -4,3 +4,4 @@ export * from './types/auth';
 export * from './constants/errors';
 export * from './validation/auth';
 export * from './validation/user';
+export * from './lib/validation';

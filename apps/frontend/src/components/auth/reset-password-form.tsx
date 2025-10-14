@@ -10,43 +10,51 @@ import { SITE_NAME } from '@/lib/site';
 import Link from 'next/link';
 import AuthFooter from './auth-footer';
 import { authApi } from '@/lib/api';
+import { resetPasswordSchema } from '@/shared/validation/auth';
+import { useFormValidation } from '@/hooks/useFormValidation';
 
 export function ResetPasswordForm({ className, ...props }: React.ComponentProps<'div'>) {
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
+    const [formData, setFormData] = useState({ token: '', password: '', confirmPassword: '' });
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
-    const [token, setToken] = useState('');
     const router = useRouter();
     const searchParams = useSearchParams();
+
+    const { errors, validate, clearFieldError, hasErrors } = useFormValidation(resetPasswordSchema);
 
     useEffect(() => {
         const tokenParam = searchParams.get('token');
         if (tokenParam) {
-            setToken(tokenParam);
+            setFormData(prev => ({ ...prev, token: tokenParam }));
         } else {
             setMessage('Invalid reset link. No token provided.');
         }
     }, [searchParams]);
+
+    const handleInputChange = (field: string, value: string) => {
+        setFormData(prev => ({ ...prev, [field]: value }));
+        clearFieldError(field);
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setMessage('');
 
-        if (password !== confirmPassword) {
-            setMessage('Passwords do not match.');
+        // Validate form data using shared schema
+        const validationResult = validate(formData);
+        if (!validationResult.success) {
             setLoading(false);
             return;
         }
 
-        if (!token) {
+        if (!formData.token) {
             setMessage('Invalid reset token.');
             setLoading(false);
             return;
         }
 
-        const result = await authApi.resetPassword(token, password);
+        const result = await authApi.resetPassword(formData.token, formData.password);
 
         if (result.success) {
             const userEmail = result.data?.email || 'your email';
@@ -58,6 +66,8 @@ export function ResetPasswordForm({ className, ...props }: React.ComponentProps<
 
         setLoading(false);
     };
+
+    const isFormValid = !hasErrors && formData.password && formData.confirmPassword && formData.token;
 
     return (
         <div className={cn('flex flex-col gap-6', className)} {...props}>
@@ -90,10 +100,11 @@ export function ResetPasswordForm({ className, ...props }: React.ComponentProps<
                             id="password"
                             type="password"
                             placeholder="••••••••"
-                            value={password}
-                            onChange={e => setPassword(e.target.value)}
+                            value={formData.password}
+                            onChange={e => handleInputChange('password', e.target.value)}
                             required
                         />
+                        {errors.password && <FieldDescription className="mt-1 text-sm text-red-600">{errors.password}</FieldDescription>}
                     </Field>
                     <Field>
                         <FieldLabel htmlFor="confirmPassword">Confirm Password</FieldLabel>
@@ -101,13 +112,16 @@ export function ResetPasswordForm({ className, ...props }: React.ComponentProps<
                             id="confirmPassword"
                             type="password"
                             placeholder="••••••••"
-                            value={confirmPassword}
-                            onChange={e => setConfirmPassword(e.target.value)}
+                            value={formData.confirmPassword}
+                            onChange={e => handleInputChange('confirmPassword', e.target.value)}
                             required
                         />
+                        {errors.confirmPassword && (
+                            <FieldDescription className="mt-1 text-sm text-red-600">{errors.confirmPassword}</FieldDescription>
+                        )}
                     </Field>
                     <Field>
-                        <Button type="submit" disabled={loading || !token}>
+                        <Button type="submit" disabled={loading || !isFormValid}>
                             {loading ? 'Resetting...' : 'Reset Password'}
                         </Button>
                     </Field>

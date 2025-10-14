@@ -1,5 +1,10 @@
 import { Request, Response } from 'express';
 import { sendVerificationOTP, sendPasswordResetToken, clearRefreshTokenSession, createUserSession } from '#features/auth/service.js';
+import { ApiError } from '#lib/middleware/errorHandler';
+import { sendSuccess } from '#lib/utils/response';
+import { db } from '#lib/database/connection.js';
+import { hashPassword, generateAccessToken, comparePassword, verifyRefreshToken, compareOTP, hashResetToken } from '#lib/utils/auth.js';
+import { setAccessTokenCookie, clearAuthCookies } from '#lib/services/cookies.js';
 import type {
     SignupInput,
     LoginInput,
@@ -8,15 +13,12 @@ import type {
     VerifyEmailInput,
     ResendOTPInput,
 } from '@diran/shared/validation/auth';
-import { ApiError } from '#lib/middleware/errorHandler';
-import { sendSuccess } from '#lib/utils/response';
-import { db } from '#lib/database/connection.js';
-import { hashPassword, generateAccessToken, comparePassword, verifyRefreshToken, compareOTP, hashResetToken } from '#lib/utils/auth.js';
 import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors';
-import { setAccessTokenCookie, clearAuthCookies } from '#lib/services/cookies.js';
+
+export { signup, login, forgotPassword, resetPassword, verifyEmail, refresh, resendOTP, logout };
 
 //? User signup
-export const signup = async (req: Request, res: Response): Promise<void> => {
+const signup = async (req: Request, res: Response): Promise<void> => {
     const { email, password, name }: SignupInput = req.body; // Extract user details from request body
 
     // Check if user already exists
@@ -54,7 +56,7 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
 };
 
 //? User login
-export const login = async (req: Request, res: Response): Promise<void> => {
+const login = async (req: Request, res: Response): Promise<void> => {
     const { email, password }: LoginInput = req.body;
 
     // Find user
@@ -100,7 +102,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 };
 
 //? Forgot password - send reset token to email
-export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
+const forgotPassword = async (req: Request, res: Response): Promise<void> => {
     const { email }: ForgotPasswordInput = req.body;
 
     const user = await db.user.findUnique({
@@ -120,7 +122,7 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
 };
 
 //? Reset password - with token
-export const resetPassword = async (req: Request, res: Response): Promise<void> => {
+const resetPassword = async (req: Request, res: Response): Promise<void> => {
     const { token, password }: ResetPasswordInput = req.body;
 
     // Hash the token to compare with database
@@ -160,7 +162,7 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
 };
 
 //? Verify email with OTP
-export const verifyEmail = async (req: Request, res: Response): Promise<void> => {
+const verifyEmail = async (req: Request, res: Response): Promise<void> => {
     const { email, otp }: VerifyEmailInput = req.body;
 
     // Find user with matching email and valid expiry
@@ -204,7 +206,7 @@ export const verifyEmail = async (req: Request, res: Response): Promise<void> =>
 };
 
 //? Refresh access token
-export const refresh = async (req: Request, res: Response): Promise<void> => {
+const refresh = async (req: Request, res: Response): Promise<void> => {
     const refreshToken = req.cookies?.refreshToken;
 
     if (!refreshToken) {
@@ -248,7 +250,7 @@ export const refresh = async (req: Request, res: Response): Promise<void> => {
 };
 
 //? Resend verification OTP - if not verified yet
-export const resendOTP = async (req: Request, res: Response): Promise<void> => {
+const resendOTP = async (req: Request, res: Response): Promise<void> => {
     const { email }: ResendOTPInput = req.body;
 
     const user = await db.user.findUnique({
@@ -270,7 +272,7 @@ export const resendOTP = async (req: Request, res: Response): Promise<void> => {
 };
 
 //? Logout user
-export const logout = async (req: Request, res: Response): Promise<void> => {
+const logout = async (req: Request, res: Response): Promise<void> => {
     const refreshToken = req.cookies?.refreshToken;
 
     // Clear cookies

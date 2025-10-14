@@ -14,14 +14,14 @@ const COMMON_COOKIE_OPTIONS = {
 
 const refreshTokenPath = '/v1/auth/refresh';
 
-export const setAccessTokenCookie = (res: Response, token: string): void => {
+const setAccessTokenCookie = (res: Response, token: string): void => {
     res.cookie('accessToken', token, {
         ...COMMON_COOKIE_OPTIONS,
         maxAge: ms(JWT_ACCESS_EXPIRES_IN as ms.StringValue),
     });
 };
 
-export const setRefreshTokenCookie = (res: Response, token: string): void => {
+const setRefreshTokenCookie = (res: Response, token: string): void => {
     res.cookie('refreshToken', token, {
         ...COMMON_COOKIE_OPTIONS,
         maxAge: ms(JWT_REFRESH_EXPIRES_IN as ms.StringValue),
@@ -29,7 +29,7 @@ export const setRefreshTokenCookie = (res: Response, token: string): void => {
     });
 };
 
-export const clearAuthCookies = (res: Response): void => {
+const clearAuthCookies = (res: Response): void => {
     res.clearCookie('accessToken', {
         ...COMMON_COOKIE_OPTIONS,
     });
@@ -38,3 +38,5 @@ export const clearAuthCookies = (res: Response): void => {
         path: refreshTokenPath,
     });
 };
+
+export { setAccessTokenCookie, setRefreshTokenCookie, clearAuthCookies };

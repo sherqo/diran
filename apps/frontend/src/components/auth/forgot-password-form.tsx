@@ -9,12 +9,16 @@ import { SITE_NAME } from '@/lib/site';
 import Link from 'next/link';
 import AuthFooter from './auth-footer';
 import { authApi } from '@/lib/api';
+import { forgotPasswordSchema } from '@/shared/validation/auth';
+import { useFormValidation } from '@/hooks/useFormValidation';
 
 export function ForgotPasswordForm({ className, ...props }: React.ComponentProps<'div'>) {
-    const [email, setEmail] = useState('');
+    const [formData, setFormData] = useState({ email: '' });
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
     const [countdown, setCountdown] = useState(0);
+
+    const { errors, validate, clearFieldError, hasErrors } = useFormValidation(forgotPasswordSchema);
 
     useEffect(() => {
         if (countdown > 0) {
@@ -23,15 +27,27 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
         }
     }, [countdown]);
 
+    const handleInputChange = (field: string, value: string) => {
+        setFormData(prev => ({ ...prev, [field]: value }));
+        clearFieldError(field);
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setMessage('');
 
-        const result = await authApi.forgotPassword(email);
+        // Validate form data using shared schema
+        const validationResult = validate(formData);
+        if (!validationResult.success) {
+            setLoading(false);
+            return;
+        }
+
+        const result = await authApi.forgotPassword(formData.email);
 
         if (result.success) {
-            setMessage(`Password reset link sent to ${email}.`);
+            setMessage(`Password reset link sent to ${formData.email}.`);
             setCountdown(60); // 1 minute
         } else {
             setMessage(result.error?.message || 'Something went wrong.');
@@ -73,13 +89,14 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
                             id="email"
                             type="email"
                             placeholder="xx@example.com"
-                            value={email}
-                            onChange={e => setEmail(e.target.value)}
+                            value={formData.email}
+                            onChange={e => handleInputChange('email', e.target.value)}
                             required
                         />
+                        {errors.email && <FieldDescription className="mt-1 text-sm text-red-600">{errors.email}</FieldDescription>}
                     </Field>
                     <Field>
-                        <Button type="submit" disabled={isDisabled}>
+                        <Button type="submit" disabled={isDisabled || hasErrors}>
                             {loading ? 'Sending...' : countdown > 0 ? `Send again in ${countdown}s` : 'Send Reset Link'}
                         </Button>
                     </Field>

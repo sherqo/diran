@@ -1,35 +1,58 @@
 import { z } from 'zod';
 
-export const signupSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  photo: z.string().url().optional(),
-});
+// Reusable field schemas
+const emailSchema = z.string().email('Invalid email address');
+
+const basePasswordSchema = z.string().min(1, 'Password is required');
+
+const strongPasswordSchema = z
+  .string()
+  .min(8, 'Password must be at least 8 characters')
+  .max(50, 'Password must be less than 50 characters')
+  .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+  .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
+  .regex(/[0-9]/, 'Password must contain at least one number');
+
+const otpSchema = z.string().length(6, 'OTP must be 6 digits').regex(/^\d+$/, 'OTP must contain only digits');
+
+// Schemas
+export const signupSchema = z
+  .object({
+    email: emailSchema,
+    password: strongPasswordSchema,
+    confirmPassword: z.string(),
+    name: z.string().min(2, 'Name must be at least 2 characters'),
+    photo: z.string().url().optional(),
+  })
+  .refine(data => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  });
 
 export const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(1, 'Password is required'),
+  email: emailSchema,
+  password: basePasswordSchema,
 });
 
 export const forgotPasswordSchema = z.object({
-  email: z.string().email('Invalid email address'),
+  email: emailSchema,
 });
 
 export const resetPasswordSchema = z.object({
   token: z.string().min(1, 'Reset token is required'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
+  password: strongPasswordSchema,
 });
 
 export const verifyEmailSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  otp: z.string().length(6, 'OTP must be 6 digits').regex(/^\d+$/, 'OTP must contain only digits'),
+  email: emailSchema,
+  otp: otpSchema,
 });
 
 export const resendOTPSchema = z.object({
-  email: z.string().email('Invalid email address'),
+  email: emailSchema,
 });
 
+// Types
 export type SignupInput = z.infer<typeof signupSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;

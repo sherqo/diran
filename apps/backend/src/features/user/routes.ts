@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import { getProfile, updateProfile, changePassword } from './controller.js';
-
 import { authenticate } from '#lib/middleware/auth.js';
 import { validateRequest } from '#lib/middleware/validation.js';
 import { updateProfileSchema, changePasswordSchema } from '@diran/shared/validation/user.js';

@@ -7,7 +7,7 @@ import { generateAccessToken, generateRefreshToken } from '#lib/utils/auth.js';
 import { setAccessTokenCookie, setRefreshTokenCookie } from '#lib/services/cookies.js';
 import ms from 'ms';
 
-export const sendVerificationOTP = async (userId: string, email: string): Promise<void> => {
+const sendVerificationOTP = async (userId: string, email: string): Promise<void> => {
     // Generate OTP
     const otp = generateOTP();
     const hashedOTP = hashOTP(otp);
@@ -34,7 +34,7 @@ export const sendVerificationOTP = async (userId: string, email: string): Promis
     }
 };
 
-export const sendPasswordResetToken = async (userId: string, email: string): Promise<void> => {
+const sendPasswordResetToken = async (userId: string, email: string): Promise<void> => {
     // Generate reset token
     const resetToken = generateResetToken();
     const hashedResetToken = hashResetToken(resetToken);
@@ -62,7 +62,7 @@ export const sendPasswordResetToken = async (userId: string, email: string): Pro
     }
 };
 
-export const createUserSession = async (user: any, res: any): Promise<void> => {
+const createUserSession = async (user: any, res: any): Promise<void> => {
     // Generate tokens
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user.id);
@@ -81,7 +81,7 @@ export const createUserSession = async (user: any, res: any): Promise<void> => {
     setRefreshTokenCookie(res, refreshToken);
 };
 
-export const clearRefreshTokenSession = async (refreshToken: string): Promise<void> => {
+const clearRefreshTokenSession = async (refreshToken: string): Promise<void> => {
     await db.user.updateMany({
         where: { refreshToken },
         data: {
@@ -90,3 +90,5 @@ export const clearRefreshTokenSession = async (refreshToken: string): Promise<vo
         },
     });
 };
+
+export { sendVerificationOTP, sendPasswordResetToken, createUserSession, clearRefreshTokenSession };

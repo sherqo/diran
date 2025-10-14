@@ -11,28 +11,43 @@ import Link from 'next/link';
 import AuthFooter from './auth-footer';
 import GoogleBtn from './google-btn';
 import { useAuth } from '@/contexts/AuthContext';
+import { loginSchema } from '@/shared/validation/auth';
+import { useFormValidation } from '@/hooks/useFormValidation';
 
 export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [formData, setFormData] = useState({ email: '', password: '' });
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
     const { login } = useAuth();
     const router = useRouter();
+
+    const { errors, validate, clearFieldError, hasErrors } = useFormValidation(loginSchema);
+
+    const handleInputChange = (field: string, value: string) => {
+        setFormData(prev => ({ ...prev, [field]: value }));
+        clearFieldError(field);
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setMessage('');
 
-        const result = await login(email, password);
+        // Validate form data using shared schema
+        const validationResult = validate(formData);
+        if (!validationResult.success) {
+            setLoading(false);
+            return;
+        }
+
+        const result = await login(formData.email, formData.password);
 
         if (result.success) {
             router.push('/profile'); // Redirect to profile page
         } else {
             // If email verification is required, redirect to OTP page
             if (result.error?.code === 'EMAIL_NOT_VERIFIED') {
-                router.push(`/otp?email=${encodeURIComponent(email)}`);
+                router.push(`/otp?email=${encodeURIComponent(formData.email)}`);
             }
             setMessage(result.error.message || '');
         }
@@ -71,10 +86,11 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                             id="email"
                             type="email"
                             placeholder="xx@example.com"
-                            value={email}
-                            onChange={e => setEmail(e.target.value)}
+                            value={formData.email}
+                            onChange={e => handleInputChange('email', e.target.value)}
                             required
                         />
+                        {errors.email && <FieldDescription className="mt-1 text-sm text-red-600">{errors.email}</FieldDescription>}
                     </Field>
                     <Field>
                         <FieldLabel htmlFor="password">Password</FieldLabel>
@@ -82,16 +98,17 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                             id="password"
                             type="password"
                             placeholder="••••••••"
-                            value={password}
-                            onChange={e => setPassword(e.target.value)}
+                            value={formData.password}
+                            onChange={e => handleInputChange('password', e.target.value)}
                             required
                         />
+                        {errors.password && <FieldDescription className="mt-1 text-sm text-red-600">{errors.password}</FieldDescription>}
                         <FieldDescription className="text-right">
                             <Link href="/forgot-password">Forgot password?</Link>
                         </FieldDescription>
                     </Field>
                     <Field>
-                        <Button type="submit" disabled={loading}>
+                        <Button type="submit" disabled={loading || hasErrors}>
                             {loading ? 'Logging in...' : 'Login'}
                         </Button>
                     </Field>
