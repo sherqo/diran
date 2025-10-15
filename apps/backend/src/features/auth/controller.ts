@@ -9,7 +9,16 @@ import {
 import { ApiError } from '#lib/middleware/errorHandler';
 import { sendSuccess } from '#lib/utils/response';
 import { db } from '#lib/database/connection.js';
-import { hashPassword, generateAccessToken, comparePassword, verifyRefreshToken, compareOTP, hashResetToken } from '#lib/utils/auth.js';
+import {
+    hashPassword,
+    generateAccessToken,
+    comparePassword,
+    verifyRefreshToken,
+    compareOTP,
+    hashResetToken,
+    generateEmailVerificationToken,
+    verifyEmailVerificationToken,
+} from '#lib/utils/auth.js';
 import { setAccessTokenCookie, clearAuthCookies } from '#lib/services/cookies.js';
 import type {
     SignupInput,
@@ -34,7 +43,10 @@ const signup = async (req: Request, res: Response): Promise<void> => {
 
     if (existingUser) {
         await sendSignupAttemptNotification(existingUser.email);
-        sendSuccess(res, {}, 'Check your email for verification code.', 201);
+
+        const emailToken = generateEmailVerificationToken(existingUser.email);
+        sendSuccess(res, { emailToken }, 'Check your email for verification code.', 201);
+
         return;
     }
 
@@ -60,7 +72,9 @@ const signup = async (req: Request, res: Response): Promise<void> => {
     // Send verification OTP
     await sendVerificationOTP(user.id, user.email);
 
-    sendSuccess(res, {}, 'Check your email for verification code.', 201);
+    // Generate email verification token for OTP page access
+    const emailToken = generateEmailVerificationToken(user.email);
+    sendSuccess(res, { emailToken }, 'Check your email for verification code.', 201);
 };
 
 //? User login
@@ -87,10 +101,15 @@ const login = async (req: Request, res: Response): Promise<void> => {
     if (!user.emailVerified) {
         // Send verification OTP
         await sendVerificationOTP(user.id, user.email);
+
+        // Generate email verification token for OTP page access
+        const emailToken = generateEmailVerificationToken(user.email);
+
         throw new ApiError(
             'Email not verified. A new verification code has been sent to your email.',
             HttpStatus.FORBIDDEN,
-            ErrorCode.EMAIL_NOT_VERIFIED
+            ErrorCode.EMAIL_NOT_VERIFIED,
+            { emailToken }
         );
     }
 
@@ -172,12 +191,14 @@ const resetPassword = async (req: Request, res: Response): Promise<void> => {
 
 //? Verify email with OTP
 const verifyEmail = async (req: Request, res: Response): Promise<void> => {
-    const { email, otp }: VerifyEmailInput = req.body;
+    const { token, otp }: VerifyEmailInput = req.body;
+
+    const decoded = verifyEmailVerificationToken(token);
 
     // Find user with matching email and valid expiry
     const user = await db.user.findFirst({
         where: {
-            email,
+            email: decoded.email,
             otpHashed: {
                 not: null,
             },
@@ -260,12 +281,15 @@ const refresh = async (req: Request, res: Response): Promise<void> => {
 
 //? Resend verification OTP - if not verified yet
 const resendOTP = async (req: Request, res: Response): Promise<void> => {
-    const { email }: ResendOTPInput = req.body;
+    const { token }: ResendOTPInput = req.body;
+
+    const decoded = verifyEmailVerificationToken(token);
 
     const user = await db.user.findUnique({
-        where: { email },
+        where: { email: decoded.email },
     });
 
+    // TODO: here is an exposure for attackers to verify if an email is registered or not
     if (!user) {
         throw new ApiError('User not found', HttpStatus.NOT_FOUND, ErrorCode.USER_NOT_FOUND);
     }
@@ -277,7 +301,10 @@ const resendOTP = async (req: Request, res: Response): Promise<void> => {
     // Send new verification OTP
     await sendVerificationOTP(user.id, user.email);
 
-    sendSuccess(res, {}, 'Verification code sent successfully');
+    // Generate new email verification token for continued OTP page access
+    const emailToken = generateEmailVerificationToken(user.email);
+
+    sendSuccess(res, { emailToken }, 'Verification code sent successfully');
 };
 
 //? Logout user

@@ -6,6 +6,7 @@ import { AuthUser } from '@diran/shared/types/auth';
 const JWT_SECRET: Secret = process.env.JWT_SECRET!; // Secret type
 const JWT_ACCESS_EXPIRES_IN = '15m'; // 15 minutes
 const JWT_REFRESH_EXPIRES_IN = '30d'; // 1 month (30 days)
+const JWT_EMAIL_VERIFICATION_EXPIRES_IN = '15m'; // 15 minutes
 
 const toAuthUser = (user: any): AuthUser => {
     return {
@@ -81,4 +82,26 @@ export const generateResetToken = (): string => {
 
 export const hashResetToken = (token: string): string => {
     return crypto.createHash('sha256').update(token).digest('hex');
+};
+
+// Functions for email verification JWT tokens
+export const generateEmailVerificationToken = (email: string): string => {
+    const payload = {
+        email,
+        type: 'email_verification',
+    };
+    const options: SignOptions = { expiresIn: JWT_EMAIL_VERIFICATION_EXPIRES_IN };
+
+    const token = jwt.sign(payload, JWT_SECRET, options);
+    return token;
+};
+
+export const verifyEmailVerificationToken = (token: string): { email: string } => {
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
+
+    if (decoded.type !== 'email_verification') {
+        throw new Error('Invalid token type');
+    }
+
+    return { email: decoded.email };
 };

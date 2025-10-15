@@ -1,4 +1,5 @@
 import { OTPForm } from '@/components/auth/otp-form';
+import { decodeEmailFromToken, isJWTToken } from '@/lib/jwt-utils';
 
 export const metadata = {
     title: 'Verify Email',
@@ -6,16 +7,29 @@ export const metadata = {
 
 type PageProps = {
     searchParams: Promise<{
-        email?: boolean;
+        verifyEmailToken?: string;
     }>;
 };
 
 export default async function OTPPage({ searchParams }: PageProps) {
-    const { email } = await searchParams;
+    const params = await searchParams;
+    const verifyEmailToken = params.verifyEmailToken;
 
-    if (!email || typeof email !== 'string') {
-        return <div className="p-4">Invalid access. Please use the link sent to your email.</div>;
+    if (!verifyEmailToken || typeof verifyEmailToken !== 'string') {
+        return <div className="p-4">Invalid access. Please try to login again</div>;
     }
 
-    return <OTPForm email={email} />;
+    // Check if it's a JWT token or regular email
+    let actualEmail: string;
+    if (isJWTToken(verifyEmailToken)) {
+        const decodedEmail = decodeEmailFromToken(verifyEmailToken);
+        if (!decodedEmail) {
+            return <div className="p-4">Invalid or expired verification link.</div>;
+        }
+        actualEmail = decodedEmail;
+    } else {
+        return <div className="p-4">Invalid access. Please try to login again</div>;
+    }
+
+    return <OTPForm email={actualEmail} verifyEmailToken={verifyEmailToken} />;
 }

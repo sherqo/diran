@@ -8,21 +8,28 @@ import { Field, FieldDescription, FieldGroup, FieldLabel } from '@/components/ui
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '@/components/ui/input-otp';
 import AuthFooter from './auth-footer';
 import { useAuth } from '@/contexts/AuthContext';
-import { verifyEmailSchema } from '@/shared/validation/auth';
+import { verifyEmailSchema } from '@diran/shared/validation/auth';
 import { useFormValidation } from '@/hooks/useFormValidation';
 
-export function OTPForm({ className, email, ...props }: React.ComponentProps<'div'> & { email: string }) {
+export function OTPForm({
+    className,
+    email,
+    verifyEmailToken,
+    ...props
+}: React.ComponentProps<'div'> & { email: string; verifyEmailToken: string }) {
     const [otp, setOtp] = useState('');
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
     const [resendLoading, setResendLoading] = useState(false);
+    const [currentToken, setCurrentToken] = useState(verifyEmailToken);
     const { verifyEmail, resendOTP } = useAuth();
     const router = useRouter();
 
     const { errorMessage, validate, clearFieldError, hasErrors } = useFormValidation(verifyEmailSchema);
 
     // Derive formData from current state and props
-    const formData = { email, otp };
+    // Use token field name to match backend validation schema
+    const formData = { token: currentToken, otp };
 
     useEffect(() => {
         if (!email) {
@@ -48,7 +55,7 @@ export function OTPForm({ className, email, ...props }: React.ComponentProps<'di
             return;
         }
 
-        const result = await verifyEmail(formData.email, formData.otp);
+        const result = await verifyEmail(formData.token, formData.otp);
 
         if (result.success) {
             setMessage(result.message || '');
@@ -65,9 +72,15 @@ export function OTPForm({ className, email, ...props }: React.ComponentProps<'di
         setResendLoading(true);
         setMessage('');
 
-        const result = await resendOTP(email);
+        const result = await resendOTP(currentToken);
         if (result.success) {
             setMessage(result.message || 'OTP has been resent successfully, please check your email.');
+            // Update token if server returns a new one
+            if (result.data?.emailToken) {
+                setCurrentToken(result.data.emailToken);
+                // Update URL with new token
+                router.replace(`/otp?verifyEmailToken=${result.data.emailToken}`);
+            }
         } else {
             setMessage(result.error.message || '');
         }

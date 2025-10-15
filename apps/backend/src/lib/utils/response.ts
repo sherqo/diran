@@ -1,7 +1,7 @@
-import { ErrorResponse, SuccessResponse } from '@diran/shared/types/api';
+import type { ErrorResponse, SuccessResponse } from '@diran/shared/types/api';
 import { Response } from 'express';
 
-export type ApiResponse<T = any> = SuccessResponse<T> | ErrorResponse;
+export type ApiResponse<T = any> = SuccessResponse<T> | ErrorResponse<T>;
 
 // Helper to send success responses
 export const sendSuccess = <T>(res: Response, data: T, message?: string, statusCode: number = 200): Response<SuccessResponse<T>> => {
@@ -15,13 +15,20 @@ export const sendSuccess = <T>(res: Response, data: T, message?: string, statusC
 };
 
 // Helper to send error responses
-export const sendError = (res: Response, message: string, statusCode: number = 500, code?: string): Response<ErrorResponse> => {
-    const response: ErrorResponse = {
+export const sendError = <T = any>(
+    res: Response,
+    message: string,
+    statusCode: number = 500,
+    code?: string,
+    data?: T
+): Response<ErrorResponse<T>> => {
+    const response: ErrorResponse<T> = {
         success: false,
         error: {
             message,
             ...(code && { code }),
         },
+        ...(data !== undefined && { data }),
     };
 
     return res.status(statusCode).json(response);

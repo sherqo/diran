@@ -47,7 +47,7 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
         const result = await authApi.forgotPassword(formData.email);
 
         if (result.success) {
-            setMessage(`Password reset link sent to ${formData.email}.`);
+            setMessage(`if the email ${formData.email} is registered, a reset link has been sent.`);
             setCountdown(60); // 1 minute
         } else {
             setMessage(result.error?.message || 'Something went wrong.');

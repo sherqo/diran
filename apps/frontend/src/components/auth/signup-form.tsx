@@ -61,7 +61,10 @@ export function SignupForm({ className, ...props }: React.ComponentProps<'div'>)
         if (result.success) {
             setMessage(result.message || 'Account created successfully!');
             setIsError(false);
-            router.push(`/otp?email=${encodeURIComponent(formData.email)}`);
+            // Use the JWT token from server response instead of raw email
+            if (result.data?.emailToken) {
+                router.push(`/otp?verifyEmailToken=${result.data.emailToken}`);
+            }
         } else {
             setMessage(result.error.message || 'Something went wrong');
             setIsError(true);

@@ -54,8 +54,8 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
             router.push('/profile'); // Redirect to profile page
         } else {
             // If email verification is required, redirect to OTP page
-            if (result.error?.code === 'EMAIL_NOT_VERIFIED') {
-                router.push(`/otp?email=${encodeURIComponent(formData.email)}`);
+            if (result.error?.code === 'EMAIL_NOT_VERIFIED' && result.data?.emailToken) {
+                router.push(`/otp?verifyEmailToken=${result.data.emailToken}`);
             }
             setMessage(result.error.message || '');
         }

@@ -37,12 +37,12 @@ export const resetPasswordSchema = z.object({
 });
 
 export const verifyEmailSchema = z.object({
-  email: emailSchema,
+  token: z.string().min(1, 'Verify email token is required'),
   otp: otpSchema,
 });
 
 export const resendOTPSchema = z.object({
-  email: emailSchema,
+  token: z.string().min(1, 'Verify email token is required'),
 });
 
 // Types

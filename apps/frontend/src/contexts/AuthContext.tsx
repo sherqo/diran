@@ -10,8 +10,8 @@ interface AuthContextType {
     loading: boolean;
     login: (email: string, password: string) => Promise<ApiResult>;
     signup: (email: string, password: string, name: string) => Promise<ApiResult>;
-    verifyEmail: (email: string, otp: string) => Promise<ApiResult>;
-    resendOTP: (email: string) => Promise<ApiResult>;
+    verifyEmail: (token: string, otp: string) => Promise<ApiResult>;
+    resendOTP: (token: string) => Promise<ApiResult>;
     logout: () => Promise<void>;
     checkAuth: () => Promise<void>;
 }
@@ -56,8 +56,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return await authApi.signup(email, password, name);
     };
 
-    const verifyEmail = async (email: string, otp: string) => {
-        const result = await authApi.verifyEmail(email, otp);
+    const verifyEmail = async (token: string, otp: string) => {
+        const result = await authApi.verifyEmail(token, otp);
 
         if (result.success) {
             // After successful verification, refresh user data
@@ -67,8 +67,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return result;
     };
 
-    const resendOTP = async (email: string) => {
-        return await authApi.resendOTP(email);
+    const resendOTP = async (token: string) => {
+        return await authApi.resendOTP(token);
     };
 
     const logout = async () => {

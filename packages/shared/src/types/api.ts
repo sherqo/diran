@@ -4,12 +4,13 @@ export interface SuccessResponse<T = any> {
   message?: string;
 }
 
-export interface ErrorResponse {
+export interface ErrorResponse<T = any> {
   success: false;
+  data?: T;
   error: {
     message: string;
     code?: string;
   };
 }
 
-export type ApiResult<T = any> = SuccessResponse<T> | ErrorResponse;
+export type ApiResult<T = any> = SuccessResponse<T> | ErrorResponse<T>;

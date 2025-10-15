@@ -8,12 +8,14 @@ import { HttpStatus, ErrorCode } from '@diran/shared/constants/errors';
 export class ApiError extends Error {
     public status: number;
     public code?: string;
+    public data?: any;
 
-    constructor(message: string, status: number = 500, code?: string) {
+    constructor(message: string, status: number = 500, code?: string, data?: any) {
         super(message);
         this.name = 'ApiError';
         this.status = status;
         if (code) this.code = code;
+        if (data) this.data = data;
     }
 }
 
@@ -37,7 +39,7 @@ export const errorHandler = (error: any, req: Request, res: Response, next: Next
     // Handle different error types
     if (error instanceof ApiError) {
         // Custom API errors - use proper response utility based on status
-        sendError(res, error.message, error.status, error.code);
+        sendError(res, error.message, error.status, error.code, error.data);
         return;
     }
 

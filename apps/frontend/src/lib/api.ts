@@ -82,16 +82,16 @@ export const authApi = {
             body: JSON.stringify({ email, password, name }),
         }),
 
-    verifyEmail: (email: string, otp: string) =>
+    verifyEmail: (token: string, otp: string) =>
         apiRequest<null>('/auth/verify-email', {
             method: 'POST',
-            body: JSON.stringify({ email, otp }),
+            body: JSON.stringify({ token, otp }),
         }),
 
-    resendOTP: (email: string) =>
+    resendOTP: (token: string) =>
         apiRequest<null>('/auth/resend-otp', {
             method: 'POST',
-            body: JSON.stringify({ email }),
+            body: JSON.stringify({ token }),
         }),
 
     forgotPassword: (email: string) =>
