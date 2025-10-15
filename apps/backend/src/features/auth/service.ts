@@ -12,14 +12,14 @@ const sendVerificationOTP = async (userId: string, email: string): Promise<void>
     // Generate OTP
     const otp = generateOTP();
     const hashedOTP = hashOTP(otp);
-    const emailVerifyExpires = new Date(Date.now() + ms('15m')); // 15 minutes
+    const otpExpires = new Date(Date.now() + ms('15m')); // 15 minutes
 
     // Update user with verify OTP
     await db.user.update({
         where: { id: userId },
         data: {
-            emailVerifyToken: hashedOTP,
-            emailVerifyExpires,
+            otpHashed: hashedOTP,
+            otpExpires: otpExpires,
         },
     });
 

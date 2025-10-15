@@ -34,7 +34,7 @@ export const generateRefreshToken = (userId: string): string => {
     return token;
 };
 
-export const verifyToken = (token: string): AuthUser => {
+export const verifyAccessToken = (token: string): AuthUser => {
     return jwt.verify(token, JWT_SECRET) as AuthUser;
 };
 
@@ -65,6 +65,7 @@ export const generateOTP = (length = 6): string => {
     return otp;
 };
 
+// Hashing and comparison functions for OTP
 export const hashOTP = (otp: string): string => {
     return crypto.createHash('sha256').update(otp).digest('hex');
 };

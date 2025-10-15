@@ -33,6 +33,10 @@ model User {
   // Timestamps
   createdAt DateTime @default(now()) @db.Timestamptz(3) @map("created_at")
   updatedAt DateTime @updatedAt @db.Timestamptz(3) @map("updated_at")
+  
+  // refresh token fields
+  refreshToken   String? @map("refresh_token")
+  refreshTokenExpires DateTime? @db.Timestamptz(3) @map("refresh_token_expires")
 
   // Password reset fields
   resetPasswordToken   String? @map("reset_password_token")
@@ -40,12 +44,11 @@ model User {
 
   // email verification fields
   emailVerified   Boolean  @default(false) @map("email_verified")
-  emailVerifyToken String?  @map("email_verify_token")
-  emailVerifyExpires DateTime? @db.Timestamptz(3) @map("email_verify_expires")
+  otpHashed       String?  @map("otp_hashed")
+  otpExpires      DateTime? @db.Timestamptz(3) @map("otp_expires")
+  // emailVerifyToken String?  @map("email_verify_token")
+  // emailVerifyExpires DateTime? @db.Timestamptz(3) @map("email_verify_expires")
 
-  // refresh token fields
-  refreshToken   String? @map("refresh_token")
-  refreshTokenExpires DateTime? @db.Timestamptz(3) @map("refresh_token_expires")
 
   @@map("users")
 }

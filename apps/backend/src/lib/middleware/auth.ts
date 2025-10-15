@@ -1,4 +1,4 @@
-import { verifyToken } from '#lib/utils/auth';
+import { verifyAccessToken } from '#lib/utils/auth';
 import { Request, Response, NextFunction } from 'express';
 import { ApiError } from './errorHandler';
 import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors';
@@ -15,7 +15,7 @@ export const authenticate = async (req: AuthenticatedRequest, res: Response, nex
         throw new ApiError('Access token required', HttpStatus.UNAUTHORIZED, ErrorCode.ACCESS_TOKEN_REQUIRED);
     }
 
-    const decodedUser = verifyToken(token);
+    const decodedUser = verifyAccessToken(token);
 
     if (!decodedUser?.id) {
         throw new ApiError('Invalid token', HttpStatus.UNAUTHORIZED, ErrorCode.INVALID_ACCESS_TOKEN);

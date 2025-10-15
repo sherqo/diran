@@ -177,21 +177,21 @@ const verifyEmail = async (req: Request, res: Response): Promise<void> => {
     const user = await db.user.findFirst({
         where: {
             email,
-            emailVerifyToken: {
+            otpHashed: {
                 not: null,
             },
-            emailVerifyExpires: {
+            otpExpires: {
                 gt: new Date(),
             },
         },
     });
 
-    if (!user || !user.emailVerifyToken) {
+    if (!user || !user.otpHashed) {
         throw new ApiError('Invalid OTP or email', HttpStatus.UNAUTHORIZED, ErrorCode.INVALID_TOKEN);
     }
 
     // Compare OTP with hashed version
-    const isOTPValid = compareOTP(otp, user.emailVerifyToken);
+    const isOTPValid = compareOTP(otp, user.otpHashed);
 
     if (!isOTPValid) {
         throw new ApiError('Invalid OTP', HttpStatus.UNAUTHORIZED, ErrorCode.INVALID_TOKEN);
@@ -202,8 +202,8 @@ const verifyEmail = async (req: Request, res: Response): Promise<void> => {
         where: { id: user.id },
         data: {
             emailVerified: true,
-            emailVerifyToken: null,
-            emailVerifyExpires: null,
+            otpHashed: null,
+            otpExpires: null,
         },
     });
 
