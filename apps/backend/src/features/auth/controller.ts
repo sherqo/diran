@@ -160,6 +160,7 @@ const resetPassword = async (req: Request, res: Response): Promise<void> => {
             password: hashedPassword,
             resetPasswordToken: null,
             resetPasswordExpires: null,
+            emailVerified: true, // Verify email if not already verified
         },
     });
 
