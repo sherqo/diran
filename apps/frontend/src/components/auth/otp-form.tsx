@@ -8,7 +8,7 @@ import { Field, FieldDescription, FieldGroup, FieldLabel } from '@/components/ui
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '@/components/ui/input-otp';
 import AuthFooter from './auth-footer';
 import { useAuth } from '@/contexts/AuthContext';
-import { verifyEmailSchema } from '@diran/shared/validation/auth';
+import { verifyEmailSchema } from '@/shared/validation/auth';
 import { useFormValidation } from '@/hooks/useFormValidation';
 
 export function OTPForm({
