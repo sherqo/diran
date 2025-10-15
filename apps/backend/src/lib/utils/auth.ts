@@ -65,7 +65,6 @@ export const generateOTP = (length = 6): string => {
     return otp;
 };
 
-// Hashing and comparison functions for OTP
 export const hashOTP = (otp: string): string => {
     return crypto.createHash('sha256').update(otp).digest('hex');
 };
