@@ -1,15 +1,16 @@
 import { apiRequest } from './helpers';
 import type { GetProfileResponseData, UpdateProfileResponseData, ChangePasswordResponseData } from '@/shared/types/user';
+import { UpdateProfileInput, ChangePasswordInput } from '@/shared/validation/user';
 
 export const getProfileApi = () => apiRequest<GetProfileResponseData>('/user/profile');
 
-export const updateProfileApi = (name?: string, photo?: string) =>
+export const updateProfileApi = ({ name, photo }: UpdateProfileInput) =>
     apiRequest<UpdateProfileResponseData>('/user/profile', {
         method: 'PUT',
         body: JSON.stringify({ name, photo }),
     });
 
-export const changePasswordApi = (currentPassword: string, newPassword: string) =>
+export const changePasswordApi = ({ currentPassword, newPassword }: ChangePasswordInput) =>
     apiRequest<ChangePasswordResponseData>('/user/change-password', {
         method: 'PUT',
         body: JSON.stringify({ currentPassword, newPassword }),

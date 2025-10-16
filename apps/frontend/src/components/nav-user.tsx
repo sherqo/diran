@@ -16,13 +16,15 @@ import {
     AlertDialogAction,
     AlertDialogCancel,
 } from '@/components/ui/alert-dialog';
+import { SettingsDialog } from './settings-dialog';
 import { Skeleton } from './ui/skeleton';
 import { User } from '@/shared/types/user';
 import { useState } from 'react';
 
 export function NavUser({ user, loading, logout }: { user: User | null; loading: boolean; logout: () => Promise<void> }) {
     const { isMobile } = useSidebar();
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false);
+    const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
 
     if (loading || !user) {
@@ -52,7 +54,7 @@ export function NavUser({ user, loading, logout }: { user: User | null; loading:
             await logout();
         } finally {
             setIsLoggingOut(false);
-            setIsDialogOpen(false);
+            setIsLogoutDialogOpen(false);
         }
     };
 
@@ -80,7 +82,11 @@ export function NavUser({ user, loading, logout }: { user: User | null; loading:
                         side={isMobile ? 'bottom' : 'right'}
                         align="start"
                         sideOffset={4}>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem
+                            onClick={e => {
+                                e.preventDefault();
+                                setIsSettingsDialogOpen(true);
+                            }}>
                             <Settings2 />
                             Settings
                         </DropdownMenuItem>
@@ -89,7 +95,7 @@ export function NavUser({ user, loading, logout }: { user: User | null; loading:
                             variant="destructive"
                             onClick={e => {
                                 e.preventDefault();
-                                setIsDialogOpen(true);
+                                setIsLogoutDialogOpen(true);
                             }}>
                             <LogOut />
                             Log out
@@ -97,7 +103,11 @@ export function NavUser({ user, loading, logout }: { user: User | null; loading:
                     </DropdownMenuContent>
                 </DropdownMenu>
 
-                <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                {/* Settings dialog */}
+                <SettingsDialog open={isSettingsDialogOpen} onOpenChange={setIsSettingsDialogOpen} />
+
+                {/* Log out confirmation dialog */}
+                <AlertDialog open={isLogoutDialogOpen} onOpenChange={setIsLogoutDialogOpen}>
                     <AlertDialogContent>
                         <AlertDialogHeader>
                             <AlertDialogTitle>Log out</AlertDialogTitle>
