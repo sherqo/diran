@@ -18,6 +18,7 @@ import { NavWorkspaces } from '@/components/nav-workspaces';
 
 import { Sidebar, SidebarContent, SidebarHeader } from '@/components/ui/sidebar';
 import { NavUser } from './nav-user';
+import { useAuth } from '@/contexts/AuthContext';
 
 // This is sample data.
 const data = {
@@ -228,10 +229,11 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+    const { user, loading, logout } = useAuth();
     return (
         <Sidebar collapsible="offcanvas" variant="floating" className="border-r-0" {...props}>
             <SidebarHeader>
-                <NavUser user={data.user} />
+                <NavUser user={user} loading={loading} logout={logout} />
                 <NavMain items={data.navMain} />
             </SidebarHeader>
             <SidebarContent>
