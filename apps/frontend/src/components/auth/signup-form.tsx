@@ -29,9 +29,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<'div'>)
     });
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState(
-        'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number.'
-    );
+    const [message, setMessage] = useState('');
     const [isError, setIsError] = useState(false);
     const { signup } = useAuth();
     const router = useRouter();

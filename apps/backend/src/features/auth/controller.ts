@@ -14,6 +14,7 @@ import {
     verifyEmailVerificationToken,
 } from '#lib/utils/auth.js';
 import { setAccessTokenCookie, clearAuthCookies } from '#lib/services/cookies.js';
+import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors';
 import type {
     SignupInput,
     LoginInput,
@@ -22,7 +23,16 @@ import type {
     VerifyEmailInput,
     ResendOTPInput,
 } from '@diran/shared/validation/auth';
-import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors';
+import {
+    SignupResponseData,
+    LoginResponseData,
+    ForgotPasswordResponseData,
+    ResetPasswordResponseData,
+    VerifyEmailResponseData,
+    RefreshResponseData,
+    ResendOTPResponseData,
+    LogoutResponseData,
+} from '@diran/shared';
 
 export { signup, login, forgotPassword, resetPassword, verifyEmail, refresh, resendOTP, logout };
 
@@ -63,7 +73,9 @@ const signup = async (req: Request, res: Response): Promise<void> => {
 
     // Generate email verification token for OTP page access
     const emailToken = generateEmailVerificationToken(user.email);
-    sendSuccess(res, { emailToken }, 'Check your email for verification code.', 201);
+
+    const data: SignupResponseData = { emailToken };
+    sendSuccess(res, data, 'Check your email for verification code.', 201);
 };
 
 //? User login
@@ -110,11 +122,12 @@ const login = async (req: Request, res: Response): Promise<void> => {
         id: user.id,
         email: user.email,
         name: user.name,
-        photo: user.photo,
-        createdAt: user.createdAt,
+        ...(user.photo && { photo: user.photo }),
+        createdAt: user.createdAt.toISOString(),
     };
 
-    sendSuccess(res, { user: userData }, 'Login successful');
+    const data: LoginResponseData = { user: userData };
+    sendSuccess(res, data, 'Login successful');
 };
 
 //? Forgot password - send reset token to email
@@ -132,7 +145,8 @@ const forgotPassword = async (req: Request, res: Response): Promise<void> => {
     // Send password reset token
     await sendPasswordResetToken(user.id, email);
 
-    sendSuccess(res, {}, 'Password reset email sent. Please check your inbox.');
+    const data: ForgotPasswordResponseData = {};
+    sendSuccess(res, data, 'Password reset email sent. Please check your inbox.');
 };
 
 //? Reset password - with token
@@ -173,7 +187,8 @@ const resetPassword = async (req: Request, res: Response): Promise<void> => {
     // Create user session (tokens + cookies)
     await createUserSession(user, req, res);
 
-    sendSuccess(res, { email: user.email }, 'Password reset successfully');
+    const data: ResetPasswordResponseData = { email: user.email };
+    sendSuccess(res, data, 'Password reset successfully');
 };
 
 //? Verify email with OTP
@@ -219,7 +234,8 @@ const verifyEmail = async (req: Request, res: Response): Promise<void> => {
     // Create user session (tokens + cookies)
     await createUserSession(user, req, res);
 
-    sendSuccess(res, {}, 'Email verified successfully');
+    const data: VerifyEmailResponseData = {};
+    sendSuccess(res, data, 'Email verified successfully');
 };
 
 //? Refresh access token
@@ -263,7 +279,8 @@ const refresh = async (req: Request, res: Response): Promise<void> => {
     // Set new access token cookie
     setAccessTokenCookie(res, accessToken);
 
-    sendSuccess(res, {}, 'Token refreshed successfully');
+    const data: RefreshResponseData = {};
+    sendSuccess(res, data, 'Token refreshed successfully');
 };
 
 //? Resend verification OTP - if not verified yet
@@ -290,7 +307,8 @@ const resendOTP = async (req: Request, res: Response): Promise<void> => {
     // Generate new email verification token for continued OTP page access
     const emailToken = generateEmailVerificationToken(user.email);
 
-    sendSuccess(res, { emailToken }, 'Verification code sent successfully');
+    const data: ResendOTPResponseData = { emailToken };
+    sendSuccess(res, data, 'Verification code sent successfully');
 };
 
 //? Logout user
@@ -305,5 +323,6 @@ const logout = async (req: Request, res: Response): Promise<void> => {
         await clearRefreshTokenSession(refreshToken);
     }
 
-    sendSuccess(res, {}, 'Logged out successfully');
+    const data: LogoutResponseData = {};
+    sendSuccess(res, data, 'Logged out successfully');
 };

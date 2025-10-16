@@ -35,22 +35,15 @@ export const generateRefreshToken = (userId: string): string => {
     return token;
 };
 
-export const verifyAccessToken = (token: string): AuthUser => {
-    return jwt.verify(token, JWT_SECRET) as AuthUser;
-};
+export const verifyAccessToken = (token: string): AuthUser => jwt.verify(token, JWT_SECRET) as AuthUser;
 
-export const verifyRefreshToken = (token: string): any => {
-    return jwt.verify(token, JWT_SECRET);
-};
+export const verifyRefreshToken = (token: string): any => jwt.verify(token, JWT_SECRET);
 
 // Functions for password hashing and comparison
-export const hashPassword = async (password: string): Promise<string> => {
-    return await bcrypt.hash(password, 12);
-};
+export const hashPassword = async (password: string): Promise<string> => await bcrypt.hash(password, 12);
 
-export const comparePassword = async (password: string, hashedPassword: string): Promise<boolean> => {
-    return await bcrypt.compare(password, hashedPassword);
-};
+export const comparePassword = async (password: string, hashedPassword: string): Promise<boolean> =>
+    await bcrypt.compare(password, hashedPassword);
 
 // Functions for OTP generation and hashing
 export const generateOTP = (length = 6): string => {
@@ -66,9 +59,7 @@ export const generateOTP = (length = 6): string => {
     return otp;
 };
 
-export const hashOTP = (otp: string): string => {
-    return crypto.createHash('sha256').update(otp).digest('hex');
-};
+export const hashOTP = (otp: string): string => crypto.createHash('sha256').update(otp).digest('hex');
 
 export const compareOTP = (otp: string, hashedOTP: string): boolean => {
     const otpHash = crypto.createHash('sha256').update(otp).digest('hex');
@@ -76,13 +67,9 @@ export const compareOTP = (otp: string, hashedOTP: string): boolean => {
 };
 
 // Functions for password reset tokens
-export const generateResetToken = (): string => {
-    return crypto.randomBytes(32).toString('hex');
-};
+export const generateResetToken = (): string => crypto.randomBytes(32).toString('hex');
 
-export const hashResetToken = (token: string): string => {
-    return crypto.createHash('sha256').update(token).digest('hex');
-};
+export const hashResetToken = (token: string): string => crypto.createHash('sha256').update(token).digest('hex');
 
 // Functions for email verification JWT tokens
 export const generateEmailVerificationToken = (email: string): string => {

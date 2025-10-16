@@ -1,40 +1,56 @@
-import { LoginData, SignupData } from '@/shared/types/auth';
+import {
+    ForgotPasswordInput,
+    LoginInput,
+    ResendOTPInput,
+    ResetPasswordInput,
+    SignupInput,
+    VerifyEmailInput,
+} from '@/shared/validation/auth';
 import { apiRequest } from './helpers';
+import type {
+    SignupResponseData,
+    LoginResponseData,
+    ForgotPasswordResponseData,
+    ResetPasswordResponseData,
+    VerifyEmailResponseData,
+    ResendOTPResponseData,
+    LogoutResponseData,
+} from '@/shared/types/auth';
 
-export const loginApi = (email: string, password: string) =>
-    apiRequest<LoginData>('/auth/login', {
+export const loginApi = ({ email, password }: LoginInput) =>
+    apiRequest<LoginResponseData>('/auth/login', {
         method: 'POST',
         body: JSON.stringify({ email, password }),
     });
 
-export const signupApi = (email: string, password: string, name: string) =>
-    apiRequest<SignupData>('/auth/signup', {
+export const signupApi = ({ email, password, name }: SignupInput) =>
+    apiRequest<SignupResponseData>('/auth/signup', {
         method: 'POST',
         body: JSON.stringify({ email, password, name }),
     });
 
-export const verifyEmailApi = (token: string, otp: string) =>
-    apiRequest<null>('/auth/verify-email', {
+export const verifyEmailApi = ({ token, otp }: VerifyEmailInput) =>
+    apiRequest<VerifyEmailResponseData>('/auth/verify-email', {
         method: 'POST',
         body: JSON.stringify({ token, otp }),
     });
 
-export const resendOTPApi = (token: string) =>
-    apiRequest<null>('/auth/resend-otp', {
+export const resendOTPApi = ({ token }: ResendOTPInput) =>
+    apiRequest<ResendOTPResponseData>('/auth/resend-otp', {
         method: 'POST',
         body: JSON.stringify({ token }),
     });
 
-export const forgotPasswordApi = (email: string) =>
-    apiRequest<null>('/auth/forgot-password', {
+export const forgotPasswordApi = ({ email }: ForgotPasswordInput) =>
+    apiRequest<ForgotPasswordResponseData>('/auth/forgot-password', {
         method: 'POST',
         body: JSON.stringify({ email }),
     });
 
-export const resetPasswordApi = (token: string, password: string) =>
-    apiRequest<{ email: string }>('/auth/reset-password', {
+export const resetPasswordApi = ({ token, password }: ResetPasswordInput) =>
+    apiRequest<ResetPasswordResponseData>('/auth/reset-password', {
         method: 'POST',
         body: JSON.stringify({ token, password }),
     });
 
-export const logoutApi = () => apiRequest<Record<string, never>>('/auth/logout', { method: 'POST' });
+export const logoutApi = () => apiRequest<LogoutResponseData>('/auth/logout', { method: 'POST' });

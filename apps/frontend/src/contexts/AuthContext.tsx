@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 
 import { ApiResult } from '@/shared/types/api';
 import { User } from '@/shared/types/user';
-import { loginApi, logoutApi, resendOTPApi, signupApi, verifyEmailApi } from '@/lib/api/auth';
+import { forgotPasswordApi, loginApi, logoutApi, resendOTPApi, resetPasswordApi, signupApi, verifyEmailApi } from '@/lib/api/auth';
 import { getProfileApi } from '@/lib/api/user';
 
 interface AuthContextType {
@@ -14,6 +14,8 @@ interface AuthContextType {
     signup: (email: string, password: string, name: string) => Promise<ApiResult>;
     verifyEmail: (token: string, otp: string) => Promise<ApiResult>;
     resendOTP: (token: string) => Promise<ApiResult>;
+    forgetPassword: (email: string) => Promise<ApiResult>;
+    resetPassword: (token: string, password: string) => Promise<ApiResult>;
     logout: () => Promise<void>;
     checkAuth: () => Promise<void>;
 }
@@ -44,7 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const login = async (email: string, password: string) => {
-        const result = await loginApi(email, password);
+        const result = await loginApi({ email, password });
 
         // Handle successful login
         if (result.success && result.data?.user) {
@@ -54,12 +56,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return result;
     };
 
-    const signup = async (email: string, password: string, name: string) => {
-        return await signupApi(email, password, name);
-    };
+    const signup = async (email: string, password: string, name: string) => await signupApi({ email, password, name });
 
     const verifyEmail = async (token: string, otp: string) => {
-        const result = await verifyEmailApi(token, otp);
+        const result = await verifyEmailApi({ token, otp });
 
         if (result.success) {
             // After successful verification, refresh user data
@@ -69,9 +69,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return result;
     };
 
-    const resendOTP = async (token: string) => {
-        return await resendOTPApi(token);
-    };
+    const resendOTP = async (token: string) => await resendOTPApi({ token });
+    const forgetPassword = async (email: string) => await forgotPasswordApi({ email });
+    const resetPassword = async (token: string, password: string) => await resetPasswordApi({ token, password });
 
     const logout = async () => {
         await logoutApi();
@@ -85,6 +85,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signup,
         verifyEmail,
         resendOTP,
+        forgetPassword,
+        resetPassword,
         logout,
         checkAuth,
     };

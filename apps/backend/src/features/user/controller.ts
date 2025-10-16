@@ -6,6 +6,7 @@ import { sendSuccess } from '#lib/utils/response';
 import { ApiError } from '#lib/middleware/errorHandler';
 import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors';
 import { ChangePasswordInput, UpdateProfileInput } from '@diran/shared/validation/user';
+import { GetProfileResponseData, UpdateProfileResponseData, ChangePasswordResponseData } from '@diran/shared';
 
 const getProfile = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const user = await db.user.findUnique({
@@ -16,11 +17,19 @@ const getProfile = async (req: AuthenticatedRequest, res: Response): Promise<voi
             name: true,
             photo: true,
             createdAt: true,
-            updatedAt: true,
         },
     });
 
-    sendSuccess(res, { user });
+    const userData = {
+        id: user!.id,
+        email: user!.email,
+        name: user!.name,
+        ...(user!.photo && { photo: user!.photo }),
+        createdAt: user!.createdAt.toISOString(),
+    };
+
+    const data: GetProfileResponseData = { user: userData };
+    sendSuccess(res, data);
 };
 
 const updateProfile = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
@@ -38,11 +47,19 @@ const updateProfile = async (req: AuthenticatedRequest, res: Response): Promise<
             name: true,
             photo: true,
             createdAt: true,
-            updatedAt: true,
         },
     });
 
-    sendSuccess(res, { user }, 'Profile updated successfully');
+    const userData = {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        ...(user.photo && { photo: user.photo }),
+        createdAt: user.createdAt.toISOString(),
+    };
+
+    const data: UpdateProfileResponseData = { user: userData };
+    sendSuccess(res, data, 'Profile updated successfully');
 };
 
 const changePassword = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
@@ -73,7 +90,8 @@ const changePassword = async (req: AuthenticatedRequest, res: Response): Promise
         data: { password: hashedNewPassword },
     });
 
-    sendSuccess(res, {}, 'Password changed successfully');
+    const data: ChangePasswordResponseData = {};
+    sendSuccess(res, data, 'Password changed successfully');
 };
 
 export { getProfile, updateProfile, changePassword };

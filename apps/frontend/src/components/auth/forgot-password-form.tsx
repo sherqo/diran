@@ -8,12 +8,13 @@ import { Input } from '@/components/ui/input';
 import { SITE_NAME } from '@/lib/site-info';
 import Link from 'next/link';
 import AuthFooter from './auth-footer';
-
 import { forgotPasswordSchema } from '@/shared/validation/auth';
 import { useFormValidation } from '@/hooks/useFormValidation';
-import { forgotPasswordApi } from '@/lib/api/auth';
+
+import { useAuth } from '@/contexts/AuthContext';
 
 export function ForgotPasswordForm({ className, ...props }: React.ComponentProps<'div'>) {
+    const { forgetPassword } = useAuth();
     const [formData, setFormData] = useState({ email: '' });
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
@@ -45,7 +46,7 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
             return;
         }
 
-        const result = await forgotPasswordApi(formData.email);
+        const result = await forgetPassword(formData.email);
 
         if (result.success) {
             setMessage(`if the email ${formData.email} is registered, a reset link has been sent.`);

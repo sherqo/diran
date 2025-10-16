@@ -12,9 +12,11 @@ import Link from 'next/link';
 import AuthFooter from './auth-footer';
 import { resetPasswordSchema } from '@/shared/validation/auth';
 import { useFormValidation } from '@/hooks/useFormValidation';
-import { resetPasswordApi } from '@/lib/api/auth';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function ResetPasswordForm({ className, token, ...props }: React.ComponentProps<'div'> & { token: string }) {
+    const { resetPassword } = useAuth();
+
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -55,7 +57,7 @@ export function ResetPasswordForm({ className, token, ...props }: React.Componen
             return;
         }
 
-        const result = await resetPasswordApi(formData.token, formData.password);
+        const result = await resetPassword(token, password);
 
         if (result.success) {
             const userEmail = result.data?.email || 'your email';
