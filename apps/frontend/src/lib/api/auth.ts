@@ -1,4 +1,4 @@
-import { LoginData, SignupData } from '@/shared/types/user';
+import { LoginData, SignupData } from '@/shared/types/auth';
 import { apiRequest } from './helpers';
 
 export const loginApi = (email: string, password: string) =>

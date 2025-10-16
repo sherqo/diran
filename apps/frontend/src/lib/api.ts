@@ -1,6 +1,7 @@
 import { ErrorCode } from '@/shared/constants/errors';
 import { ApiResult, ErrorResponse, SuccessResponse } from '@/shared/types/api';
-import { LoginData, SignupData, User } from '@/shared/types/user';
+import { LoginData, SignupData } from '@/shared/types/auth';
+import { User } from '@/shared/types/user';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4003/v1';
 
