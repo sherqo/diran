@@ -19,6 +19,16 @@ export function SettingsDialog({ open, onOpenChange }: { open: boolean; onOpenCh
     const { user, checkAuth } = useAuth();
     const { theme, setTheme } = useTheme();
 
+    // Listen for openSettings event from command palette
+    React.useEffect(() => {
+        const handleOpenSettings = () => {
+            onOpenChange(true);
+        };
+
+        window.addEventListener('openSettings', handleOpenSettings);
+        return () => window.removeEventListener('openSettings', handleOpenSettings);
+    }, [onOpenChange]);
+
     // Profile form state
     const [profileForm, setProfileForm] = React.useState({
         name: user?.name || '',

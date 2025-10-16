@@ -1,5 +1,6 @@
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { CommandPalette } from '@/components/command-palette';
 import { Metadata } from 'next';
 import { ThemeProvider } from 'next-themes';
 
@@ -19,7 +20,10 @@ export default function RootLayout({
         <body>
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
                 <AuthProvider>
-                    <ProtectedRoute>{children}</ProtectedRoute>
+                    <ProtectedRoute>
+                        {children}
+                        <CommandPalette />
+                    </ProtectedRoute>
                 </AuthProvider>
             </ThemeProvider>
         </body>

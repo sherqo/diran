@@ -33,11 +33,13 @@ const data = {
             title: 'Search',
             url: '#',
             icon: Search,
+            kbd: 'K',
         },
         {
             title: 'Ask AI',
             url: '#',
             icon: Sparkles,
+            kbd: 'A',
         },
         {
             title: 'Home',
@@ -230,11 +232,18 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const { user, loading, logout } = useAuth();
+
+    const handleSearchClick = () => {
+        // Dispatch custom event to open command palette
+        const event = new CustomEvent('openCommandPalette');
+        window.dispatchEvent(event);
+    };
+
     return (
         <Sidebar collapsible="offcanvas" variant="floating" className="border-r-0" {...props}>
             <SidebarHeader>
                 <NavUser user={user} loading={loading} logout={logout} />
-                <NavMain items={data.navMain} />
+                <NavMain items={data.navMain} onSearchClick={handleSearchClick} />
             </SidebarHeader>
             <SidebarContent>
                 <NavFavorites favorites={data.favorites} />
