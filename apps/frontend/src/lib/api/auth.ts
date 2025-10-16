@@ -1,4 +1,4 @@
-import { LoginData, SignupData, User } from '@/shared/types/user';
+import { LoginData, SignupData } from '@/shared/types/user';
 import { apiRequest } from './helpers';
 
 export const loginApi = (email: string, password: string) =>
@@ -38,5 +38,3 @@ export const resetPasswordApi = (token: string, password: string) =>
     });
 
 export const logoutApi = () => apiRequest<Record<string, never>>('/auth/logout', { method: 'POST' });
-
-export const getProfileApi = () => apiRequest<{ user: User }>('/user/profile');

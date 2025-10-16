@@ -4,7 +4,8 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 
 import { ApiResult } from '@/shared/types/api';
 import { User } from '@/shared/types/user';
-import { getProfileApi, loginApi, logoutApi, resendOTPApi, signupApi, verifyEmailApi } from '@/lib/api/auth';
+import { loginApi, logoutApi, resendOTPApi, signupApi, verifyEmailApi } from '@/lib/api/auth';
+import { getProfileApi } from '@/lib/api/user';
 
 interface AuthContextType {
     user: User | null;
