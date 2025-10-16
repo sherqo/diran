@@ -6,11 +6,24 @@ import { Ellipsis, Settings2, LogOut } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar';
+import {
+    AlertDialog,
+    AlertDialogContent,
+    AlertDialogHeader,
+    AlertDialogFooter,
+    AlertDialogTitle,
+    AlertDialogDescription,
+    AlertDialogAction,
+    AlertDialogCancel,
+} from '@/components/ui/alert-dialog';
 import { Skeleton } from './ui/skeleton';
 import { User } from '@/shared/types/user';
+import { useState } from 'react';
 
 export function NavUser({ user, loading, logout }: { user: User | null; loading: boolean; logout: () => Promise<void> }) {
     const { isMobile } = useSidebar();
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
 
     if (loading || !user) {
         return (
@@ -32,6 +45,16 @@ export function NavUser({ user, loading, logout }: { user: User | null; loading:
             </SidebarMenu>
         );
     }
+
+    const handleConfirmLogout = async () => {
+        try {
+            setIsLoggingOut(true);
+            await logout();
+        } finally {
+            setIsLoggingOut(false);
+            setIsDialogOpen(false);
+        }
+    };
 
     return (
         <SidebarMenu>
@@ -57,45 +80,39 @@ export function NavUser({ user, loading, logout }: { user: User | null; loading:
                         side={isMobile ? 'bottom' : 'right'}
                         align="start"
                         sideOffset={4}>
-                        {/* <DropdownMenuLabel className="p-0 font-normal">
-                            <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                                <Avatar className="h-8 w-8 rounded-lg">
-                                    <AvatarImage src={user.avatar} alt={user.name} />
-                                    <AvatarFallback className="rounded-lg">CN</AvatarFallback>
-                                </Avatar>
-                                <div className="grid flex-1 text-left text-sm leading-tight">
-                                    <span className="truncate font-medium">{user.name}</span>
-                                    <span className="text-muted-foreground truncate text-xs">{user.email}</span>
-                                </div>
-                            </div>
-                        </DropdownMenuLabel> */}
-                        {/* <DropdownMenuSeparator /> */}
-                        {/* <DropdownMenuGroup>
-                            <DropdownMenuItem>
-                                <IconUserCircle />
-                                Account
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                                <IconCreditCard />
-                                Billing
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                                <IconNotification />
-                                Notifications
-                            </DropdownMenuItem>
-                        </DropdownMenuGroup> */}
-                        {/* <DropdownMenuSeparator /> */}
                         <DropdownMenuItem>
                             <Settings2 />
                             Settings
                         </DropdownMenuItem>
 
-                        <DropdownMenuItem variant="destructive" onSelect={async () => await logout()}>
+                        <DropdownMenuItem
+                            variant="destructive"
+                            onClick={e => {
+                                e.preventDefault();
+                                setIsDialogOpen(true);
+                            }}>
                             <LogOut />
                             Log out
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
+
+                <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Log out</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                Are you sure you want to log out? You will need to sign in again to access your account.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel disabled={isLoggingOut}>Cancel</AlertDialogCancel>
+                            <AlertDialogAction destructive onClick={handleConfirmLogout} disabled={isLoggingOut}>
+                                {isLoggingOut ? 'Logging out...' : 'Log out'}
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
             </SidebarMenuItem>
         </SidebarMenu>
     );
