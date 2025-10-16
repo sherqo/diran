@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { signup, login, forgotPassword, resetPassword, refresh, logout, verifyEmail, resendOTP } from './controller.js';
 import { validateRequest } from '#lib/middleware/validation.js';
+import { authRateLimiters } from '#lib/middleware/rateLimiter.js';
 import {
     forgotPasswordSchema,
     loginSchema,
@@ -12,14 +13,14 @@ import {
 
 const router: Router = Router();
 
-// Public routes
+// Public routes with specific rate limiting
 router.post('/refresh', refresh);
-router.post('/signup', validateRequest(signupSchema), signup);
-router.post('/login', validateRequest(loginSchema), login);
-router.post('/forgot-password', validateRequest(forgotPasswordSchema), forgotPassword);
-router.post('/reset-password', validateRequest(resetPasswordSchema), resetPassword);
-router.post('/verify-email', validateRequest(verifyEmailSchema), verifyEmail);
-router.post('/resend-otp', validateRequest(resendOTPSchema), resendOTP);
+router.post('/signup', authRateLimiters.login, validateRequest(signupSchema), signup);
+router.post('/login', authRateLimiters.login, validateRequest(loginSchema), login);
+router.post('/forgot-password', authRateLimiters.resetPassword, validateRequest(forgotPasswordSchema), forgotPassword);
+router.post('/reset-password', authRateLimiters.resetPassword, validateRequest(resetPasswordSchema), resetPassword);
+router.post('/verify-email', authRateLimiters.otp, validateRequest(verifyEmailSchema), verifyEmail);
+router.post('/resend-otp', authRateLimiters.resendOTP, validateRequest(resendOTPSchema), resendOTP);
 router.post('/logout', logout);
 
 export default router;
