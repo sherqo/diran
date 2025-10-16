@@ -1,59 +1,92 @@
-import React from 'react';
-import { cn } from '@/lib/utils';
+import * as React from "react"
 
-type GradientAngle =
-    | 'to bottom right'
-    | 'to bottom left'
-    | 'to top right'
-    | 'to top left'
-    | 'to right'
-    | 'to left'
-    | 'to top'
-    | 'to bottom';
+import { cn } from "@/lib/utils"
 
-interface CardProps {
-    children?: React.ReactNode;
-    className?: string;
-    colors?: string[]; // Hex, rgba, hsl, etc.
-    angle?: GradientAngle;
-    title?: string;
-    description?: string;
+function Card({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="card"
+      className={cn(
+        "bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm",
+        className
+      )}
+      {...props}
+    />
+  )
 }
 
-export const Card = ({
-    children,
-    className,
-    colors = [
-        '#fdba74cc', // orange-300/80%
-        '#fde68acc', // amber-200/80%
-        '#fef9c3aa', // yellow-100/67%
-        '#ffedd5bb', // orange-100/73%
-        '#fecaca66', // red-200/40%
-        '#fff7ed99', // orange-50/60%
-    ],
-    angle = 'to bottom right',
-    title,
-    description,
-}: CardProps) => {
-    const gradient = `linear-gradient(${angle}, ${colors.join(', ')})`;
+function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="card-header"
+      className={cn(
+        "@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6",
+        className
+      )}
+      {...props}
+    />
+  )
+}
 
-    return (
-        <div className={cn('relative flex flex-col overflow-hidden rounded-2xl p-8', className)}>
-            {/* Gradient Layer */}
-            <div className="absolute inset-0 rounded-2xl" style={{ background: gradient }} />
-            {/* Glass layer */}
-            <div className="absolute inset-0 rounded-2xl border border-white/40 bg-white/25 backdrop-blur-md" />
+function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="card-title"
+      className={cn("leading-none font-semibold", className)}
+      {...props}
+    />
+  )
+}
 
-            {/* Content */}
-            {children && <div className="relative z-10 flex-1">{children}</div>}
+function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="card-description"
+      className={cn("text-muted-foreground text-sm", className)}
+      {...props}
+    />
+  )
+}
 
-            {/* Title and Description at bottom */}
-            {(title || description) && (
-                <div className="relative z-10 mt-auto pt-4">
-                    {title && <h3 className="text-foreground mb-1 text-xl font-semibold">{title}</h3>}
-                    {description && <p className="text-md text-muted-foreground font-semibold">{description}</p>}
-                </div>
-            )}
-        </div>
-    );
-};
+function CardAction({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="card-action"
+      className={cn(
+        "col-start-2 row-span-2 row-start-1 self-start justify-self-end",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+function CardContent({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="card-content"
+      className={cn("px-6", className)}
+      {...props}
+    />
+  )
+}
+
+function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="card-footer"
+      className={cn("flex items-center px-6 [.border-t]:pt-6", className)}
+      {...props}
+    />
+  )
+}
+
+export {
+  Card,
+  CardHeader,
+  CardFooter,
+  CardTitle,
+  CardAction,
+  CardDescription,
+  CardContent,
+}

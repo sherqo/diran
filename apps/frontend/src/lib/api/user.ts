@@ -6,12 +6,12 @@ export const getProfileApi = () => apiRequest<GetProfileResponseData>('/user/pro
 
 export const updateProfileApi = ({ name, photo }: UpdateProfileInput) =>
     apiRequest<UpdateProfileResponseData>('/user/profile', {
-        method: 'PUT',
+        method: 'PATCH',
         body: JSON.stringify({ name, photo }),
     });
 
 export const changePasswordApi = ({ currentPassword, newPassword }: ChangePasswordInput) =>
     apiRequest<ChangePasswordResponseData>('/user/change-password', {
-        method: 'PUT',
+        method: 'POST',
         body: JSON.stringify({ currentPassword, newPassword }),
     });

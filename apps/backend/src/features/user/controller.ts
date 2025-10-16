@@ -35,11 +35,13 @@ const getProfile = async (req: AuthenticatedRequest, res: Response): Promise<voi
 const updateProfile = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const { name, photo }: UpdateProfileInput = req.body;
 
+    const photoValue = !photo ? null : photo; // "" or undefined → null, else actual string
+
     const user = await db.user.update({
         where: { id: req.user!.id },
         data: {
             ...(name && { name }),
-            ...(photo && { photo }),
+            photo: photoValue,
         },
         select: {
             id: true,

@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const updateProfileSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters').max(50, 'Name must be less than 50 characters').optional(),
-  photo: z.url('Invalid photo URL').optional(),
+  photo: z.union([z.url(), z.literal('')]).optional(),
 });
 
 export const changePasswordSchema = z.object({
