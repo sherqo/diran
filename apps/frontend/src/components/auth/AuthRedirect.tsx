@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { Loader } from '../ui/loader';
 
 interface AuthRedirectProps {
     children: React.ReactNode;
@@ -21,11 +22,9 @@ export function AuthRedirect({ children, redirectTo = '/profile' }: AuthRedirect
 
     // Show loading spinner while checking auth
     if (loading) {
-        return (
-            <div className="flex min-h-screen items-center justify-center">
-                <div className="border-primary h-8 w-8 animate-spin rounded-full border-b-2"></div>
-            </div>
-        );
+        <div className="flex min-h-screen items-center justify-center">
+            <Loader />
+        </div>;
     }
 
     // Don't render auth forms if already authenticated

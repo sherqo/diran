@@ -1,3 +1,5 @@
+import { Loader } from '@/components/ui/loader';
+
 export const metadata = {
     title: 'Be the first — Diran',
 };
@@ -17,6 +19,7 @@ export default function WaitPage() {
                         className="bg-primary text-primary-foreground rounded-md px-4 py-2">
                         Join waitlist
                     </a>
+                    <Loader className="text-primary" />
                 </div>
             </div>
         </div>
