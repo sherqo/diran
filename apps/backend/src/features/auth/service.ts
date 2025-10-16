@@ -109,24 +109,4 @@ const sendSessionCreatedNotification = async (email: string, req: Request): Prom
     }
 };
 
-const sendSignupAttemptNotification = async (email: string): Promise<void> => {
-    // Send friendly notification email for signup attempts on existing account
-    try {
-        await sendMail({
-            to: [email],
-            subject: 'Account Creation Attempt Detected',
-            html: emailTemplates.signupAttempt(email),
-        });
-    } catch (error) {
-        console.error('Failed to send signup attempt notification:', error);
-    }
-};
-
-export {
-    sendVerificationOTP,
-    sendPasswordResetToken,
-    createUserSession,
-    clearRefreshTokenSession,
-    sendSessionCreatedNotification,
-    sendSignupAttemptNotification,
-};
+export { sendVerificationOTP, sendPasswordResetToken, createUserSession, clearRefreshTokenSession, sendSessionCreatedNotification };

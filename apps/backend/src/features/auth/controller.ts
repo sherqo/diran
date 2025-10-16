@@ -1,11 +1,5 @@
 import { Request, Response } from 'express';
-import {
-    sendVerificationOTP,
-    sendPasswordResetToken,
-    clearRefreshTokenSession,
-    createUserSession,
-    sendSignupAttemptNotification,
-} from '#features/auth/service.js';
+import { sendVerificationOTP, sendPasswordResetToken, clearRefreshTokenSession, createUserSession } from '#features/auth/service.js';
 import { ApiError } from '#lib/middleware/errorHandler';
 import { sendSuccess } from '#lib/utils/response';
 import { db } from '#lib/database/connection.js';
@@ -42,12 +36,7 @@ const signup = async (req: Request, res: Response): Promise<void> => {
     });
 
     if (existingUser) {
-        await sendSignupAttemptNotification(existingUser.email);
-
-        const emailToken = generateEmailVerificationToken(existingUser.email);
-        sendSuccess(res, { emailToken }, 'Check your email for verification code.', 201);
-
-        return;
+        throw new ApiError('Email already in use', HttpStatus.BAD_REQUEST, ErrorCode.ALREADY_EXISTS);
     }
 
     // Hash password
@@ -137,15 +126,13 @@ const forgotPassword = async (req: Request, res: Response): Promise<void> => {
     });
 
     if (!user) {
-        // Don't reveal if user exists or not
-        sendSuccess(res, {}, 'If an account with that email exists, we have sent a password reset link');
-        return;
+        throw new ApiError('We could not reach this account', HttpStatus.NOT_FOUND, ErrorCode.USER_NOT_FOUND);
     }
 
     // Send password reset token
     await sendPasswordResetToken(user.id, email);
 
-    sendSuccess(res, {}, 'If an account with that email exists, we have sent a password reset link');
+    sendSuccess(res, {}, 'Password reset email sent. Please check your inbox.');
 };
 
 //? Reset password - with token
@@ -289,7 +276,6 @@ const resendOTP = async (req: Request, res: Response): Promise<void> => {
         where: { email: decoded.email },
     });
 
-    // TODO: here is an exposure for attackers to verify if an email is registered or not
     if (!user) {
         throw new ApiError('User not found', HttpStatus.NOT_FOUND, ErrorCode.USER_NOT_FOUND);
     }

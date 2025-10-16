@@ -32,12 +32,6 @@ export const emailTemplates = {
         <p>If this was you, no action is required.</p>
         <p>If this wasn't you, please consider changing your password.</p>
     `,
-    signupAttempt: (email: string) => `<h1>Account Creation Attempt Detected</h1>
-        <p>Someone tried to create an account with your email: <strong>${email}</strong></p>
-        <p>You already have an account with us. If this was you, you can <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/login">sign in here</a>.</p>
-        <p>If this wasn't you, please ignore this email. No new account was created.</p>
-        <p>This is just a notification - your existing account is safe.</p>
-    `,
 };
 
 type SendMailParams = {
