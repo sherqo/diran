@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 
 import './marketing.css';
 import Footer from '@/components/features/footer/Footer';
-import { SITE_NAME, SITE_URL, MARKETING_DESCRIPTION, MARKETING_KEYWORDS, PUBLISHER_NAME, TWITTER_HANDLE } from '@/lib/site';
+import { SITE_NAME, SITE_URL, MARKETING_DESCRIPTION, MARKETING_KEYWORDS, PUBLISHER_NAME, TWITTER_HANDLE } from '@/lib/site-info';
 
 export const metadata: Metadata = {
     title: {

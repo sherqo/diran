@@ -13,7 +13,7 @@ import {
     // FieldSeparator
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { SITE_NAME } from '@/lib/site';
+import { SITE_NAME } from '@/lib/site-info';
 import Link from 'next/link';
 import AuthFooter from './auth-footer';
 // import GoogleBtn from './google-btn';

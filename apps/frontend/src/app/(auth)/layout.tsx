@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { AuthProvider } from '@/contexts/AuthContext';
-import { SITE_NAME } from '@/lib/site';
+import { SITE_NAME } from '@/lib/site-info';
 import { AuthRedirect } from '@/components/auth/AuthRedirect';
 import { ThemeProvider } from 'next-themes';
 

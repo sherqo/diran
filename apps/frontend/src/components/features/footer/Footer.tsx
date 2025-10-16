@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { SITE_NAME } from '@/lib/site';
+import { SITE_NAME } from '@/lib/site-info';
 import React from 'react';
 
 const Footer = () => {

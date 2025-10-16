@@ -5,7 +5,7 @@ import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'motion/
 
 import React, { useRef, useState } from 'react';
 import Image from 'next/image';
-import { SITE_NAME } from '@/lib/site';
+import { SITE_NAME } from '@/lib/site-info';
 
 interface NavbarProps {
     children: React.ReactNode;

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import '@fontsource-variable/inter';
-import { SITE_NAME } from '@/lib/site';
+import { SITE_NAME } from '@/lib/site-info';
 
 export const metadata: Metadata = {
     title: {
