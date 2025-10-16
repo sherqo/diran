@@ -4,7 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-    --radius: 0.3rem;
+    --radius: 0.45rem;
 
     /* Fonts */
     --font-inter: 'Inter Variable', system-ui, sans-serif;
@@ -44,6 +44,7 @@
     --color-chart-3: var(--chart-3);
     --color-chart-4: var(--chart-4);
     --color-chart-5: var(--chart-5);
+
     --color-sidebar: var(--sidebar);
     --color-sidebar-foreground: var(--sidebar-foreground);
     --color-sidebar-primary: var(--sidebar-primary);
@@ -100,6 +101,7 @@
     --chart-3: #ffb25a;
     --chart-4: #ffd789;
     --chart-5: #fffae4;
+
     --sidebar: #f9f9f9;
     --sidebar-foreground: #333333;
     --sidebar-primary: #ff6a00;

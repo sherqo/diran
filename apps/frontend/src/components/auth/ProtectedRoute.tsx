@@ -20,19 +20,25 @@ export function ProtectedRoute({ children, redirectTo = '/login' }: ProtectedRou
         }
     }, [loading, user, router, redirectTo]);
 
-    // Show loading spinner while checking auth
-    if (loading) {
-        return (
-            <div className="flex min-h-screen items-center justify-center">
-                <Loader />
-            </div>
-        );
-    }
-
-    // Don't render protected content if not authenticated
-    if (!user) {
+    // While loading we still render children but dim them and overlay a centered loader
+    // If not authenticated and not loading, don't render protected content
+    if (!user && !loading) {
         return null;
     }
 
-    return <>{children}</>;
+    return (
+        <div className="relative min-h-screen">
+            {/* children are visible; when loading they get dimmed and interaction is disabled */}
+            <div className={'h-full w-full ' + (loading ? 'pointer-events-none opacity-40' : '')}>{children}</div>
+
+            {loading && (
+                // overlay loader centered
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                    <div className="bg-transparent">
+                        <Loader />
+                    </div>
+                </div>
+            )}
+        </div>
+    );
 }
