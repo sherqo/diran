@@ -66,6 +66,12 @@ export const errorHandler = (error: any, req: Request, res: Response, next: Next
         return;
     }
 
+    // Timeout errors
+    if (error.code === 'ETIMEDOUT' || error.message === 'Request timeout') {
+        sendError(res, 'Request timeout, please try again later', HttpStatus.REQUEST_TIMEOUT, ErrorCode.TIMEOUT);
+        return;
+    }
+
     // Generic errors
     sendError(res, 'Internal server error', HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.INTERNAL_ERROR);
 };

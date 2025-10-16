@@ -7,6 +7,7 @@ export enum HttpStatus {
   CONFLICT = 409,
   UNPROCESSABLE_ENTITY = 422,
   INTERNAL_SERVER_ERROR = 500,
+  REQUEST_TIMEOUT = 408,
 }
 
 // Application-specific error codes
@@ -50,5 +51,5 @@ export enum ErrorCode {
   INVALID_JSON = 'INVALID_JSON',
 
   NETWORK_ERROR = 'NETWORK_ERROR',
-  TIMEOUT_ERROR = 'TIMEOUT_ERROR',
+  TIMEOUT = 'TIMEOUT',
 }

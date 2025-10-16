@@ -4,7 +4,7 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import apiRouter from '#routes';
-import { errorHandler, notFoundHandler } from '#lib/middleware/errorHandler';
+import { ApiError, errorHandler, notFoundHandler } from '#lib/middleware/errorHandler';
 import { logger } from '#lib/middleware/logger';
 import { db } from '#lib/database/connection';
 import { isDevelopment, logStartup } from '#lib/utils/common';

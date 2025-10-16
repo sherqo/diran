@@ -10,8 +10,11 @@ import {
     signupSchema,
     verifyEmailSchema,
 } from '@diran/shared/validation/auth.js';
+import timeout from 'connect-timeout';
 
 const router: Router = Router();
+
+router.use(timeout('15s')); // Set a timeout of 15 seconds for all routes in this router
 
 // Public routes with specific rate limiting
 router.post('/refresh', refresh);
