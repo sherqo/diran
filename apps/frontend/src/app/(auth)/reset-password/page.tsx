@@ -6,6 +6,19 @@ export const metadata: Metadata = {
     description: 'Reset your password for Diran AI',
 };
 
-export default function ResetPasswordPage() {
-    return <ResetPasswordForm />;
+type PageProps = {
+    searchParams: Promise<{
+        token?: string;
+    }>;
+};
+
+export default async function ResetPasswordPage({ searchParams }: PageProps) {
+    const params = await searchParams;
+    const token = params.token;
+
+    if (!token || typeof token !== 'string') {
+        return <div className="p-4">Invalid or expired reset link.</div>;
+    }
+
+    return <ResetPasswordForm token={token} />;
 }

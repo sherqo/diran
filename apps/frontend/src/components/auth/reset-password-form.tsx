@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Field, FieldDescription, FieldGroup, FieldLabel } from '@/components/ui/field';
@@ -10,22 +10,20 @@ import { Input } from '@/components/ui/input';
 import { SITE_NAME } from '@/lib/site-info';
 import Link from 'next/link';
 import AuthFooter from './auth-footer';
-import { authApi } from '@/lib/api';
 import { resetPasswordSchema } from '@/shared/validation/auth';
 import { useFormValidation } from '@/hooks/useFormValidation';
+import { resetPasswordApi } from '@/lib/api/auth';
 
-export function ResetPasswordForm({ className, ...props }: React.ComponentProps<'div'>) {
+export function ResetPasswordForm({ className, token, ...props }: React.ComponentProps<'div'> & { token: string }) {
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
     const router = useRouter();
-    const searchParams = useSearchParams();
 
     const { errorMessage, validate, clearFieldError, hasErrors } = useFormValidation(resetPasswordSchema);
 
     // Derive token from searchParams and formData from current state
-    const token = searchParams.get('token') || '';
     const formData = { token, password };
 
     // Derive initial error message for missing token
@@ -57,7 +55,7 @@ export function ResetPasswordForm({ className, ...props }: React.ComponentProps<
             return;
         }
 
-        const result = await authApi.resetPassword(formData.token, formData.password);
+        const result = await resetPasswordApi(formData.token, formData.password);
 
         if (result.success) {
             const userEmail = result.data?.email || 'your email';

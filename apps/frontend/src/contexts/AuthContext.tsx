@@ -1,9 +1,10 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import { authApi } from '@/lib/api';
+
 import { ApiResult } from '@/shared/types/api';
 import { User } from '@/shared/types/user';
+import { getProfileApi, loginApi, logoutApi, resendOTPApi, signupApi, verifyEmailApi } from '@/lib/api/auth';
 
 interface AuthContextType {
     user: User | null;
@@ -25,7 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Check authentication status on mount
     const checkAuth = async () => {
         setLoading(true);
-        const result = await authApi.getProfile();
+        const result = await getProfileApi();
 
         if (result.success && result.data?.user) {
             setUser(result.data.user);
@@ -42,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const login = async (email: string, password: string) => {
-        const result = await authApi.login(email, password);
+        const result = await loginApi(email, password);
 
         // Handle successful login
         if (result.success && result.data?.user) {
@@ -53,11 +54,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     const signup = async (email: string, password: string, name: string) => {
-        return await authApi.signup(email, password, name);
+        return await signupApi(email, password, name);
     };
 
     const verifyEmail = async (token: string, otp: string) => {
-        const result = await authApi.verifyEmail(token, otp);
+        const result = await verifyEmailApi(token, otp);
 
         if (result.success) {
             // After successful verification, refresh user data
@@ -68,11 +69,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     const resendOTP = async (token: string) => {
-        return await authApi.resendOTP(token);
+        return await resendOTPApi(token);
     };
 
     const logout = async () => {
-        await authApi.logout();
+        await logoutApi();
         setUser(null);
     };
 
