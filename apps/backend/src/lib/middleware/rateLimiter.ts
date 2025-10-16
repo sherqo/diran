@@ -58,3 +58,29 @@ export const authRateLimiters = {
         message: responseMessage,
     }),
 };
+
+export const profileRateLimiter = {
+    updateProfile: rateLimit({
+        windowMs: ms('1m'), // 1 minute
+        limit: 3, // 3 requests per 1 minute
+        standardHeaders: 'draft-8',
+        legacyHeaders: false,
+        message: responseMessage,
+    }),
+
+    changePassword: rateLimit({
+        windowMs: ms('1m'), // 1 minute
+        limit: 2, // 2 requests per 1 minute
+        standardHeaders: 'draft-8',
+        legacyHeaders: false,
+        message: responseMessage,
+    }),
+
+    bigWindow: rateLimit({
+        windowMs: ms('1h'), // 1 hour
+        limit: 10, // 10 requests per 1 hour
+        standardHeaders: 'draft-8',
+        legacyHeaders: false,
+        message: responseMessage,
+    }),
+};

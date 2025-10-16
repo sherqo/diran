@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { signup, login, forgotPassword, resetPassword, refresh, logout, verifyEmail, resendOTP } from './controller.js';
-import { validateRequest } from '#lib/middleware/validation.js';
-import { authRateLimiters } from '#lib/middleware/rateLimiter.js';
+import { validateRequest as vr } from '#lib/middleware/validation.js';
+import { authRateLimiters as rl } from '#lib/middleware/rateLimiter.js';
 import {
     forgotPasswordSchema,
     loginSchema,
@@ -18,12 +18,12 @@ router.use(timeout('15s')); // Set a timeout of 15 seconds for all routes in thi
 
 // Public routes with specific rate limiting
 router.post('/refresh', refresh);
-router.post('/signup', authRateLimiters.login, validateRequest(signupSchema), signup);
-router.post('/login', authRateLimiters.login, validateRequest(loginSchema), login);
-router.post('/forgot-password', authRateLimiters.resetPassword, validateRequest(forgotPasswordSchema), forgotPassword);
-router.post('/reset-password', authRateLimiters.resetPassword, validateRequest(resetPasswordSchema), resetPassword);
-router.post('/verify-email', authRateLimiters.otp, validateRequest(verifyEmailSchema), verifyEmail);
-router.post('/resend-otp', authRateLimiters.resendOTP, validateRequest(resendOTPSchema), resendOTP);
+router.post('/signup', rl.login, vr(signupSchema), signup);
+router.post('/login', rl.login, vr(loginSchema), login);
+router.post('/forgot-password', rl.resetPassword, vr(forgotPasswordSchema), forgotPassword);
+router.post('/reset-password', rl.resetPassword, vr(resetPasswordSchema), resetPassword);
+router.post('/verify-email', rl.otp, vr(verifyEmailSchema), verifyEmail);
+router.post('/resend-otp', rl.resendOTP, vr(resendOTPSchema), resendOTP);
 router.post('/logout', logout);
 
 export default router;
