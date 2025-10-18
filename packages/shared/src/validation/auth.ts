@@ -1,25 +1,26 @@
 import { z } from 'zod';
 
 // Reusable field schemas
-const emailSchema = z.email('Invalid email address').max(100, 'Email must be less than 150 characters');
+const emailSchema = z.email('Invalid email address').trim().toLowerCase().max(150, 'Email must be less than 150 characters');
 
-const basePasswordSchema = z.string().min(1, 'Password is required');
+export const basePasswordSchema = z.string().trim().min(1, 'Password is required');
 
-const strongPasswordSchema = z
+export const strongPasswordSchema = z
   .string()
+  .trim()
   .min(8, 'Password must be at least 8 characters')
   .max(50, 'Password must be less than 50 characters')
   .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
   .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
   .regex(/[0-9]/, 'Password must contain at least one number');
 
-const otpSchema = z.string().length(6, 'OTP must be 6 digits').regex(/^\d+$/, 'OTP must contain only digits');
+const otpSchema = z.string().trim().length(6, 'OTP must be 6 digits').regex(/^\d+$/, 'OTP must contain only digits');
 
 // Schemas
 export const signupSchema = z.object({
   email: emailSchema,
   password: strongPasswordSchema,
-  name: z.string().min(2, 'Name must be at least 2 characters').max(30, 'Name must be less than 30 characters'),
+  name: z.string().trim().min(2, 'Name must be at least 2 characters').max(30, 'Name must be less than 30 characters'),
 });
 
 export const loginSchema = z.object({
@@ -32,17 +33,17 @@ export const forgotPasswordSchema = z.object({
 });
 
 export const resetPasswordSchema = z.object({
-  token: z.string().min(1, 'Reset token is required'),
+  token: z.string().trim().min(1, 'Reset token is required'),
   password: strongPasswordSchema,
 });
 
 export const verifyEmailSchema = z.object({
-  token: z.string().min(1, 'Verify email token is required'),
+  token: z.string().trim().min(1, 'Verify email token is required'),
   otp: otpSchema,
 });
 
 export const resendOTPSchema = z.object({
-  token: z.string().min(1, 'Verify email token is required'),
+  token: z.string().trim().min(1, 'Verify email token is required'),
 });
 
 // Types
