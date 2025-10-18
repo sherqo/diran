@@ -1,77 +1,77 @@
 :root {
-  --tiptap-card-bg-color: var(--white);
-  --tiptap-card-border-color: var(--tt-gray-light-a-100);
-  --tiptap-card-group-label-color: var(--tt-gray-light-a-800);
+    --tiptap-card-bg-color: var(--white);
+    --tiptap-card-border-color: var(--tt-gray-light-a-100);
+    --tiptap-card-group-label-color: var(--tt-gray-light-a-800);
 }
 
 .dark {
-  --tiptap-card-bg-color: var(--tt-gray-dark-50);
-  --tiptap-card-border-color: var(--tt-gray-dark-a-100);
-  --tiptap-card-group-label-color: var(--tt-gray-dark-a-800);
+    --tiptap-card-bg-color: var(--tt-gray-dark-50);
+    --tiptap-card-border-color: var(--tt-gray-dark-a-100);
+    --tiptap-card-group-label-color: var(--tt-gray-dark-a-800);
 }
 
 .tiptap-card {
-  --padding: 0.375rem;
-  --border-width: 1px;
+    --padding: 0.375rem;
+    --border-width: 1px;
+    display: flex;
 
-  border-radius: calc(var(--padding) + var(--tt-radius-lg));
-  box-shadow: var(--tt-shadow-elevated-md);
-  background-color: var(--tiptap-card-bg-color);
-  border: 1px solid var(--tiptap-card-border-color);
-  display: flex;
-  flex-direction: column;
-  outline: none;
-  align-items: center;
+    position: relative;
+    flex-direction: column;
+    align-items: center;
+    outline: none;
+    box-shadow: var(--tt-shadow-elevated-md);
+    border: 1px solid var(--tiptap-card-border-color);
 
-  position: relative;
-  min-width: 0;
-  word-wrap: break-word;
-  background-clip: border-box;
+    border-radius: calc(var(--padding) + var(--tt-radius-lg));
+    background-color: var(--tiptap-card-bg-color);
+    min-width: 0;
+    word-wrap: break-word;
+    background-clip: border-box;
 }
 
 .tiptap-card-header {
-  padding: 0.375rem;
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  border-bottom: var(--border-width) solid var(--tiptap-card-border-color);
+    display: flex;
+    flex: 0 0 auto;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: var(--border-width) solid var(--tiptap-card-border-color);
+    padding: 0.375rem;
+    width: 100%;
 }
 
 .tiptap-card-body {
-  padding: 0.375rem;
-  flex: 1 1 auto;
-  overflow-y: auto;
+    flex: 1 1 auto;
+    padding: 0.375rem;
+    overflow-y: auto;
 }
 
 .tiptap-card-item-group {
-  position: relative;
-  display: flex;
-  vertical-align: middle;
-  min-width: max-content;
+    display: flex;
+    position: relative;
+    vertical-align: middle;
+    min-width: max-content;
 
-  &[data-orientation="vertical"] {
-    flex-direction: column;
-    justify-content: center;
-  }
+    &[data-orientation='vertical'] {
+        flex-direction: column;
+        justify-content: center;
+    }
 
-  &[data-orientation="horizontal"] {
-    gap: 0.25rem;
-    flex-direction: row;
-    align-items: center;
-  }
+    &[data-orientation='horizontal'] {
+        flex-direction: row;
+        align-items: center;
+        gap: 0.25rem;
+    }
 }
 
 .tiptap-card-group-label {
-  padding-top: 0.75rem;
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
-  padding-bottom: 0.25rem;
-  line-height: normal;
-  font-size: 0.75rem;
-  font-weight: 600;
-  line-height: normal;
-  text-transform: capitalize;
-  color: var(--tiptap-card-group-label-color);
+    padding-top: 0.75rem;
+    padding-right: 0.5rem;
+    padding-bottom: 0.25rem;
+    padding-left: 0.5rem;
+    color: var(--tiptap-card-group-label-color);
+    font-weight: 600;
+    font-size: 0.75rem;
+    line-height: normal;
+    line-height: normal;
+    text-transform: capitalize;
 }
