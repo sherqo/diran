@@ -3,7 +3,6 @@
 import { type LucideIcon } from 'lucide-react';
 
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { CommandShortcut } from './ui/command';
 import { Kbd, KbdGroup } from './ui/kbd';
 
 export function NavMain({
