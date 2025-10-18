@@ -60,7 +60,7 @@ export function OTPForm({
         if (result.success) {
             setMessage(result.message || '');
             // Redirect to profile after verification
-            router.push('/profile');
+            router.push('/home');
         } else {
             setMessage(result.error.message || '');
         }

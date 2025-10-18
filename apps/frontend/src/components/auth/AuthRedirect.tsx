@@ -10,7 +10,7 @@ interface AuthRedirectProps {
     redirectTo?: string;
 }
 
-export function AuthRedirect({ children, redirectTo = '/profile' }: AuthRedirectProps) {
+export function AuthRedirect({ children, redirectTo = '/home' }: AuthRedirectProps) {
     const { user, loading } = useAuth();
     const router = useRouter();
 

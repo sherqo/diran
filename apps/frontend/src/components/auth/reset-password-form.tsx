@@ -61,8 +61,8 @@ export function ResetPasswordForm({ className, token, ...props }: React.Componen
 
         if (result.success) {
             const userEmail = result.data?.email || 'your email';
-            setMessage(`Password reset successfully for ${userEmail}. Redirecting to your profile...`);
-            router.push('/profile');
+            setMessage(`Password reset successfully for ${userEmail}. Redirecting to your home page...`);
+            router.push('/home');
         } else {
             setMessage(result.error?.message || 'Something went wrong.');
         }

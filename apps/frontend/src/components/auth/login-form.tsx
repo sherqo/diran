@@ -51,7 +51,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
         const result = await login(formData.email, formData.password);
 
         if (result.success) {
-            router.push('/profile'); // Redirect to profile page
+            router.push('/home'); // Redirect to home page
         } else {
             // If email verification is required, redirect to OTP page
             if (result.error?.code === 'EMAIL_NOT_VERIFIED' && result.data?.emailToken) {
