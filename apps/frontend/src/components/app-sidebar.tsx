@@ -240,7 +240,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     };
 
     return (
-        <Sidebar collapsible="offcanvas" variant="floating" className="border-r-0" {...props}>
+        <Sidebar collapsible="offcanvas" variant="sidebar" className="border-r-0" {...props}>
             <SidebarHeader>
                 <NavUser user={user} loading={loading} logout={logout} />
                 <NavMain items={data.navMain} onSearchClick={handleSearchClick} />
