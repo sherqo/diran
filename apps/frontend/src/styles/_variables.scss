@@ -163,7 +163,7 @@
     *,
     ::before,
     ::after {
-        transition: none var(--tt-transition-duration-default) var(--tt-transition-easing-default);
+        transition: var(--tt-transition-duration-default) var(--tt-transition-easing-default);
         box-sizing: border-box;
     }
 }
