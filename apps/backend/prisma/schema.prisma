@@ -53,6 +53,34 @@ model User {
   @@map("users")
 }
 
+// Schema for block 
+model Block{
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  type       BlockType
+  parentId  String?  @db.Uuid @map("parent_id")
+  parent    Block?   @relation("BlockToChildren", fields: [parentId], references: [id])
+  children  Block[]  @relation("BlockToChildren")
+
+  // Timestamps
+  createdAt   DateTime @default(now()) @db.Timestamptz(3) @map("created_at")
+  updatedAt   DateTime @updatedAt @db.Timestamptz(3) @map("updated_at")
+
+  @@map("blocks")
+  @@index([parentId], name: "idx_blocks_parent_id")
+}
+
+// Block kinds (page, heading, paragraph, etc.)
+enum BlockType {
+  PAGE
+  HEADING_1
+  HEADING_2
+  HEADING_3
+  PARAGRAPH
+  CODE
+  TODO
+}
+
+
 // idc about this db and never use it in this project, it's for the waitlist in the landing page
 model waitlist {
   id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
