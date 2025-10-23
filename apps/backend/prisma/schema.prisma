@@ -55,18 +55,30 @@ model User {
 
 // Schema for block 
 model Block{
-  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  // Who are you?
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   type       BlockType
-  parentId  String?  @db.Uuid @map("parent_id")
-  parent    Block?   @relation("BlockToChildren", fields: [parentId], references: [id])
-  children  Block[]  @relation("BlockToChildren")
+
+  // Self-referential relationship for hierarchical blocks
+  parentId   String    @db.Uuid @map("parent_id") // All has parents, even the page, its user is the parent 
+  parent     Block?    @relation("BlockToChildren", fields: [parentId], references: [id])
+  children   Block[]   @relation("BlockToChildren")
+  order      Int       // order among brothers
+
+  content    Json      // content varies by block type, stored as JSON, will be checked/validated in the applicatioin 
 
   // Timestamps
-  createdAt   DateTime @default(now()) @db.Timestamptz(3) @map("created_at")
-  updatedAt   DateTime @updatedAt @db.Timestamptz(3) @map("updated_at")
+  createdAt  DateTime  @default(now()) @db.Timestamptz(3) @map("created_at")
+  updatedAt  DateTime  @updatedAt @db.Timestamptz(3) @map("updated_at")
+
+  // FUTURE
+  // Tags // many to many, more than one tag per block, more than one block per tag
+  // Permissions
+  //
 
   @@map("blocks")
-  @@index([parentId], name: "idx_blocks_parent_id")
+  @@index([parentId], name: "idx_blocks_parent_id") // index for querying children by parent
+  @@unique([parentId, order]) // NO two children under the same parent can have the same order
 }
 
 // Block kinds (page, heading, paragraph, etc.)
