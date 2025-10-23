@@ -210,6 +210,24 @@ export function SimpleEditor() {
         }
     }, [isMobile, mobileView]);
 
+    // inside your SimpleEditor component
+    React.useEffect(() => {
+        if (!editor) return;
+
+        const handleUpdate = () => {
+            const json = editor.getJSON(); // for DB storage
+            const html = editor.getHTML(); // for rendering elsewhere
+            const text = editor.getText(); // plain text
+            console.log({ json, html, text });
+        };
+
+        editor.on('update', handleUpdate);
+
+        return () => {
+            editor.off('update', handleUpdate);
+        };
+    }, [editor]);
+
     return (
         <div className="simple-editor-wrapper">
             <EditorContext.Provider value={{ editor }}>
