@@ -13,7 +13,7 @@
 //    and to match the precision of Supabase's `now()` function — it defaults to 3 decimal places. 
 
 
-// ==== Config ====
+// ========== Config ==========
 generator client {
   provider = "prisma-client-js"
 }
@@ -24,7 +24,7 @@ datasource db {
   directUrl = env("DATABASE_DIRECT_URL")
 }
 
-// ==== Types ====
+// ========== Types ==========
 // Block kinds (page, heading, paragraph, etc.)
 enum BlockType {
   PAGE
@@ -45,8 +45,20 @@ enum RoleType {
   NONE // idk why? but makes sense to have a none role :)
 }
 
+enum ActorType {
+  USER
+  TEAM // not used yet, for future
+}
 
-// ====  Schema ====
+enum EntityType {
+  BLOCK
+  TAG
+}
+
+
+// ==========  Schemas ==========
+// --------- Actors ---------
+// users, the main actor now - Oct, 2025
 model User {
   id       String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   email    String  @unique
@@ -74,7 +86,8 @@ model User {
   @@map("users")
 }
 
-// Schema for block 
+// --------- Entities ---------
+// Schema for block
 model Block {
   // Who are you?
   id   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
@@ -104,9 +117,13 @@ model Block {
 // Schema for permissions
 model Permission {
   id      String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  actorId  String   @map("actor_id") @db.Uuid // can be user, team or whatever for scalability...
-  entityId String   @map("entity_id") @db.Uuid // can be block, tags or whatever 
   
+  actorId  String   @map("actor_id") @db.Uuid // can be user, team or whatever for scalability...
+  actorType ActorType
+
+  entityId String   @map("entity_id") @db.Uuid // can be block, tags or whatever 
+  entityType EntityType
+
   role    RoleType // what role this actor has on this entity
 
   // Timestamps
