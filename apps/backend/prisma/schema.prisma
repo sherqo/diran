@@ -71,8 +71,6 @@ model User {
   otpHashed     String?      @map("otp_hashed")
   otpExpires    DateTime?    @map("otp_expires") @db.Timestamptz(3)
 
-  Permission    Permission[]
-
   @@map("users")
 }
 
@@ -94,9 +92,6 @@ model Block {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  // Permissions
-  Permission Permission[]
-
   // FUTURE
   // Tags // many to many, more than one tag per block, more than one block per tag
 
@@ -109,20 +104,16 @@ model Block {
 // Schema for permissions
 model Permission {
   id      String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-
-  userId  String   @map("user_id") @db.Uuid
-  user    User     @relation(fields: [userId], references: [id])
-
-  blockId String   @map("block_id") @db.Uuid
-  block   Block    @relation(fields: [blockId], references: [id])
+  actorId  String   @map("actor_id") @db.Uuid // can be user, team or whatever for scalability...
+  entityId String   @map("entity_id") @db.Uuid // can be block, tags or whatever 
   
-  role    RoleType
+  role    RoleType // what role this actor has on this entity
 
   // Timestamps
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  @@unique([userId, blockId]) // one permission per user per block
+  @@unique([actorId, entityId]) // one permission per actor per entity
   @@map("permissions")
 }
 
