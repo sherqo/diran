@@ -12,7 +12,6 @@
 //  - We use `@db.Timestamptz(3)` for timestamps to store the timezone information
 //    and to match the precision of Supabase's `now()` function — it defaults to 3 decimal places. 
 
-
 // ========== Config ==========
 generator client {
   provider = "prisma-client-js"
@@ -55,7 +54,6 @@ enum EntityType {
   TAG
 }
 
-
 // ==========  Schemas ==========
 // --------- Actors ---------
 // users, the main actor now - Oct, 2025
@@ -79,9 +77,9 @@ model User {
   resetPasswordExpires DateTime? @map("reset_password_expires") @db.Timestamptz(3)
 
   // email verification fields
-  emailVerified Boolean      @default(false) @map("email_verified")
-  otpHashed     String?      @map("otp_hashed")
-  otpExpires    DateTime?    @map("otp_expires") @db.Timestamptz(3)
+  emailVerified Boolean   @default(false) @map("email_verified")
+  otpHashed     String?   @map("otp_hashed")
+  otpExpires    DateTime? @map("otp_expires") @db.Timestamptz(3)
 
   @@map("users")
 }
@@ -108,7 +106,6 @@ model Block {
   // FUTURE
   // Tags // many to many, more than one tag per block, more than one block per tag
 
-
   @@unique([parentId, order]) // NO two children under the same parent can have the same order
   @@index([parentId], name: "idx_blocks_parent_id") // index for querying children by parent
   @@map("blocks")
@@ -116,15 +113,15 @@ model Block {
 
 // Schema for permissions
 model Permission {
-  id      String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  
-  actorId  String   @map("actor_id") @db.Uuid // can be user, team or whatever for scalability...
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  actorId   String    @map("actor_id") @db.Uuid // can be user, team or whatever for scalability...
   actorType ActorType
 
-  entityId String   @map("entity_id") @db.Uuid // can be block, tags or whatever 
+  entityId   String     @map("entity_id") @db.Uuid // can be block, tags or whatever 
   entityType EntityType
 
-  role    RoleType // what role this actor has on this entity
+  role RoleType // what role this actor has on this entity
 
   // Timestamps
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
