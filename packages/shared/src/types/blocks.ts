@@ -1,4 +1,4 @@
-export enum BlockType {
+export enum BlockTypeEnum {
   PAGE = 'PAGE',
 
   // Headings
@@ -15,7 +15,7 @@ export enum BlockType {
 export interface Block {
   // All of this should be synced with the database model
   id: string;
-  type: BlockType;
+  type: BlockTypeEnum;
   parentId: string | null; // null for root blocks like PAGE
   order: number;
   content: Record<string, any>; // JSON content varies by block type
