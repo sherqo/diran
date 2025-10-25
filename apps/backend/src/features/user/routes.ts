@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { validateRequest as vr } from '#lib/middleware/validation.js';
-import { getProfile, updateProfile, changePassword } from './controller.js';
 import { authenticate } from '#lib/middleware/auth.js';
+import { getProfile, updateProfile, changePassword } from './controller.js';
 import { updateProfileSchema, changePasswordSchema } from '@diran/shared/validation/user.js';
 import timeout from 'connect-timeout';
 import { profileRateLimiter as rl } from '#lib/middleware/rateLimiter.js';
