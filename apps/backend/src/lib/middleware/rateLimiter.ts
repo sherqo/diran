@@ -1,4 +1,3 @@
-import { resendOTP } from '#features/auth/controller';
 import { rateLimit } from 'express-rate-limit';
 import ms from 'ms';
 
