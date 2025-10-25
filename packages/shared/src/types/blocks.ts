@@ -16,12 +16,12 @@ export interface Block {
   // All of this should be synced with the database model
   id: string;
   type: BlockType;
-  parentId?: string;
+  parentId: string | null; // null for root blocks like PAGE
   order: number;
   content: Record<string, any>; // JSON content varies by block type
   createdAt: string;
   updatedAt: string;
-  children?: Block[];
+  children?: Block[]; // Not all blocks will have children
 }
 
 export interface CreateBlockResponseData {
