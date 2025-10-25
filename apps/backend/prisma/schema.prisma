@@ -106,6 +106,12 @@ model Block {
   // FUTURE
   // Tags // many to many, more than one tag per block, more than one block per tag
 
+  /**
+   * quick note: we can have many block with the SAME parent and
+   * SAME order in case of the parentId is null
+   * postgres treats nulls as different unknown values
+   * i love postgres <3
+   */
   @@unique([parentId, order]) // NO two children under the same parent can have the same order
   @@index([parentId], name: "idx_blocks_parent_id") // index for querying children by parent
   @@map("blocks")
