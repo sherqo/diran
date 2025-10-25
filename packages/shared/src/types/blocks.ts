@@ -1,4 +1,4 @@
-export const enum BlockType {
+export enum BlockType {
   PAGE = 'PAGE',
 
   // Headings
