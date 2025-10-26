@@ -3,16 +3,31 @@ import { BlockTypeEnum } from '../types/blocks.js';
 
 const BlockTypeEnumSchema = z.enum(BlockTypeEnum);
 
-export const createBlockSchema = z.object({
-  // i need a full block here but without id, createdAt, updatedAt
-  type: BlockTypeEnumSchema,
-  parentId: z.string().optional(),
-  order: z.number(), // a lot of Qs here...
-  content: z.record(z.string(), z.any()),
-});
+export const createBlockSchema = z
+  .object({
+    // i need a full block here but without id, createdAt, updatedAt
+    type: BlockTypeEnumSchema,
+    parentId: z.string().optional(),
+    order: z.number(), // a lot of Qs here...
+    content: z.record(z.string(), z.any()),
+  })
+  .refine(
+    data => {
+      // If type is "PAGE", parentId must be undefined.
+      // If not "PAGE", parentId must exist.
+      if (data.type === BlockTypeEnum.PAGE) return data.parentId === undefined;
+      return typeof data.parentId === 'string' && data.parentId.trim() !== '';
+    },
+    {
+      message: "parentId is required unless type='PAGE'",
+      path: ['parentId'],
+    }
+  );
+
 export const getBlockSchema = z.object({
   id: z.string(),
 });
+
 export const updateBlockSchema = z.object({
   id: z.string(),
 
@@ -22,6 +37,7 @@ export const updateBlockSchema = z.object({
   order: z.number().optional(),
   content: z.record(z.string(), z.any()).optional(),
 });
+
 export const deleteBlockSchema = z.object({
   id: z.string(),
 });
