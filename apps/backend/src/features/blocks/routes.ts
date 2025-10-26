@@ -19,9 +19,9 @@ router.use(timeout('10s')); // i do not think block operations should take more 
 // All block routes require authentication
 router.use(authenticate);
 
-router.post('/', vr(createBlockSchema), createBlock);
-router.get('/:id', vr(getBlockSchema), getBlock);
-router.put('/:id', vr(updateBlockSchema), updateBlock);
-router.delete('/:id', vr(deleteBlockSchema), deleteBlock);
+router.post('/', vr({ bodySchema: createBlockSchema }), createBlock);
+router.get('/:id', vr({ paramsSchema: getBlockSchema }), getBlock);
+router.put('/:id', vr({ paramsSchema: updateBlockSchema }), updateBlock);
+router.delete('/:id', vr({ paramsSchema: deleteBlockSchema }), deleteBlock);
 
 export default router;

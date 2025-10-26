@@ -18,12 +18,12 @@ router.use(timeout('15s')); // Set a timeout of 15 seconds for all routes in thi
 
 // Public routes with specific rate limiting
 router.post('/refresh', refresh);
-router.post('/signup', rl.login, vr(signupSchema), signup);
-router.post('/login', rl.login, vr(loginSchema), login);
-router.post('/forgot-password', rl.resetPassword, vr(forgotPasswordSchema), forgotPassword);
-router.post('/reset-password', rl.resetPassword, vr(resetPasswordSchema), resetPassword);
-router.post('/verify-email', rl.otp, vr(verifyEmailSchema), verifyEmail);
-router.post('/resend-otp', rl.resendOTP, vr(resendOTPSchema), resendOTP);
+router.post('/signup', rl.login, vr({ bodySchema: signupSchema }), signup);
+router.post('/login', rl.login, vr({ bodySchema: loginSchema }), login);
+router.post('/forgot-password', rl.resetPassword, vr({ bodySchema: forgotPasswordSchema }), forgotPassword);
+router.post('/reset-password', rl.resetPassword, vr({ bodySchema: resetPasswordSchema }), resetPassword);
+router.post('/verify-email', rl.otp, vr({ bodySchema: verifyEmailSchema }), verifyEmail);
+router.post('/resend-otp', rl.resendOTP, vr({ bodySchema: resendOTPSchema }), resendOTP);
 router.post('/logout', logout);
 
 export default router;

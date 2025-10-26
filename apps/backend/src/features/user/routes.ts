@@ -14,7 +14,7 @@ router.use(timeout('15s')); // Set a timeout of 15 seconds for all routes in thi
 router.use(authenticate);
 
 router.get('/profile', getProfile);
-router.patch('/profile', rl.bigWindow, rl.updateProfile, vr(updateProfileSchema), updateProfile);
-router.post('/change-password', rl.bigWindow, rl.changePassword, vr(changePasswordSchema), changePassword);
+router.patch('/profile', rl.bigWindow, rl.updateProfile, vr({ bodySchema: updateProfileSchema }), updateProfile);
+router.post('/change-password', rl.bigWindow, rl.changePassword, vr({ bodySchema: changePasswordSchema }), changePassword);
 
 export default router;
