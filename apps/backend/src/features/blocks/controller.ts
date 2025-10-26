@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { AuthenticatedRequest } from '#lib/middleware/auth';
-import { CreateBlockInput, GetBlockInput, UpdateBlockInput, DeleteBlockInput } from '@diran/shared/validation/blocks';
+import { CreateBlockBodyInput, GetBlockInput, UpdateBlockInput, DeleteBlockInput } from '@diran/shared/validation/blocks';
 import { db } from '#lib/database/connection';
 import { sendSuccess } from '#lib/utils/response';
 import { ApiError } from '#lib/middleware/errorHandler';
@@ -27,7 +27,7 @@ const createBlock = async (req: AuthenticatedRequest, res: Response): Promise<vo
      * i wanna be nice, i'm a nice man, i'm nice :)
      */
 
-    const { type, parentId, order, content } = req.body as CreateBlockInput; // all basic validation are already done
+    const { type, parentId, order, content } = req.body as CreateBlockBodyInput; // all basic validation are already done
 
     const created = await db.block.create({
         data: {

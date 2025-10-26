@@ -3,7 +3,7 @@ import { BlockTypeEnum } from '../types/blocks.js';
 
 const BlockTypeEnumSchema = z.enum(BlockTypeEnum);
 
-export const createBlockSchema = z
+export const createBlockBodySchema = z
   .object({
     // i need a full block here but without id, createdAt, updatedAt
     type: BlockTypeEnumSchema,
@@ -23,6 +23,10 @@ export const createBlockSchema = z
       path: ['parentId'],
     }
   );
+
+const idSchema = z.object({
+  id: z.string(),
+});
 
 export const getBlockSchema = z.object({
   id: z.string(),
@@ -48,7 +52,7 @@ export const deleteBlockSchema = z.object({
  * but i feel like it's a good practice bc all files did the same
  */
 // Types
-export type CreateBlockInput = z.infer<typeof createBlockSchema>;
+export type CreateBlockBodyInput = z.infer<typeof createBlockBodySchema>;
 export type GetBlockInput = z.infer<typeof getBlockSchema>;
 export type UpdateBlockInput = z.infer<typeof updateBlockSchema>;
 export type DeleteBlockInput = z.infer<typeof deleteBlockSchema>;
