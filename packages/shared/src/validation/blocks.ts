@@ -7,7 +7,7 @@ export const createBlockBodySchema = z
   .object({
     // i need a full block here but without id, createdAt, updatedAt
     type: BlockTypeEnumSchema,
-    parentId: z.string().optional(),
+    parentId: z.uuid().optional().nullable(),
     order: z.number(), // a lot of Qs here...
     content: z.record(z.string(), z.any()),
   })
@@ -24,26 +24,22 @@ export const createBlockBodySchema = z
     }
   );
 
-const idSchema = z.object({
-  id: z.string(),
-});
-
 export const getBlockSchema = z.object({
-  id: z.string(),
+  id: z.uuid(),
 });
 
 export const updateBlockSchema = z.object({
-  id: z.string(),
+  id: z.uuid(),
 
   // same block but optional
   type: BlockTypeEnumSchema.optional(),
-  parentId: z.string().nullable().optional(),
+  parentId: z.uuid().nullable().optional(),
   order: z.number().optional(),
   content: z.record(z.string(), z.any()).optional(),
 });
 
 export const deleteBlockSchema = z.object({
-  id: z.string(),
+  id: z.uuid(),
 });
 
 /**
