@@ -8,7 +8,7 @@ import { Field, FieldDescription, FieldGroup, FieldLabel } from '@/components/ui
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '@/components/ui/input-otp';
 import AuthFooter from './auth-footer';
 import { useAuth } from '@/contexts/AuthContext';
-import { verifyEmailSchema } from '@/shared/validation/auth';
+import { verifyEmailBodySchema } from '@/shared/validation/auth';
 import { useFormValidation } from '@/hooks/useFormValidation';
 
 export function OTPForm({
@@ -25,7 +25,7 @@ export function OTPForm({
     const { verifyEmail, resendOTP } = useAuth();
     const router = useRouter();
 
-    const { errorMessage, validate, clearFieldError, hasErrors } = useFormValidation(verifyEmailSchema);
+    const { errorMessage, validate, clearFieldError, hasErrors } = useFormValidation(verifyEmailBodySchema);
 
     // Derive formData from current state and props
     // Use token field name to match backend validation schema

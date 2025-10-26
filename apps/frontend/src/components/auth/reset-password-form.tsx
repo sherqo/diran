@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { SITE_NAME } from '@/lib/site-info';
 import Link from 'next/link';
 import AuthFooter from './auth-footer';
-import { resetPasswordSchema } from '@/shared/validation/auth';
+import { resetPasswordBodySchema } from '@/shared/validation/auth';
 import { useFormValidation } from '@/hooks/useFormValidation';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -23,7 +23,7 @@ export function ResetPasswordForm({ className, token, ...props }: React.Componen
     const [message, setMessage] = useState('');
     const router = useRouter();
 
-    const { errorMessage, validate, clearFieldError, hasErrors } = useFormValidation(resetPasswordSchema);
+    const { errorMessage, validate, clearFieldError, hasErrors } = useFormValidation(resetPasswordBodySchema);
 
     // Derive token from searchParams and formData from current state
     const formData = { token, password };

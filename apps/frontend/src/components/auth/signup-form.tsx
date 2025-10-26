@@ -18,7 +18,7 @@ import Link from 'next/link';
 import AuthFooter from './auth-footer';
 // import GoogleBtn from './google-btn';
 import { useAuth } from '@/contexts/AuthContext';
-import { signupSchema } from '@/shared/validation/auth';
+import { signupBodySchema } from '@/shared/validation/auth';
 import { useFormValidation } from '@/hooks/useFormValidation';
 
 export function SignupForm({ className, ...props }: React.ComponentProps<'div'>) {
@@ -34,7 +34,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<'div'>)
     const { signup } = useAuth();
     const router = useRouter();
 
-    const { errorMessage, validate, clearFieldError, hasErrors } = useFormValidation(signupSchema);
+    const { errorMessage, validate, clearFieldError, hasErrors } = useFormValidation(signupBodySchema);
 
     const handleInputChange = (field: string, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));

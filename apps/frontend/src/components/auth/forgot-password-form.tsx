@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { SITE_NAME } from '@/lib/site-info';
 import Link from 'next/link';
 import AuthFooter from './auth-footer';
-import { forgotPasswordSchema } from '@/shared/validation/auth';
+import { forgotPasswordBodySchema } from '@/shared/validation/auth';
 import { useFormValidation } from '@/hooks/useFormValidation';
 
 import { useAuth } from '@/contexts/AuthContext';
@@ -20,7 +20,7 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
     const [message, setMessage] = useState('');
     const [countdown, setCountdown] = useState(0);
 
-    const { errorMessage, validate, clearFieldError, hasErrors } = useFormValidation(forgotPasswordSchema);
+    const { errorMessage, validate, clearFieldError, hasErrors } = useFormValidation(forgotPasswordBodySchema);
 
     useEffect(() => {
         if (countdown > 0) {

@@ -17,39 +17,39 @@ export const strongPasswordSchema = z
 const otpSchema = z.string().trim().length(6, 'OTP must be 6 digits').regex(/^\d+$/, 'OTP must contain only digits');
 
 // Schemas
-export const signupSchema = z.object({
+export const signupBodySchema = z.object({
   email: emailSchema,
   password: strongPasswordSchema,
   name: z.string().trim().min(2, 'Name must be at least 2 characters').max(30, 'Name must be less than 30 characters'),
 });
 
-export const loginSchema = z.object({
+export const loginBodySchema = z.object({
   email: emailSchema,
   password: basePasswordSchema,
 });
 
-export const forgotPasswordSchema = z.object({
+export const forgotPasswordBodySchema = z.object({
   email: emailSchema,
 });
 
-export const resetPasswordSchema = z.object({
+export const resetPasswordBodySchema = z.object({
   token: z.string().trim().min(1, 'Reset token is required'),
   password: strongPasswordSchema,
 });
 
-export const verifyEmailSchema = z.object({
+export const verifyEmailBodySchema = z.object({
   token: z.string().trim().min(1, 'Verify email token is required'),
   otp: otpSchema,
 });
 
-export const resendOTPSchema = z.object({
+export const resendOTPBodySchema = z.object({
   token: z.string().trim().min(1, 'Verify email token is required'),
 });
 
 // Types
-export type SignupInput = z.infer<typeof signupSchema>;
-export type LoginInput = z.infer<typeof loginSchema>;
-export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
-export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
-export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>;
-export type ResendOTPInput = z.infer<typeof resendOTPSchema>;
+export type SignupBodyInput = z.infer<typeof signupBodySchema>;
+export type LoginBodyInput = z.infer<typeof loginBodySchema>;
+export type ForgotPasswordBodyInput = z.infer<typeof forgotPasswordBodySchema>;
+export type ResetPasswordBodyInput = z.infer<typeof resetPasswordBodySchema>;
+export type VerifyEmailBodyInput = z.infer<typeof verifyEmailBodySchema>;
+export type ResendOTPBodyInput = z.infer<typeof resendOTPBodySchema>;

@@ -15,7 +15,7 @@ Shared types, validation schemas, and constants used across the frontend and bac
 import type { User, ApiResult, SuccessResponse } from '@app/shared';
 
 // Import validation schemas
-import { signupSchema, loginSchema } from '@app/shared';
+import { signupBodySchema, loginBodySchema } from '@app/shared';
 
 // Import constants
 import { ErrorCode, HttpStatus } from '@app/shared';

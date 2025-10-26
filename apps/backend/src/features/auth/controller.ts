@@ -16,12 +16,12 @@ import {
 import { setAccessTokenCookie, clearAuthCookies } from '#lib/services/cookies.js';
 import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors';
 import type {
-    SignupInput,
-    LoginInput,
-    ForgotPasswordInput,
-    ResetPasswordInput,
-    VerifyEmailInput,
-    ResendOTPInput,
+    SignupBodyInput,
+    LoginBodyInput,
+    ForgotPasswordBodyInput,
+    ResetPasswordBodyInput,
+    VerifyEmailBodyInput,
+    ResendOTPBodyInput,
 } from '@diran/shared/validation/auth';
 import {
     SignupResponseData,
@@ -38,7 +38,7 @@ export { signup, login, forgotPassword, resetPassword, verifyEmail, refresh, res
 
 //? User signup
 const signup = async (req: Request, res: Response): Promise<void> => {
-    const { email, password, name }: SignupInput = req.body; // Extract user details from request body
+    const { email, password, name }: SignupBodyInput = req.body; // Extract user details from request body
 
     // Check if user already exists
     const existingUser = await db.user.findUnique({
@@ -80,7 +80,7 @@ const signup = async (req: Request, res: Response): Promise<void> => {
 
 //? User login
 const login = async (req: Request, res: Response): Promise<void> => {
-    const { email, password }: LoginInput = req.body;
+    const { email, password }: LoginBodyInput = req.body;
 
     // Find user
     const user = await db.user.findUnique({
@@ -132,7 +132,7 @@ const login = async (req: Request, res: Response): Promise<void> => {
 
 //? Forgot password - send reset token to email
 const forgotPassword = async (req: Request, res: Response): Promise<void> => {
-    const { email }: ForgotPasswordInput = req.body;
+    const { email }: ForgotPasswordBodyInput = req.body;
 
     const user = await db.user.findUnique({
         where: { email },
@@ -151,7 +151,7 @@ const forgotPassword = async (req: Request, res: Response): Promise<void> => {
 
 //? Reset password - with token
 const resetPassword = async (req: Request, res: Response): Promise<void> => {
-    const { token, password }: ResetPasswordInput = req.body;
+    const { token, password }: ResetPasswordBodyInput = req.body;
 
     // Hash the token to compare with database
     const hashedToken = hashResetToken(token);
@@ -193,7 +193,7 @@ const resetPassword = async (req: Request, res: Response): Promise<void> => {
 
 //? Verify email with OTP
 const verifyEmail = async (req: Request, res: Response): Promise<void> => {
-    const { token, otp }: VerifyEmailInput = req.body;
+    const { token, otp }: VerifyEmailBodyInput = req.body;
 
     const decoded = verifyEmailVerificationToken(token);
 
@@ -285,7 +285,7 @@ const refresh = async (req: Request, res: Response): Promise<void> => {
 
 //? Resend verification OTP - if not verified yet
 const resendOTP = async (req: Request, res: Response): Promise<void> => {
-    const { token }: ResendOTPInput = req.body;
+    const { token }: ResendOTPBodyInput = req.body;
 
     const decoded = verifyEmailVerificationToken(token);
 
