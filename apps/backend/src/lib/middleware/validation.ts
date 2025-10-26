@@ -13,7 +13,7 @@ export const validateRequest = ({
     paramsSchema?: ZodSchema;
     querySchema?: ZodSchema;
 }) => {
-    return (req: Request, _res: Response): void => {
+    return (req: Request, _res: Response, next: NextFunction): void => {
         if (bodySchema) {
             const result = validateData(bodySchema, req.body);
             if (!result.success) {
@@ -37,5 +37,7 @@ export const validateRequest = ({
             }
             req.query = result.data as Record<string, string>;
         }
+
+        next();
     };
 };
