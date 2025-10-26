@@ -20,7 +20,7 @@ router.use(timeout('10s')); // i do not think block operations should take more 
 router.use(authenticate);
 
 router.post('/', vr({ bodySchema: createBlockSchema }), createBlock);
-router.get('/:id', vr({ paramsSchema: getBlockSchema }), getBlock);
+router.get('/:id', vr({ paramsSchema: getBlockSchema }), getBlock); // need to change this
 router.put('/:id', vr({ paramsSchema: updateBlockSchema }), updateBlock);
 router.delete('/:id', vr({ paramsSchema: deleteBlockSchema }), deleteBlock);
 
