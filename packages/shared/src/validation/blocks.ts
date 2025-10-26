@@ -24,11 +24,11 @@ export const createBlockBodySchema = z
     }
   );
 
-export const getBlockSchema = z.object({
+export const getBlockParamSchema = z.object({
   id: z.uuid(),
 });
 
-export const updateBlockSchema = z.object({
+export const updateBlockParamSchema = z.object({
   id: z.uuid(),
 
   // same block but optional
@@ -38,7 +38,7 @@ export const updateBlockSchema = z.object({
   content: z.record(z.string(), z.any()).optional(),
 });
 
-export const deleteBlockSchema = z.object({
+export const deleteBlockParamSchema = z.object({
   id: z.uuid(),
 });
 
@@ -49,6 +49,6 @@ export const deleteBlockSchema = z.object({
  */
 // Types
 export type CreateBlockBodyInput = z.infer<typeof createBlockBodySchema>;
-export type GetBlockInput = z.infer<typeof getBlockSchema>;
-export type UpdateBlockInput = z.infer<typeof updateBlockSchema>;
-export type DeleteBlockInput = z.infer<typeof deleteBlockSchema>;
+export type GetBlockParamInput = z.infer<typeof getBlockParamSchema>;
+export type UpdateBlockParamInput = z.infer<typeof updateBlockParamSchema>;
+export type DeleteBlockParamInput = z.infer<typeof deleteBlockParamSchema>;

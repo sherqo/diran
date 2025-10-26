@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { AuthenticatedRequest } from '#lib/middleware/auth';
-import { CreateBlockBodyInput, GetBlockInput, UpdateBlockInput, DeleteBlockInput } from '@diran/shared/validation/blocks';
+import { CreateBlockBodyInput, GetBlockParamInput, UpdateBlockParamInput, DeleteBlockParamInput } from '@diran/shared/validation/blocks';
 import { db } from '#lib/database/connection';
 import { sendSuccess } from '#lib/utils/response';
 import { ApiError } from '#lib/middleware/errorHandler';
@@ -63,7 +63,7 @@ const createBlock = async (req: AuthenticatedRequest, res: Response): Promise<vo
 
 // READ
 const getBlock = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { id } = req.params as GetBlockInput;
+    const { id } = req.params as GetBlockParamInput;
 
     const found = await db.block.findUnique({
         where: { id },
@@ -99,7 +99,7 @@ const getBlock = async (req: AuthenticatedRequest, res: Response): Promise<void>
 // UPDATE --
 const updateBlock = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     const { id } = req.params as { id: string };
-    const payload = req.body as Partial<UpdateBlockInput>;
+    const payload = req.body as Partial<UpdateBlockParamInput>;
 
     const existing = await db.block.findUnique({ where: { id } });
     if (!existing) {
@@ -143,7 +143,7 @@ const updateBlock = async (req: AuthenticatedRequest, res: Response): Promise<vo
 
 // DELETE
 const deleteBlock = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { id } = req.params as DeleteBlockInput;
+    const { id } = req.params as DeleteBlockParamInput;
 
     const block = await db.block.findUnique({ where: { id } });
     if (!block) {
