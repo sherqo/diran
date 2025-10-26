@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { AuthenticatedRequest } from '#lib/middleware/auth';
-import { CreateBlockInput, GetBlockInput, UpdateBlockInput, deleteBlockSchema } from '@diran/shared/validation/blocks';
+import { CreateBlockInput, GetBlockInput, UpdateBlockInput, DeleteBlockInput } from '@diran/shared/validation/blocks';
 import { db } from '#lib/database/connection';
 import { sendSuccess } from '#lib/utils/response';
 import { ApiError } from '#lib/middleware/errorHandler';
@@ -143,18 +143,16 @@ const updateBlock = async (req: AuthenticatedRequest, res: Response): Promise<vo
 
 // DELETE
 const deleteBlock = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { id } = req.params;
+    const { id } = req.params as DeleteBlockInput;
 
-    const existing = await db.block.findUnique({ where: { id } });
-
-    if (!existing) {
+    const block = await db.block.findUnique({ where: { id } });
+    if (!block) {
         throw new ApiError('Block not found', HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND);
     }
 
     await db.block.delete({ where: { id } });
 
-    const data = {};
-    sendSuccess(res, data, 'Block deleted successfully');
+    sendSuccess(res, {}, 'Block deleted successfully');
 };
 
 export { createBlock, getBlock, updateBlock, deleteBlock };
