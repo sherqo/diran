@@ -1,0 +1,22 @@
+type: http_request
+model: http_request
+id: rq_g5kAuYZXvx
+createdAt: 2025-10-09T18:34:28.538
+updatedAt: 2025-10-09T18:48:36.027
+workspaceId: wk_xHj4uko5i5
+folderId: null
+authentication: {}
+authenticationType: null
+body: {}
+bodyType: null
+description: ''
+headers:
+- enabled: true
+  name: User-Agent
+  value: insomnia/11.6.1
+  id: null
+method: GET
+name: Not found
+sortPriority: -1760034868538.0
+url: ${[base_url]}/rerfgdgfd
+urlParameters: []

@@ -1,0 +1,22 @@
+type: http_request
+model: http_request
+id: rq_Beq3cA9rWc
+createdAt: 2025-10-09T16:14:17.245
+updatedAt: 2025-10-27T07:01:58.194624964
+workspaceId: wk_xHj4uko5i5
+folderId: fl_iPVC7rgeH5
+authentication: {}
+authenticationType: null
+body: {}
+bodyType: null
+description: ''
+headers:
+- enabled: true
+  name: User-Agent
+  value: insomnia/11.6.1
+  id: null
+method: GET
+name: health
+sortPriority: -1760026457245.0
+url: https://api.diran.app/v1/health
+urlParameters: []

@@ -1,0 +1,22 @@
+type: http_request
+model: http_request
+id: rq_L8EoQkibLU
+createdAt: 2025-10-10T14:04:33.524
+updatedAt: 2025-10-14T10:37:19.973
+workspaceId: wk_xHj4uko5i5
+folderId: fl_8prugxyg8S
+authentication: {}
+authenticationType: null
+body: {}
+bodyType: null
+description: ''
+headers:
+- enabled: true
+  name: User-Agent
+  value: insomnia/11.6.1
+  id: null
+method: POST
+name: refresh
+sortPriority: -1760017295548.0
+url: ${[remote_url ]}/auth/refresh
+urlParameters: []

@@ -1,0 +1,27 @@
+type: http_request
+model: http_request
+id: rq_7vGoCroCQM
+createdAt: 2025-10-09T13:24:44.200
+updatedAt: 2025-10-10T20:53:21.404
+workspaceId: wk_xHj4uko5i5
+folderId: fl_8prugxyg8S
+authentication: {}
+authenticationType: null
+body:
+  text: "\n\n{\n\t\"token\": \"ac2ad85c9c603fb3da2926c50b1d270b4099a7ad437558972d2ff0e9ec349cab\",\n\t\"password\": \"theloveyou\"\n}"
+bodyType: application/json
+description: ''
+headers:
+- enabled: true
+  name: Content-Type
+  value: application/json
+  id: null
+- enabled: true
+  name: User-Agent
+  value: insomnia/11.6.1
+  id: null
+method: POST
+name: reset-password
+sortPriority: -1760017295598.0
+url: ${[base_url]}/auth/reset-password
+urlParameters: []

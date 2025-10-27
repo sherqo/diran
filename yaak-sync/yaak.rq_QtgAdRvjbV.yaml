@@ -1,0 +1,27 @@
+type: http_request
+model: http_request
+id: rq_QtgAdRvjbV
+createdAt: 2025-10-09T13:14:09.309
+updatedAt: 2025-10-14T13:04:32.454
+workspaceId: wk_xHj4uko5i5
+folderId: fl_8prugxyg8S
+authentication: {}
+authenticationType: null
+body:
+  text: "\n\n{\n\t\"name\": \"Sherqo Diran\",\n\t\"email\": \"sharqawycs@gmail.com\",\n\t\"password\": \"sharqaywy\"\n}"
+bodyType: application/json
+description: ''
+headers:
+- enabled: true
+  name: Content-Type
+  value: application/json
+  id: null
+- enabled: true
+  name: User-Agent
+  value: insomnia/11.6.1
+  id: null
+method: POST
+name: signup
+sortPriority: -1760017295648.0
+url: ${[base_url]}/auth/signup
+urlParameters: []

@@ -1,0 +1,27 @@
+type: http_request
+model: http_request
+id: rq_F2G2HocGSk
+createdAt: 2025-10-10T15:01:14.032
+updatedAt: 2025-10-10T19:29:35.711
+workspaceId: wk_xHj4uko5i5
+folderId: fl_8prugxyg8S
+authentication: {}
+authenticationType: null
+body:
+  text: ''
+bodyType: application/json
+description: ''
+headers:
+- enabled: true
+  name: Content-Type
+  value: application/json
+  id: null
+- enabled: true
+  name: User-Agent
+  value: insomnia/11.6.1
+  id: null
+method: POST
+name: logout
+sortPriority: -1760017295498.0
+url: ${[base_url]}/auth/logout
+urlParameters: []

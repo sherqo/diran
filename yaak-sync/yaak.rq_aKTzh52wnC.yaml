@@ -1,0 +1,28 @@
+type: http_request
+model: http_request
+id: rq_aKTzh52wnC
+createdAt: 2025-10-09T19:03:33.874
+updatedAt: 2025-10-09T19:32:12.341
+workspaceId: wk_xHj4uko5i5
+folderId: null
+authentication:
+  token: deyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJiMTQ1YzdhYi1jODNjLTRjNWEtODI3OC1hOGU2NzFmZDZiODMiLCJpYXQiOjE3NjAwMjAwNjMsImV4cCI6MTc2MDYyNDg2M30.-G2eiCNc3XVaZIreJGCbFjkwIG1L_GTDkIG52XR0TI8
+authenticationType: bearer
+body:
+  text: "\n\n{\n\t\"name\": \"nddr\"\n}"
+bodyType: application/json
+description: ''
+headers:
+- enabled: true
+  name: Content-Type
+  value: application/json
+  id: null
+- enabled: true
+  name: User-Agent
+  value: insomnia/11.6.1
+  id: null
+method: PATCH
+name: not authenticated
+sortPriority: -1760021703095.0
+url: ${[base_url]}/user/profile
+urlParameters: []

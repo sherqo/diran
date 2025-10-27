@@ -1,0 +1,27 @@
+type: http_request
+model: http_request
+id: rq_qY5Xy4vfBR
+createdAt: 2025-10-09T19:10:05.893
+updatedAt: 2025-10-09T19:11:11.551
+workspaceId: wk_xHj4uko5i5
+folderId: null
+authentication: {}
+authenticationType: null
+body:
+  text: "\n\n{\n\t\"password\": \"shar2awy#\"\n}"
+bodyType: application/json
+description: ''
+headers:
+- enabled: true
+  name: Content-Type
+  value: application/json
+  id: null
+- enabled: true
+  name: User-Agent
+  value: insomnia/11.6.1
+  id: null
+method: POST
+name: Bad schema
+sortPriority: -1760026091576.0
+url: ${[base_url]}/auth/login
+urlParameters: []

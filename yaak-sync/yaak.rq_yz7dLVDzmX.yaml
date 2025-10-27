@@ -1,0 +1,27 @@
+type: http_request
+model: http_request
+id: rq_yz7dLVDzmX
+createdAt: 2025-10-10T19:30:33.760
+updatedAt: 2025-10-10T20:48:32.947
+workspaceId: wk_xHj4uko5i5
+folderId: fl_8prugxyg8S
+authentication: {}
+authenticationType: null
+body:
+  text: "\n\n{\n\t\"email\":\"sharqawycs@gmail.com\",\n\t\"otp\":\"758581\"\n}"
+bodyType: application/json
+description: ''
+headers:
+- enabled: true
+  name: Content-Type
+  value: application/json
+  id: null
+- enabled: true
+  name: User-Agent
+  value: insomnia/11.6.1
+  id: null
+method: POST
+name: verify-email
+sortPriority: -1760017295629.25
+url: ${[base_url]}/auth/verify-email
+urlParameters: []

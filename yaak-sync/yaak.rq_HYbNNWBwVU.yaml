@@ -1,0 +1,27 @@
+type: http_request
+model: http_request
+id: rq_HYbNNWBwVU
+createdAt: 2025-10-09T13:24:31.628
+updatedAt: 2025-10-10T20:49:46.509
+workspaceId: wk_xHj4uko5i5
+folderId: fl_8prugxyg8S
+authentication: {}
+authenticationType: null
+body:
+  text: "\n\n{\n\t\"email\": \"sharqawycs@gmail.com\"\n}"
+bodyType: application/json
+description: ''
+headers:
+- enabled: true
+  name: Content-Type
+  value: application/json
+  id: null
+- enabled: true
+  name: User-Agent
+  value: insomnia/11.6.1
+  id: null
+method: POST
+name: forgot-password
+sortPriority: -1760017295623.0
+url: ${[base_url]}/auth/forgot-password
+urlParameters: []

@@ -1,0 +1,14 @@
+type: workspace
+model: workspace
+id: wk_xHj4uko5i5
+createdAt: 2025-10-09T13:14:09.258
+updatedAt: 2025-10-09T13:15:44.007
+authentication: {}
+authenticationType: null
+description: ''
+headers: []
+name: Diran AI Backend
+encryptionKeyChallenge: null
+settingValidateCertificates: true
+settingFollowRedirects: true
+settingRequestTimeout: 0

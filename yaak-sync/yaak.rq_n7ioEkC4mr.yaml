@@ -1,0 +1,27 @@
+type: http_request
+model: http_request
+id: rq_n7ioEkC4mr
+createdAt: 2025-10-10T19:31:08.048
+updatedAt: 2025-10-10T20:47:45.027
+workspaceId: wk_xHj4uko5i5
+folderId: fl_8prugxyg8S
+authentication: {}
+authenticationType: null
+body:
+  text: "\n\n{\n\t\"email\":\"sharqawycs@gmail.com\"\n}"
+bodyType: application/json
+description: ''
+headers:
+- enabled: true
+  name: Content-Type
+  value: application/json
+  id: null
+- enabled: true
+  name: User-Agent
+  value: insomnia/11.6.1
+  id: null
+method: POST
+name: resend-otp
+sortPriority: -1760017295626.125
+url: ${[base_url]}/auth/resend-otp
+urlParameters: []

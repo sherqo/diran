@@ -1,0 +1,21 @@
+type: environment
+model: environment
+id: ev_rGTwYbNZJf
+workspaceId: wk_xHj4uko5i5
+createdAt: 2025-10-09T13:14:09.277
+updatedAt: 2025-10-14T10:30:49.822
+name: Base Environment
+public: true
+base: true
+parentModel: workspace
+parentId: null
+variables:
+- enabled: true
+  name: base_url
+  value: http://localhost:4003/v1
+  id: null
+- enabled: true
+  name: remote_url
+  value: https://api.diran.app/v1
+  id: null
+color: null
