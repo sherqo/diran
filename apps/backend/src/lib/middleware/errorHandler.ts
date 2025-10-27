@@ -74,6 +74,11 @@ export const errorHandler = (error: any, _req: Request, res: Response, _next: Ne
         return;
     }
 
+    if (error instanceof SyntaxError && 'body' in error) {
+        sendError(res, 'Invalid JSON', HttpStatus.BAD_REQUEST, ErrorCode.INVALID_JSON);
+        return;
+    }
+
     // Generic errors
     sendError(res, 'Internal server error', HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.INTERNAL_ERROR);
 };
