@@ -15,20 +15,14 @@ export function validateData<T>(schema: z.ZodSchema<T>, data: unknown): ApiResul
     };
   }
 
-  // Format Zod errors into a readable error message
-  const errors: string[] = [];
-
-  for (const issue of result.error.issues) {
-    errors.push(`${issue.message}`);
-  }
-
-  const errorMessage = errors[0];
+  const details = result.error.issues.map(i => `${i.path.join('.') || 'root'}: ${i.message}`);
 
   return {
     success: false,
     error: {
-      message: errorMessage,
+      message: details[0], // dumb but keep it for backward compatibility
       code: ErrorCode.VALIDATION_ERROR,
+      details,
     },
   };
 }

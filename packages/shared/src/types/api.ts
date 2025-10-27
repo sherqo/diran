@@ -10,6 +10,7 @@ export interface ErrorResponse<T = any> {
   error: {
     message: string;
     code?: string;
+    details?: string[];
   };
 }
 
