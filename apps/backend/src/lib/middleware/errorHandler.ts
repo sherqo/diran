@@ -20,7 +20,7 @@ export class ApiError extends Error {
 }
 
 // Error handling middleware
-export const errorHandler = (error: any, req: Request, res: Response, next: NextFunction): void => {
+export const errorHandler = (error: any, _req: Request, res: Response): void => {
     // Log the error (always log in development, minimal in production)
     if (isDevelopment) {
         console.error('🚨 API Error:', {
@@ -28,9 +28,9 @@ export const errorHandler = (error: any, req: Request, res: Response, next: Next
             time: new Date().toISOString(),
             stack: error.stack,
             name: error.name,
-            url: req.url,
-            method: req.method,
-            body: req.body,
+            url: _req.url,
+            method: _req.method,
+            body: _req.body,
         });
     } else {
         console.error('🚨 API Error:', { message: error.message, time: new Date().toISOString() });
@@ -77,6 +77,6 @@ export const errorHandler = (error: any, req: Request, res: Response, next: Next
 };
 
 // 404 handler
-export const notFoundHandler = (req: Request, res: Response): void => {
+export const notFoundHandler = (_req: Request, res: Response): void => {
     sendError(res, 'Route not found', HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND);
 };
