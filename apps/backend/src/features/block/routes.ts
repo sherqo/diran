@@ -8,7 +8,7 @@ import {
     getBlockParamSchema,
     updateBlockParamSchema,
     deleteBlockParamSchema,
-} from '@diran/shared/validation/blocks.js';
+} from '@diran/shared/validation/block.js';
 import timeout from 'connect-timeout';
 /**
  * I won't add rate limiters here for now.

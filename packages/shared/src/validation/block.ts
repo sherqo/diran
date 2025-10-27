@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { BlockTypeEnum } from '../types/blocks.js';
+import { BlockTypeEnum } from '../types/block.js';
 
 const BlockTypeEnumSchema = z.enum(BlockTypeEnum);
 

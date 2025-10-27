@@ -1,4 +1,4 @@
-import { healthRoutes, authRoutes, userRoutes, blocksRoutes } from '#features';
+import { healthRoutes, authRoutes, userRoutes, blockRoutes } from '#features';
 import express, { Router } from 'express';
 
 // Create API router with all v1 routes
@@ -8,6 +8,6 @@ const apiRouter: Router = express.Router();
 apiRouter.use('/health', healthRoutes);
 apiRouter.use('/auth', authRoutes);
 apiRouter.use('/user', userRoutes);
-apiRouter.use('/blocks', blocksRoutes);
+apiRouter.use('/block', blockRoutes);
 
 export default apiRouter;
