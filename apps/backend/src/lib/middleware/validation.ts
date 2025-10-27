@@ -14,18 +14,16 @@ export const validateRequest = ({
     querySchema?: ZodSchema;
 }) => {
     return (req: Request, _res: Response, next: NextFunction): void => {
-        if (bodySchema) {
-            const result = validateData(bodySchema, req.body);
-            if (!result.success) {
-                throw new ApiError(result.error.message, HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR);
-            }
-            req.body = result.data;
-        }
-
         if (paramsSchema) {
             const result = validateData(paramsSchema, req.params);
             if (!result.success) {
-                throw new ApiError(result.error.message, HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR);
+                throw new ApiError(
+                    result.error.message,
+                    HttpStatus.BAD_REQUEST,
+                    ErrorCode.VALIDATION_ERROR,
+                    undefined,
+                    result.error.details
+                );
             }
             req.params = result.data as Record<string, string>;
         }
@@ -33,9 +31,29 @@ export const validateRequest = ({
         if (querySchema) {
             const result = validateData(querySchema, req.query);
             if (!result.success) {
-                throw new ApiError(result.error.message, HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR);
+                throw new ApiError(
+                    result.error.message,
+                    HttpStatus.BAD_REQUEST,
+                    ErrorCode.VALIDATION_ERROR,
+                    undefined,
+                    result.error.details
+                );
             }
             req.query = result.data as Record<string, string>;
+        }
+
+        if (bodySchema) {
+            const result = validateData(bodySchema, req.body);
+            if (!result.success) {
+                throw new ApiError(
+                    result.error.message,
+                    HttpStatus.BAD_REQUEST,
+                    ErrorCode.VALIDATION_ERROR,
+                    undefined,
+                    result.error.details
+                );
+            }
+            req.body = result.data;
         }
 
         next();

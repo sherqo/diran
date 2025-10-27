@@ -20,13 +20,15 @@ export const sendError = <T = any>(
     message: string,
     statusCode: number = 500,
     code?: string,
-    data?: T
+    data?: T,
+    details?: string[]
 ): Response<ErrorResponse<T>> => {
     const response: ErrorResponse<T> = {
         success: false,
         error: {
             message,
             ...(code && { code }),
+            ...(details && { details }),
         },
         ...(data !== undefined && { data }),
     };

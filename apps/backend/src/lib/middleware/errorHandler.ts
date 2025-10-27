@@ -9,18 +9,20 @@ export class ApiError extends Error {
     public status: number;
     public code?: string;
     public data?: any;
+    public details?: string[];
 
-    constructor(message: string, status: number = 500, code?: string, data?: any) {
+    constructor(message: string, status: number = 500, code?: string, data?: any, details?: string[]) {
         super(message);
         this.name = 'ApiError';
         this.status = status;
         if (code) this.code = code;
         if (data) this.data = data;
+        if (details) this.details = details;
     }
 }
 
 // Error handling middleware
-export const errorHandler = (error: any, _req: Request, res: Response, next: NextFunction): void => {
+export const errorHandler = (error: any, _req: Request, res: Response, _next: NextFunction): void => {
     // Log the error (always log in development, minimal in production)
     if (isDevelopment) {
         console.error('🚨 API Error:', {
@@ -39,7 +41,7 @@ export const errorHandler = (error: any, _req: Request, res: Response, next: Nex
     // Handle different error types
     if (error instanceof ApiError) {
         // Custom API errors - use proper response utility based on status
-        sendError(res, error.message, error.status, error.code, error.data);
+        sendError(res, error.message, error.status, error.code, error.data, error.details);
         return;
     }
 
@@ -51,7 +53,7 @@ export const errorHandler = (error: any, _req: Request, res: Response, next: Nex
 
     // Validation errors (Zod)
     if (error.name === 'ZodError') {
-        sendError(res, JSON.parse(error.message), HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR);
+        sendError(res, error.errors, HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR);
         return;
     }
 
