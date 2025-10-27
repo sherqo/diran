@@ -2,13 +2,13 @@ type: http_request
 model: http_request
 id: rq_QtgAdRvjbV
 createdAt: 2025-10-09T13:14:09.309
-updatedAt: 2025-10-14T13:04:32.454
+updatedAt: 2025-10-27T10:42:16.967647019
 workspaceId: wk_xHj4uko5i5
 folderId: fl_8prugxyg8S
 authentication: {}
 authenticationType: null
 body:
-  text: "\n\n{\n\t\"name\": \"Sherqo Diran\",\n\t\"email\": \"sharqawycs@gmail.com\",\n\t\"password\": \"sharqaywy\"\n}"
+  text: "\n\n{\n\t\"name\": \"Sherqo Diran\",\n\t\"email\": \"sharqawycsgmail.com\",\n\t\"password\": \"shaaYwy\"\n}"
 bodyType: application/json
 description: ''
 headers:

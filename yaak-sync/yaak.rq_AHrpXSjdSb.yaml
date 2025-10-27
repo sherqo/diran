@@ -2,7 +2,7 @@ type: http_request
 model: http_request
 id: rq_AHrpXSjdSb
 createdAt: 2025-10-09T13:42:03.281
-updatedAt: 2025-10-14T10:31:27.846
+updatedAt: 2025-10-27T09:31:20.384703379
 workspaceId: wk_xHj4uko5i5
 folderId: fl_6EBTzQCzod
 authentication:
@@ -24,5 +24,5 @@ headers:
 method: GET
 name: get profile
 sortPriority: -1760017335320.0
-url: ${[remote_url ]}/user/profile
+url: ${[ base_url ]}/user/profile
 urlParameters: []
