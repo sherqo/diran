@@ -38,7 +38,6 @@ enum BlockType {
 // Roles Type
 enum RoleType {
   OWNER
-  ADMIN
   EDITOR
   VIEWER
   NONE // idk why? but makes sense to have a none role :)
