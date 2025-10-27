@@ -18,6 +18,7 @@ const PORT = Number(process.env.PORT) || 4003;
 
 // Request logger middleware (only in development)
 if (isDevelopment) {
+    console.log('I AM IN DEV!!!');
     app.use(logger);
 }
 
