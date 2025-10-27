@@ -6,6 +6,12 @@ import { AuthUser } from '@diran/shared/types/auth';
 
 export interface AuthenticatedRequest extends Request {
     user?: AuthUser;
+
+    // permissions added by permission middleware(s)
+    permissions?: {
+        canRead: boolean;
+        canWrite: boolean;
+    };
 }
 
 export const authenticate = async (req: AuthenticatedRequest, _res: Response, next: NextFunction): Promise<void> => {
