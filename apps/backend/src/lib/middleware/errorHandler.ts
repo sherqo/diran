@@ -20,7 +20,7 @@ export class ApiError extends Error {
 }
 
 // Error handling middleware
-export const errorHandler = (error: any, _req: Request, res: Response): void => {
+export const errorHandler = (error: any, _req: Request, res: Response, next: NextFunction): void => {
     // Log the error (always log in development, minimal in production)
     if (isDevelopment) {
         console.error('🚨 API Error:', {
