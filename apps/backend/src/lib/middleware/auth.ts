@@ -8,7 +8,7 @@ export interface AuthenticatedRequest extends Request {
     user?: AuthUser;
 }
 
-export const authenticate = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+export const authenticate = async (req: AuthenticatedRequest, _res: Response, next: NextFunction): Promise<void> => {
     const token = req.cookies.accessToken;
 
     if (!token) {
