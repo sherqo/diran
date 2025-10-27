@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { validateRequest as vr } from '#lib/middleware/validation.js';
-import { authenticate } from '#lib/middleware/auth.js';
-//! permission middlewares can and MUST be added here
+import { authenticate as auth } from '#lib/middleware/auth.js';
+import { validatePermission as perm } from './middlewares.js';
 import { createBlock, getBlock, updateBlock, deleteBlock } from './controller.js';
 import {
     createBlockBodySchema,
@@ -9,7 +9,7 @@ import {
     updateBlockParamSchema,
     deleteBlockParamSchema,
 } from '@diran/shared/validation/block.js';
-import timeout from 'connect-timeout';
+import to from 'connect-timeout';
 /**
  * I won't add rate limiters here for now.
  * Blocks operations happens a lot
@@ -19,14 +19,14 @@ import timeout from 'connect-timeout';
 
 const router: Router = Router();
 
-router.use(timeout('10s')); // i do not think block operations should take more than few seconds
+// ngl, a skill issue to decide what is the right order for middlewares
 
 // All block routes require authentication
-router.use(authenticate);
+router.post('/', to('5s'), vr({ bodySchema: createBlockBodySchema }), auth, createBlock);
 
-router.post('/', vr({ bodySchema: createBlockBodySchema }), createBlock);
-router.get('/:id', vr({ paramsSchema: getBlockParamSchema }), getBlock); // need to change this
-router.put('/:id', vr({ paramsSchema: updateBlockParamSchema }), updateBlock);
-router.delete('/:id', vr({ paramsSchema: deleteBlockParamSchema }), deleteBlock);
+router.use(to('4s')); // less risky than creation
+router.get('/:id', vr({ paramsSchema: getBlockParamSchema }), auth, perm, getBlock);
+router.put('/:id', vr({ paramsSchema: updateBlockParamSchema }), auth, perm, updateBlock);
+router.delete('/:id', vr({ paramsSchema: deleteBlockParamSchema }), auth, perm, deleteBlock);
 
 export default router;

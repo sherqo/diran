@@ -5,8 +5,7 @@ import { db } from '#lib/database/connection';
 import { sendSuccess } from '#lib/utils/response';
 import { ApiError } from '#lib/middleware/errorHandler';
 import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors';
-
-// ====== Just placeholders for now ======
+import { ActorType, EntityType, RoleType } from '@prisma/client';
 
 // CREATE
 const createBlock = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
@@ -27,14 +26,17 @@ const createBlock = async (req: AuthenticatedRequest, res: Response): Promise<vo
      * i wanna be nice, i'm a nice man, i'm nice :)
      */
 
+    // TODO: check on the order uniqueness under the same parentId
+
     const { type, parentId, order, content } = req.body as CreateBlockBodyInput; // all basic validation are already done
 
+    // Creating the block
     const created = await db.block.create({
         data: {
             type,
             parentId: parentId ?? null,
             order,
-            content,
+            content, // THE TYPE, i'm just, AHHHH >_<
         },
         select: {
             id: true,
@@ -57,9 +59,32 @@ const createBlock = async (req: AuthenticatedRequest, res: Response): Promise<vo
         updatedAt: created.updatedAt.toISOString(),
     };
 
+    // Assinging the permission to the creator as OWNER
+    const perm = await db.permission.create({
+        data: {
+            actorId: req.user!.id,
+            actorType: ActorType.USER,
+            entityId: created.id,
+            entityType: EntityType.BLOCK,
+            role: RoleType.OWNER,
+        },
+    });
+
+    if (!perm) {
+        // my db bill sucks :(
+        await db.block.delete({ where: { id: created.id } });
+        throw new ApiError(
+            'Failed to assign permission to the block creator',
+            HttpStatus.INTERNAL_SERVER_ERROR,
+            ErrorCode.PERMISSION_ASSIGNMENT_FAILED
+        );
+    }
+
     const data = { block };
-    sendSuccess(res, data, 'Block created successfully', 201);
+    sendSuccess(res, data, 'Block created successfully', HttpStatus.CREATED);
 };
+
+// ====== Just placeholder(s) for now ======
 
 // READ
 const getBlock = async (req: AuthenticatedRequest, res: Response): Promise<void> => {

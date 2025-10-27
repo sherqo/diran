@@ -2,13 +2,13 @@ type: http_request
 model: http_request
 id: rq_TH4mnLWU7Y
 createdAt: 2025-10-09T13:22:59.413
-updatedAt: 2025-10-27T09:32:58.208659150
+updatedAt: 2025-10-27T12:30:41.447173384
 workspaceId: wk_xHj4uko5i5
 folderId: fl_8prugxyg8S
 authentication: {}
 authenticationType: null
 body:
-  text: "\n\n{\n\t\"email\": \"sharqawycs@gmail.com\",\n\t\"password\": \"\"\n\n}"
+  text: "\n\n{\n\t\"email\": \"sharqawycs@gmail.com\",\n\t\"password\": \"Shar2awy#\"\n\n}"
 bodyType: application/json
 description: ''
 headers:

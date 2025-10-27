@@ -1,5 +1,12 @@
 // Standard HTTP status codes for API errors
 export enum HttpStatus {
+  // not errors but, keep them for now >_<
+  OK = 200,
+  CREATED = 201,
+  ACCEPTED = 202,
+  NO_CONTENT = 204,
+
+  // errors
   BAD_REQUEST = 400,
   UNAUTHORIZED = 401,
   FORBIDDEN = 403,
@@ -52,5 +59,7 @@ export enum ErrorCode {
 
   NETWORK_ERROR = 'NETWORK_ERROR',
   TIMEOUT = 'TIMEOUT',
+
   PERMISSION_DENIED = 'PERMISSION_DENIED',
+  PERMISSION_ASSIGNMENT_FAILED = 'PERMISSION_ASSIGNMENT_FAILED',
 }
