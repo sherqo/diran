@@ -13,9 +13,9 @@ export const createBlockBodySchema = z
   })
   .refine(
     data => {
-      // If type is "PAGE", parentId must be undefined.
+      // If type is "PAGE", parentId must be undefined. -> this is wrong!
       // If not "PAGE", parentId must exist.
-      if (data.type === BlockTypeEnum.PAGE) return data.parentId === undefined;
+      // if (data.type === BlockTypeEnum.PAGE) return data.parentId === undefined;
       return typeof data.parentId === 'string' && data.parentId.trim() !== '';
     },
     {
