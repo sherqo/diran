@@ -5,7 +5,7 @@ import { db } from '#lib/database/connection';
 import { sendSuccess } from '#lib/utils/response';
 import { ApiError } from '#lib/middleware/errorHandler';
 import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors';
-import { ActorType, EntityType, RoleType } from '@prisma/client';
+import { BlockType, ActorType, EntityType, RoleType } from '@prisma/client';
 
 // CREATE
 const createBlock = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
@@ -26,62 +26,98 @@ const createBlock = async (req: AuthenticatedRequest, res: Response): Promise<vo
      * i wanna be nice, i'm a nice man, i'm nice :)
      */
 
-    // TODO: check on the order uniqueness under the same parentId
+    // TODO: check on the order uniqueness under the same parentId, done by the DB, just check the error and throw a proper one
+    // Your Creation just sucks, what is the difference between creating pages or blocks? where to add to the db
+    // should we even still treat pages as blocks? yes
+    // how to handle permissions for both creation pages or blocks? no permissoin for blocks, pages only for now
+    // how do you check the parentId validity? i think handled by the foreign key in the db
+    // a lot of Qs here, just do not suck!!
+    // the perm depending on who?? being page or not? or having parentId or not?
+    // imagine a page inside a page and wanna move the inner page, how to handle that? FOCUSSSSS
 
-    const { type, parentId, order, content } = req.body as CreateBlockBodyInput; // all basic validation are already done
+    /**
+     * the options:
+     *   1. adding a page with no parent, no permission needed, add permission to the creator as OWNER
+     *   2. adding a page with a parent, permission needed on the parent, no permission will added to the new page
+     *   3. adding a block with a parent, permission needed on the parent, no permission will added to the new block
+     *
+     * so, simply:
+     *    - if the block (or page) has a parentId, no permission row (inherited)
+     *    - if the block is a PAGE and has no parentId, add permission to the creator as OWNER (can be shared as well)
+     */
 
-    // Creating the block
-    const created = await db.block.create({
-        data: {
-            type,
-            parentId: parentId ?? null,
-            order,
-            content, // THE TYPE, i'm just, AHHHH >_<
-        },
-        select: {
-            id: true,
-            type: true,
-            parentId: true,
-            order: true,
-            content: true,
-            createdAt: true,
-            updatedAt: true,
-        },
-    });
+    /**
+     * i am sure if the type is not PAGE, parentId is defined
+     * so, if the type is PAGE, we should check if parentId is defined or not
+     */
 
-    const block = {
-        id: created.id,
-        type: created.type,
-        parentId: created.parentId,
-        order: created.order,
-        content: created.content,
-        createdAt: created.createdAt.toISOString(),
-        updatedAt: created.updatedAt.toISOString(),
-    };
+    const { type, parentId, order, content } = req.body as CreateBlockBodyInput;
 
-    // Assinging the permission to the creator as OWNER
-    const perm = await db.permission.create({
-        data: {
-            actorId: req.user!.id,
-            actorType: ActorType.USER,
-            entityId: created.id,
-            entityType: EntityType.BLOCK,
-            role: RoleType.OWNER,
-        },
-    });
+    try {
+        const result = await db.$transaction(async tx => {
+            // Creating the block with creatorId
+            const created = await tx.block.create({
+                data: {
+                    type,
+                    parentId: parentId ?? null,
+                    order,
+                    content,
+                    // creatorId: req.user!.id, // we may add it later
+                },
+                select: {
+                    id: true,
+                    type: true,
+                    parentId: true,
+                    order: true,
+                    content: true,
+                    createdAt: true,
+                    updatedAt: true,
+                },
+            });
 
-    if (!perm) {
-        // my db bill sucks :(
-        await db.block.delete({ where: { id: created.id } });
-        throw new ApiError(
-            'Failed to assign permission to the block creator',
-            HttpStatus.INTERNAL_SERVER_ERROR,
-            ErrorCode.PERMISSION_ASSIGNMENT_FAILED
-        );
+            const block = {
+                id: created.id,
+                type: created.type,
+                parentId: created.parentId,
+                order: created.order,
+                content: created.content,
+                createdAt: created.createdAt.toISOString(),
+                updatedAt: created.updatedAt.toISOString(),
+            };
+
+            const needsPermissionAssignment = type === BlockType.PAGE && !parentId;
+
+            if (needsPermissionAssignment) {
+                // Create permission within the same transaction
+                await tx.permission.create({
+                    data: {
+                        actorId: req.user!.id,
+                        actorType: ActorType.USER,
+                        entityId: created.id,
+                        entityType: EntityType.BLOCK,
+                        role: RoleType.OWNER,
+                    },
+                });
+            }
+
+            return { block, needsPermissionAssignment };
+        });
+
+        const message = result.needsPermissionAssignment ? 'Parent block created successfully' : 'Children block created successfully';
+
+        sendSuccess(res, { block: result.block }, message, HttpStatus.CREATED);
+    } catch (error: any) {
+        // Handle specific database errors
+        if (error.code === 'P2002' && error.meta?.target?.includes('order')) {
+            throw new ApiError('A block with this order already exists in the same parent', HttpStatus.CONFLICT, ErrorCode.DUPLICATE_ORDER);
+        }
+
+        if (error.code === 'P2003' && error.meta?.field_name === 'parentId') {
+            throw new ApiError('Parent block not found', HttpStatus.BAD_REQUEST, ErrorCode.INVALID_PARENT_ID);
+        }
+
+        throw new ApiError('Failed to create block', HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.DATABASE_ERROR);
     }
-
-    const data = { block };
-    sendSuccess(res, data, 'Block created successfully', HttpStatus.CREATED);
 };
 
 // ====== Just placeholder(s) for now ======
