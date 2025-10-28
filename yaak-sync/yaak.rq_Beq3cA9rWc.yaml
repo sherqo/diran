@@ -2,7 +2,7 @@ type: http_request
 model: http_request
 id: rq_Beq3cA9rWc
 createdAt: 2025-10-09T16:14:17.245
-updatedAt: 2025-10-27T07:01:58.194624964
+updatedAt: 2025-10-28T11:30:26.928550984
 workspaceId: wk_xHj4uko5i5
 folderId: fl_iPVC7rgeH5
 authentication: {}
@@ -18,5 +18,5 @@ headers:
 method: GET
 name: health
 sortPriority: -1760026457245.0
-url: https://api.diran.app/v1/health
+url: ${[ base_url ]}/health
 urlParameters: []

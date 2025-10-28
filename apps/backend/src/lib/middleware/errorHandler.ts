@@ -1,8 +1,8 @@
 import { sendError } from '#lib/utils/response';
 import { Request, Response, NextFunction } from 'express';
-
 import { isDevelopment } from '#lib/utils/common';
 import { HttpStatus, ErrorCode } from '@diran/shared/constants/errors';
+import { Prisma } from '@prisma/client';
 
 // Custom error class for API errors
 export class ApiError extends Error {
@@ -45,10 +45,8 @@ export const errorHandler = (error: any, _req: Request, res: Response, _next: Ne
         return;
     }
 
-    // Prisma errors
-    if (error.name === 'PrismaClientKnownRequestError') {
-        sendError(res, 'Database error', HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.DATABASE_ERROR);
-        return;
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        return handlePrismaError(error, _req, res, _next);
     }
 
     // Validation errors (Zod)
@@ -82,6 +80,43 @@ export const errorHandler = (error: any, _req: Request, res: Response, _next: Ne
     // Generic errors
     sendError(res, 'Internal server error', HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.INTERNAL_ERROR);
 };
+
+// Map a Prisma error code prefix / exact code to status + message
+const prismaErrorMap: Record<string, { status: number; code: string; message: string }> = {
+    // Unique constraint violation
+    P2002: { status: HttpStatus.CONFLICT, code: ErrorCode.DUPLICATE_RESOURCE, message: 'Duplicate value violates unique constraint' },
+    // Foreign key violation
+    P2003: { status: HttpStatus.BAD_REQUEST, code: ErrorCode.INVALID_INPUT, message: 'Foreign key constraint failed' },
+    // Record not found
+    P2025: { status: HttpStatus.NOT_FOUND, code: ErrorCode.NOT_FOUND, message: 'Record not found' },
+    // Invalid ID / argument
+    P2014: { status: HttpStatus.BAD_REQUEST, code: ErrorCode.INVALID_INPUT, message: 'Invalid ID or relation' },
+    // Generic known request error fallback
+    // etc — include more as needed
+};
+
+export function handlePrismaError(error: unknown, req: Request, res: Response, next: NextFunction): void {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        const meta = (error.meta ?? {}) as any;
+        const target = Array.isArray(meta.target) ? meta.target.join(', ') : meta.field_name || 'unknown field';
+
+        const entry = prismaErrorMap[error.code] || {
+            status: HttpStatus.INTERNAL_SERVER_ERROR,
+            code: ErrorCode.DATABASE_ERROR,
+            message: `Database error (${error.code}) on ${target}`,
+        };
+
+        // Log in dev
+        if (isDevelopment) {
+            console.error('Prisma error details:', { code: error.code, target, meta, stack: error.stack });
+        }
+
+        sendError(res, entry.message, entry.status, entry.code);
+        return;
+    }
+    // Not a PrismaClientKnownRequestError → pass through
+    next(error);
+}
 
 // 404 handler
 export const notFoundHandler = (_req: Request, res: Response): void => {

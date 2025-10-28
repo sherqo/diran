@@ -2,7 +2,7 @@ type: http_request
 model: http_request
 id: rq_L8EoQkibLU
 createdAt: 2025-10-10T14:04:33.524
-updatedAt: 2025-10-14T10:37:19.973
+updatedAt: 2025-10-28T11:46:56.347883243
 workspaceId: wk_xHj4uko5i5
 folderId: fl_8prugxyg8S
 authentication: {}
@@ -18,5 +18,5 @@ headers:
 method: POST
 name: refresh
 sortPriority: -1760017295548.0
-url: ${[remote_url ]}/auth/refresh
+url: ${[ base_url ]}/auth/refresh
 urlParameters: []
