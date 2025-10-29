@@ -96,7 +96,7 @@ model Block {
   children Block[] @relation("BlockToChildren") // relationship (not real)
   order    Int // order among brothers
 
-  content Json // content varies by block type, stored as JSON, will be checked/validated in the applicatioin 
+  content Json @db.JsonB // content varies by block type, stored as JSON, will be checked/validated in the applicatioin 
 
   // Timestamps
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
