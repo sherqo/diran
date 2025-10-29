@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { AuthenticatedRequest } from '#lib/middleware/auth';
-import { CreateBlockBodyInput, GetBlockParamInput, UpdateBlockParamInput, DeleteBlockParamInput } from '@diran/shared/validation/blocks';
+import { CreateBlockBodyInput, GetBlockParamInput, UpdateBlockParamInput, DeleteBlockParamInput } from '@diran/shared/validation/block';
 import { db } from '#lib/database/connection';
 import { sendSuccess } from '#lib/utils/response';
 import { ApiError } from '#lib/middleware/errorHandler';
@@ -51,73 +51,61 @@ const createBlock = async (req: AuthenticatedRequest, res: Response): Promise<vo
      * so, if the type is PAGE, we should check if parentId is defined or not
      */
 
-    const { type, parentId, order, content } = req.body as CreateBlockBodyInput;
+    // i won't remove any of the comments, they are gold :D
 
-    try {
-        const result = await db.$transaction(async tx => {
-            // Creating the block with creatorId
-            const created = await tx.block.create({
-                data: {
-                    type,
-                    parentId: parentId ?? null,
-                    order,
-                    content,
-                    // creatorId: req.user!.id, // we may add it later
-                },
-                select: {
-                    id: true,
-                    type: true,
-                    parentId: true,
-                    order: true,
-                    content: true,
-                    createdAt: true,
-                    updatedAt: true,
-                },
-            });
+    const { type, parentId, order, content }: CreateBlockBodyInput = req.body;
 
-            const block = {
-                id: created.id,
-                type: created.type,
-                parentId: created.parentId,
-                order: created.order,
-                content: created.content,
-                createdAt: created.createdAt.toISOString(),
-                updatedAt: created.updatedAt.toISOString(),
-            };
-
-            const needsPermissionAssignment = type === BlockType.PAGE && !parentId;
-
-            if (needsPermissionAssignment) {
-                // Create permission within the same transaction
-                await tx.permission.create({
-                    data: {
-                        actorId: req.user!.id,
-                        actorType: ActorType.USER,
-                        entityId: created.id,
-                        entityType: EntityType.BLOCK,
-                        role: RoleType.OWNER,
-                    },
-                });
-            }
-
-            return { block, needsPermissionAssignment };
+    const result = await db.$transaction(async tx => {
+        // Creating the block
+        const created = await tx.block.create({
+            data: {
+                type,
+                parentId: parentId ?? null,
+                order,
+                content,
+                // creatorId: req.user!.id, // TODO: we may need?
+            },
+            select: {
+                id: true,
+                type: true,
+                parentId: true,
+                order: true,
+                content: true,
+                createdAt: true,
+                updatedAt: true,
+            },
         });
 
-        const message = result.needsPermissionAssignment ? 'Parent block created successfully' : 'Children block created successfully';
+        const block = {
+            id: created.id,
+            type: created.type,
+            parentId: created.parentId,
+            order: created.order,
+            content: created.content,
+            createdAt: created.createdAt.toISOString(),
+            updatedAt: created.updatedAt.toISOString(),
+        };
 
-        sendSuccess(res, { block: result.block }, message, HttpStatus.CREATED);
-    } catch (error: any) {
-        // Handle specific database errors
-        if (error.code === 'P2002' && error.meta?.target?.includes('order')) {
-            throw new ApiError('A block with this order already exists in the same parent', HttpStatus.CONFLICT, ErrorCode.DUPLICATE_ORDER);
+        const needsPermissionAssignment = type === BlockType.PAGE && !parentId;
+
+        if (needsPermissionAssignment) {
+            await tx.permission.create({
+                data: {
+                    actorId: req.user!.id,
+                    actorType: ActorType.USER,
+                    entityId: created.id,
+                    entityType: EntityType.BLOCK,
+                    role: RoleType.OWNER,
+                },
+            });
         }
 
-        if (error.code === 'P2003' && error.meta?.field_name === 'parentId') {
-            throw new ApiError('Parent block not found', HttpStatus.BAD_REQUEST, ErrorCode.INVALID_PARENT_ID);
-        }
+        return { block, needsPermissionAssignment };
+    });
 
-        throw new ApiError('Failed to create block', HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.DATABASE_ERROR);
-    }
+    const message = result.needsPermissionAssignment ? 'Parent block created successfully' : 'Children block created successfully';
+
+    sendSuccess(res, { block: result.block }, message, HttpStatus.CREATED); // TODO: should i return the block?
 };
 
 // ====== Just placeholder(s) for now ======

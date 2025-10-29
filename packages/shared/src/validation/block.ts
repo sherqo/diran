@@ -8,7 +8,7 @@ export const createBlockBodySchema = z
     // i need a full block here but without id, createdAt, updatedAt
     type: BlockTypeEnumSchema,
     parentId: z.uuid().optional().nullable(),
-    order: z.number(), // a lot of Qs here...
+    order: z.string().min(1).max(100), // a lot of Qs here...
     content: z.record(z.string(), z.any()),
   })
   .refine(
@@ -34,7 +34,7 @@ export const updateBlockParamSchema = z.object({
   // same block but optional
   type: BlockTypeEnumSchema.optional(),
   parentId: z.uuid().nullable().optional(),
-  order: z.number().optional(),
+  order: z.string().min(1).max(100), // a lot of Qs here...
   content: z.record(z.string(), z.any()).optional(),
 });
 
