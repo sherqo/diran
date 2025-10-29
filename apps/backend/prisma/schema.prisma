@@ -94,7 +94,7 @@ model Block {
   parentId String? @map("parent_id") @db.Uuid // All has parents, except root blocks (pages)
   parent   Block?  @relation("BlockToChildren", fields: [parentId], references: [id]) // relationship (not real)
   children Block[] @relation("BlockToChildren") // relationship (not real)
-  order    Int // order among brothers
+  order    String  // order among brothers - to string for fractoinal indexing like "a", "b", "ac"
 
   content Json @db.JsonB // content varies by block type, stored as JSON, will be checked/validated in the applicatioin 
 
