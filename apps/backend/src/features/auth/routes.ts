@@ -16,17 +16,17 @@ export async function registerAuthRoutes(fastify: FastifyInstance): Promise<void
     // Fastify automatically handles async errors, no need for wrapper
 
     // Public routes with specific rate limiting
-    fastify.post('/v1/auth/refresh', {
+    fastify.post('/auth/refresh', {
         handler: refresh,
     });
 
     await fastify.register(async fastify => {
         await fastify.register(fastifyRateLimit, rl.login);
-        fastify.post('/v1/auth/signup', {
+        fastify.post('/auth/signup', {
             preHandler: vr({ bodySchema: signupBodySchema }),
             handler: signup,
         });
-        fastify.post('/v1/auth/login', {
+        fastify.post('/auth/login', {
             preHandler: vr({ bodySchema: loginBodySchema }),
             handler: login,
         });
@@ -34,11 +34,11 @@ export async function registerAuthRoutes(fastify: FastifyInstance): Promise<void
 
     await fastify.register(async fastify => {
         await fastify.register(fastifyRateLimit, rl.resetPassword);
-        fastify.post('/v1/auth/forgot-password', {
+        fastify.post('/auth/forgot-password', {
             preHandler: vr({ bodySchema: forgotPasswordBodySchema }),
             handler: forgotPassword,
         });
-        fastify.post('/v1/auth/reset-password', {
+        fastify.post('/auth/reset-password', {
             preHandler: vr({ bodySchema: resetPasswordBodySchema }),
             handler: resetPassword,
         });
@@ -46,7 +46,7 @@ export async function registerAuthRoutes(fastify: FastifyInstance): Promise<void
 
     await fastify.register(async fastify => {
         await fastify.register(fastifyRateLimit, rl.otp);
-        fastify.post('/v1/auth/verify-email', {
+        fastify.post('/auth/verify-email', {
             preHandler: vr({ bodySchema: verifyEmailBodySchema }),
             handler: verifyEmail,
         });
@@ -54,13 +54,13 @@ export async function registerAuthRoutes(fastify: FastifyInstance): Promise<void
 
     await fastify.register(async fastify => {
         await fastify.register(fastifyRateLimit, rl.resendOTP);
-        fastify.post('/v1/auth/resend-otp', {
+        fastify.post('/auth/resend-otp', {
             preHandler: vr({ bodySchema: resendOTPBodySchema }),
             handler: resendOTP,
         });
     });
 
-    fastify.post('/v1/auth/logout', {
+    fastify.post('/auth/logout', {
         handler: logout,
     });
 }

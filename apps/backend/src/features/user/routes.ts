@@ -8,7 +8,7 @@ import { profileRateLimiter as rl } from '#lib/middleware/rateLimiter.js';
 
 export async function registerUserRoutes(fastify: FastifyInstance): Promise<void> {
     // All user routes require authentication
-    fastify.get('/v1/user/profile', {
+    fastify.get('/user/profile', {
         preHandler: authenticate,
         handler: getProfile,
     });
@@ -17,7 +17,7 @@ export async function registerUserRoutes(fastify: FastifyInstance): Promise<void
     await fastify.register(async fastify => {
         await fastify.register(fastifyRateLimit, rl.updateProfile);
 
-        fastify.patch('/v1/user/profile', {
+        fastify.patch('/user/profile', {
             preHandler: [vr({ bodySchema: updateProfileSchema }), authenticate],
             handler: updateProfile,
         });
@@ -27,7 +27,7 @@ export async function registerUserRoutes(fastify: FastifyInstance): Promise<void
     await fastify.register(async fastify => {
         await fastify.register(fastifyRateLimit, rl.changePassword);
 
-        fastify.post('/v1/user/change-password', {
+        fastify.post('/user/change-password', {
             preHandler: [vr({ bodySchema: changePasswordSchema }), authenticate],
             handler: changePassword,
         });

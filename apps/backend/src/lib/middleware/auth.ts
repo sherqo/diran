@@ -15,15 +15,9 @@ export interface AuthenticatedRequest extends FastifyRequest {
 }
 
 export const authenticate: preHandlerHookHandler = async (req: FastifyRequest, _reply: FastifyReply): Promise<void> => {
-    console.log('🍪 All cookies:', req.cookies);
-    console.log('🍪 Cookie header:', req.headers.cookie);
-    console.log('🍪 Has cookies property?', 'cookies' in req);
-    console.log('🍪 Cookies type:', typeof req.cookies);
-
     const token = req.cookies?.accessToken;
 
     if (!token) {
-        console.log('❌ No access token found in cookies');
         throw new ApiError('Access token required', HttpStatus.UNAUTHORIZED, ErrorCode.ACCESS_TOKEN_REQUIRED);
     }
 

@@ -19,16 +19,15 @@ const getCommonCookieOptions = () => {
     return options;
 };
 
+const accessTokenPath = '/';
 const refreshTokenPath = '/v1/auth/refresh';
 
 const setAccessTokenCookie = (reply: FastifyReply, token: string): void => {
-    const options = {
+    reply.setCookie('accessToken', token, {
         ...getCommonCookieOptions(),
-        maxAge: ms(JWT_ACCESS_EXPIRES_IN as ms.StringValue), // maxAge in milliseconds
-        path: '/', // Make cookie available to all routes
-    };
-    console.log('🍪 Setting accessToken cookie with options:', options);
-    reply.setCookie('accessToken', token, options);
+        maxAge: ms(JWT_ACCESS_EXPIRES_IN as ms.StringValue),
+        path: accessTokenPath, // Make cookie available to all routes
+    });
 };
 
 const setRefreshTokenCookie = (reply: FastifyReply, token: string): void => {
@@ -42,7 +41,7 @@ const setRefreshTokenCookie = (reply: FastifyReply, token: string): void => {
 const clearAuthCookies = (reply: FastifyReply): void => {
     reply.clearCookie('accessToken', {
         ...getCommonCookieOptions(),
-        path: '/', // Must match the path used when setting
+        path: accessTokenPath, // Must match the path used when setting
     });
     reply.clearCookie('refreshToken', {
         ...getCommonCookieOptions(),

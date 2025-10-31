@@ -59,12 +59,16 @@ async function setupPlugins() {
 
 // Register routes
 async function setupRoutes() {
-    // Register routes directly on app with prefix
-    // This ensures they have access to cookie parser and other plugins
-    await registerAuthRoutes(app);
-    await registerHealthRoutes(app);
-    await registerUserRoutes(app);
-    await registerBlockRoutes(app);
+    // All routes automatically get /v1 prefix
+    await app.register(
+        async (fastify) => {
+            await registerAuthRoutes(fastify);
+            await registerHealthRoutes(fastify);
+            await registerUserRoutes(fastify);
+            await registerBlockRoutes(fastify);
+        },
+        { prefix: '/v1' }
+    );
 }
 
 // Graceful shutdown
