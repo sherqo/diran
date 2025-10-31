@@ -6,6 +6,7 @@ import fastifyRateLimit from '@fastify/rate-limit';
 import fastifyCompress from '@fastify/compress';
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
+import fastifyUnderPressure from '@fastify/under-pressure';
 import dotenv from 'dotenv';
 import { serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
 import { db } from '#lib/database/connection';
@@ -57,6 +58,16 @@ async function setupPlugins() {
     // Cookie parser MUST be registered first before other plugins
     // This is critical for cookie parsing to work
     await app.register(fastifyCookie);
+
+    // Under pressure - detect server overload
+    await app.register(fastifyUnderPressure, {
+        maxEventLoopDelay: 8000, // 8s, Railway CPUs can lag easily
+        maxHeapUsedBytes: 256 * 1024 * 1024, // 256MB
+        maxRssBytes: 512 * 1024 * 1024, // 512MB
+        retryAfter: 5, // seconds
+        message: 'SERVER_NUKED',
+        exposeStatusRoute: '/health',
+    });
 
     // Response compression (gzip/brotli)
     await app.register(fastifyCompress, {
