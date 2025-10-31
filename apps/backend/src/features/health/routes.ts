@@ -4,7 +4,7 @@ import { healthCheckRateLimiterConfig as rl } from '#lib/middleware/rateLimiter'
 import { getHealth } from './controller';
 
 export async function registerHealthRoutes(fastify: FastifyInstance): Promise<void> {
-    fastify.get('/health', {
+    fastify.get('/', {
         handler: getHealth,
     });
 }
