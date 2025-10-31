@@ -4,6 +4,7 @@ import fastifyHelmet from '@fastify/helmet';
 import fastifyCookie from '@fastify/cookie';
 import fastifyRateLimit from '@fastify/rate-limit';
 import dotenv from 'dotenv';
+import { serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
 import { db } from '#lib/database/connection';
 import { isDevelopment, logStartup } from '#lib/utils/common';
 import { errorHandler, notFoundHandler } from '#lib/middleware/errorHandler';
@@ -15,11 +16,15 @@ dotenv.config({ debug: isDevelopment });
 
 const PORT = Number(process.env.PORT) || 4003;
 
-// Create Fastify instance
+// Create Fastify instance with Zod type provider for native performance
 const app = Fastify({
-    logger: isDevelopment, // built-in logger
+    logger: isDevelopment,
     bodyLimit: 10485760, // 10MB in bytes
-});
+}).withTypeProvider<ZodTypeProvider>();
+
+// Set Zod validators for automatic schema validation
+app.setValidatorCompiler(validatorCompiler);
+app.setSerializerCompiler(serializerCompiler);
 
 // Register plugins
 async function setupPlugins() {

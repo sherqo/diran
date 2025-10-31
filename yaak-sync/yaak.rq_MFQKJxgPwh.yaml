@@ -2,14 +2,14 @@ type: http_request
 model: http_request
 id: rq_MFQKJxgPwh
 createdAt: 2025-10-09T14:11:32.777
-updatedAt: 2025-10-10T20:53:57.882
+updatedAt: 2025-10-31T19:01:40.318186281
 workspaceId: wk_xHj4uko5i5
 folderId: fl_6EBTzQCzod
 authentication:
   token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJiMTQ1YzdhYi1jODNjLTRjNWEtODI3OC1hOGU2NzFmZDZiODMiLCJpYXQiOjE3NjAwMjAwNjMsImV4cCI6MTc2MDYyNDg2M30.-G2eiCNc3XVaZIreJGCbFjkwIG1L_GTDkIG52XR0TI8
 authenticationType: bearer
 body:
-  text: "\n\n{\n\t\"currentPassword\": \"theloveyou\",\n\t\"newPassword\": \"shar2awy#\"\n}"
+  text: "\n\n{\n\t\"currentPassword\": \"theloveyou\",\n\t\"newPassword\": \"d\"\n}"
 bodyType: application/json
 description: ''
 headers:

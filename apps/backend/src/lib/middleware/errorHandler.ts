@@ -52,7 +52,18 @@ export const errorHandler = (error: FastifyError | any, request: FastifyRequest,
 
     // Validation errors (Zod)
     if (error.name === 'ZodError') {
-        sendError(reply, error.errors, HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR);
+        const details = error.errors?.map((err: any) => `${err.path.join('.')}: ${err.message}`) || [];
+        sendError(reply, 'Validation error', HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR, undefined, details);
+        return;
+    }
+
+    // Fastify validation errors (from Zod type provider)
+    if (error.validation) {
+        const details = error.validation.map((err: any) => {
+            const path = err.instancePath?.replace(/^\//, '').replace(/\//g, '.') || err.params?.issue?.path?.join('.') || 'unknown';
+            return `${path}: ${err.message}`;
+        });
+        sendError(reply, 'Validation error', HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR, undefined, details);
         return;
     }
 
@@ -67,15 +78,15 @@ export const errorHandler = (error: FastifyError | any, request: FastifyRequest,
         return;
     }
 
-    // Timeout errors
-    if (error.code === 'ETIMEDOUT' || error.message === 'Request timeout') {
-        sendError(reply, 'Request timeout, please try again later', HttpStatus.REQUEST_TIMEOUT, ErrorCode.TIMEOUT);
+    // Rate limit errors
+    if (error.statusCode === 429 || error.code === 'FST_ERR_RATE_LIMIT') {
+        sendError(reply, 'Too many requests, please try again later', HttpStatus.TOO_MANY_REQUESTS, ErrorCode.TOO_MANY_REQUESTS);
         return;
     }
 
-    // Fastify validation errors
-    if (error.validation) {
-        sendError(reply, 'Validation error', HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR, undefined, error.validation);
+    // Timeout errors
+    if (error.code === 'ETIMEDOUT' || error.message === 'Request timeout') {
+        sendError(reply, 'Request timeout, please try again later', HttpStatus.REQUEST_TIMEOUT, ErrorCode.TIMEOUT);
         return;
     }
 

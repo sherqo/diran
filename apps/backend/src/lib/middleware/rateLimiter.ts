@@ -1,7 +1,5 @@
 import type { RateLimitPluginOptions } from '@fastify/rate-limit';
 
-const responseMessage = { success: false, error: { message: 'Too many requests, please try again later.' } };
-
 export const globalRateLimiterConfig: RateLimitPluginOptions = {
     max: 100,
     timeWindow: '1 minute',
