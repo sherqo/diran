@@ -11,11 +11,11 @@ const getCommonCookieOptions = () => {
         secure: !isDevelopment,
         sameSite: isDevelopment ? 'lax' : 'none',
     };
-    
+
     if (!isDevelopment && process.env.COOKIE_DOMAIN) {
         options.domain = process.env.COOKIE_DOMAIN;
     }
-    
+
     return options;
 };
 

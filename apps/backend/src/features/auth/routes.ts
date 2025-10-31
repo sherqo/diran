@@ -14,13 +14,13 @@ import {
 
 export async function registerAuthRoutes(fastify: FastifyInstance): Promise<void> {
     // Fastify automatically handles async errors, no need for wrapper
-    
+
     // Public routes with specific rate limiting
     fastify.post('/v1/auth/refresh', {
         handler: refresh,
     });
 
-    await fastify.register(async (fastify) => {
+    await fastify.register(async fastify => {
         await fastify.register(fastifyRateLimit, rl.login);
         fastify.post('/v1/auth/signup', {
             preHandler: vr({ bodySchema: signupBodySchema }),
@@ -32,7 +32,7 @@ export async function registerAuthRoutes(fastify: FastifyInstance): Promise<void
         });
     });
 
-    await fastify.register(async (fastify) => {
+    await fastify.register(async fastify => {
         await fastify.register(fastifyRateLimit, rl.resetPassword);
         fastify.post('/v1/auth/forgot-password', {
             preHandler: vr({ bodySchema: forgotPasswordBodySchema }),
@@ -44,7 +44,7 @@ export async function registerAuthRoutes(fastify: FastifyInstance): Promise<void
         });
     });
 
-    await fastify.register(async (fastify) => {
+    await fastify.register(async fastify => {
         await fastify.register(fastifyRateLimit, rl.otp);
         fastify.post('/v1/auth/verify-email', {
             preHandler: vr({ bodySchema: verifyEmailBodySchema }),
@@ -52,7 +52,7 @@ export async function registerAuthRoutes(fastify: FastifyInstance): Promise<void
         });
     });
 
-    await fastify.register(async (fastify) => {
+    await fastify.register(async fastify => {
         await fastify.register(fastifyRateLimit, rl.resendOTP);
         fastify.post('/v1/auth/resend-otp', {
             preHandler: vr({ bodySchema: resendOTPBodySchema }),

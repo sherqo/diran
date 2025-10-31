@@ -14,9 +14,9 @@ export async function registerUserRoutes(fastify: FastifyInstance): Promise<void
     });
 
     // Update profile with rate limiting
-    await fastify.register(async (fastify) => {
+    await fastify.register(async fastify => {
         await fastify.register(fastifyRateLimit, rl.updateProfile);
-        
+
         fastify.patch('/v1/user/profile', {
             preHandler: [vr({ bodySchema: updateProfileSchema }), authenticate],
             handler: updateProfile,
@@ -24,9 +24,9 @@ export async function registerUserRoutes(fastify: FastifyInstance): Promise<void
     });
 
     // Change password with rate limiting
-    await fastify.register(async (fastify) => {
+    await fastify.register(async fastify => {
         await fastify.register(fastifyRateLimit, rl.changePassword);
-        
+
         fastify.post('/v1/user/change-password', {
             preHandler: [vr({ bodySchema: changePasswordSchema }), authenticate],
             handler: changePassword,

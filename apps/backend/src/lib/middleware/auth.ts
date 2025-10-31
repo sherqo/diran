@@ -19,7 +19,7 @@ export const authenticate: preHandlerHookHandler = async (req: FastifyRequest, _
     console.log('🍪 Cookie header:', req.headers.cookie);
     console.log('🍪 Has cookies property?', 'cookies' in req);
     console.log('🍪 Cookies type:', typeof req.cookies);
-    
+
     const token = req.cookies?.accessToken;
 
     if (!token) {

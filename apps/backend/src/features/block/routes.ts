@@ -19,7 +19,7 @@ import {
 
 export async function registerBlockRoutes(fastify: FastifyInstance): Promise<void> {
     // All block routes require authentication
-    
+
     // Create block
     fastify.post('/v1/block', {
         preHandler: [vr({ bodySchema: createBlockBodySchema }), auth],
