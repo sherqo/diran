@@ -2,7 +2,7 @@ type: http_request
 model: http_request
 id: rq_2CC4r3K7gK
 createdAt: 2025-10-27T12:16:15.076977261
-updatedAt: 2025-10-27T12:39:00.895471253
+updatedAt: 2025-10-31T19:27:14.324631819
 workspaceId: wk_xHj4uko5i5
 folderId: fl_ATSPWaW5T7
 authentication: {}
@@ -11,7 +11,7 @@ body:
   text: |-
     {
       "type": "HEADING_1",
-      "order": 100,
+      "order": "xx",
       "parentId": "30e5c353-2de0-442d-8c86-18c4cc376537",
       "content": {
         "title" : "the good title"

@@ -3,6 +3,7 @@ import fastifyCors from '@fastify/cors';
 import fastifyHelmet from '@fastify/helmet';
 import fastifyCookie from '@fastify/cookie';
 import fastifyRateLimit from '@fastify/rate-limit';
+import fastifyCompress from '@fastify/compress';
 import dotenv from 'dotenv';
 import { serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
 import { db } from '#lib/database/connection';
@@ -31,6 +32,13 @@ async function setupPlugins() {
     // Cookie parser MUST be registered first before other plugins
     // This is critical for cookie parsing to work
     await app.register(fastifyCookie);
+
+    // Response compression (gzip/brotli)
+    await app.register(fastifyCompress, {
+        global: true,
+        threshold: 1024, // Only compress responses > 1KB
+        encodings: ['br', 'gzip', 'deflate'], // Prefer brotli, fallback to gzip
+    });
 
     // Helmet for security headers
     await app.register(fastifyHelmet, {
