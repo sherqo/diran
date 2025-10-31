@@ -1,10 +1,10 @@
 import { verifyAccessToken } from '#lib/utils/auth';
-import { Request, Response, NextFunction } from 'express';
+import { FastifyRequest, FastifyReply, preHandlerHookHandler } from 'fastify';
 import { ApiError } from './errorHandler';
 import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors';
 import { AuthUser } from '@diran/shared/types/auth';
 
-export interface AuthenticatedRequest extends Request {
+export interface AuthenticatedRequest extends FastifyRequest {
     user?: AuthUser;
 
     // permissions added by permission middleware(s)
@@ -14,8 +14,8 @@ export interface AuthenticatedRequest extends Request {
     };
 }
 
-export const authenticate = async (req: AuthenticatedRequest, _res: Response, next: NextFunction): Promise<void> => {
-    const token = req.cookies.accessToken;
+export const authenticate: preHandlerHookHandler = async (req: FastifyRequest, _reply: FastifyReply): Promise<void> => {
+    const token = req.cookies?.accessToken;
 
     if (!token) {
         throw new ApiError('Access token required', HttpStatus.UNAUTHORIZED, ErrorCode.ACCESS_TOKEN_REQUIRED);
@@ -28,6 +28,5 @@ export const authenticate = async (req: AuthenticatedRequest, _res: Response, ne
     }
 
     // TODO: fix deleted users by them in a small datastructure for short time
-    req.user = decodedUser;
-    next();
+    (req as AuthenticatedRequest).user = decodedUser;
 };

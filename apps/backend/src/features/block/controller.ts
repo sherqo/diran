@@ -1,4 +1,4 @@
-import { Response } from 'express';
+import { FastifyRequest, FastifyReply } from 'fastify';
 import { AuthenticatedRequest } from '#lib/middleware/auth';
 import { CreateBlockBodyInput, GetBlockParamInput, UpdateBlockParamInput, DeleteBlockParamInput } from '@diran/shared/validation/block';
 import { db } from '#lib/database/connection';
@@ -8,7 +8,7 @@ import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors';
 import { BlockType, ActorType, EntityType, RoleType } from '@prisma/client';
 
 // CREATE
-const createBlock = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+const createBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     /**
      * how do we create a block?
      * ok look:
@@ -53,7 +53,7 @@ const createBlock = async (req: AuthenticatedRequest, res: Response): Promise<vo
 
     // i won't remove any of the comments, they are gold :D
 
-    const { type, parentId, order, content }: CreateBlockBodyInput = req.body;
+    const { type, parentId, order, content }: CreateBlockBodyInput = req.body as CreateBlockBodyInput;
 
     const result = await db.$transaction(async tx => {
         // Creating the block
@@ -105,13 +105,13 @@ const createBlock = async (req: AuthenticatedRequest, res: Response): Promise<vo
 
     const message = result.needsPermissionAssignment ? 'Parent block created successfully' : 'Children block created successfully';
 
-    sendSuccess(res, { block: result.block }, message, HttpStatus.CREATED); // TODO: should i return the block?
+    sendSuccess(reply, { block: result.block }, message, HttpStatus.CREATED); // TODO: should i return the block?
 };
 
 // ====== Just placeholder(s) for now ======
 
 // READ
-const getBlock = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+const getBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     const { id } = req.params as GetBlockParamInput;
 
     const found = await db.block.findUnique({
@@ -142,11 +142,11 @@ const getBlock = async (req: AuthenticatedRequest, res: Response): Promise<void>
     };
 
     const data = { block };
-    sendSuccess(res, data);
+    sendSuccess(reply, data);
 };
 
 // UPDATE --
-const updateBlock = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+const updateBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     const { id } = req.params as { id: string };
     const payload = req.body as Partial<UpdateBlockParamInput>;
 
@@ -178,7 +178,7 @@ const updateBlock = async (req: AuthenticatedRequest, res: Response): Promise<vo
     });
 
     sendSuccess(
-        res,
+        reply,
         {
             block: {
                 ...updated,
@@ -191,7 +191,7 @@ const updateBlock = async (req: AuthenticatedRequest, res: Response): Promise<vo
 };
 
 // DELETE
-const deleteBlock = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+const deleteBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     const { id } = req.params as DeleteBlockParamInput;
 
     const block = await db.block.findUnique({ where: { id } });
@@ -201,7 +201,7 @@ const deleteBlock = async (req: AuthenticatedRequest, res: Response): Promise<vo
 
     await db.block.delete({ where: { id } });
 
-    sendSuccess(res, {}, 'Block deleted successfully');
+    sendSuccess(reply, {}, 'Block deleted successfully');
 };
 
 export { createBlock, getBlock, updateBlock, deleteBlock };

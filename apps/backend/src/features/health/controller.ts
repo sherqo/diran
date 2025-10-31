@@ -1,9 +1,9 @@
-import { Request, Response } from 'express';
+import { FastifyRequest, FastifyReply } from 'fastify';
 import { db } from '#lib/database/connection';
 import { sendSuccess } from '#lib/utils/response';
 import { GetHealthResponseData } from '@diran/shared';
 
-export const getHealth = async (req: Request, res: Response): Promise<void> => {
+export const getHealth = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
     // Check database connection
     await db.$queryRaw`SELECT 1`;
 
@@ -14,5 +14,5 @@ export const getHealth = async (req: Request, res: Response): Promise<void> => {
         database: 'connected',
     };
 
-    sendSuccess(res, data);
+    sendSuccess(reply, data);
 };

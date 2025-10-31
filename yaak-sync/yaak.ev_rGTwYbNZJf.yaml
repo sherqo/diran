@@ -3,7 +3,7 @@ model: environment
 id: ev_rGTwYbNZJf
 workspaceId: wk_xHj4uko5i5
 createdAt: 2025-10-09T13:14:09.277
-updatedAt: 2025-10-14T10:30:49.822
+updatedAt: 2025-10-31T18:01:21.688834771
 name: Base Environment
 public: true
 base: true
@@ -13,9 +13,13 @@ variables:
 - enabled: true
   name: base_url
   value: http://localhost:4003/v1
-  id: null
+  id: AUiXrsEmdj
 - enabled: true
   name: remote_url
   value: https://api.diran.app/v1
-  id: null
+  id: 7PPwJDXKps
+- enabled: true
+  name: test
+  value: http://localhost:4003
+  id: g9AFYDzYWj
 color: null

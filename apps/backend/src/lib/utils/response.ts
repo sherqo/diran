@@ -1,28 +1,28 @@
 import type { ErrorResponse, SuccessResponse } from '@diran/shared/types/api';
-import { Response } from 'express';
+import { FastifyReply } from 'fastify';
 
 export type ApiResponse<T = any> = SuccessResponse<T> | ErrorResponse<T>;
 
 // Helper to send success responses
-export const sendSuccess = <T>(res: Response, data: T, message?: string, statusCode: number = 200): Response<SuccessResponse<T>> => {
+export const sendSuccess = <T>(reply: FastifyReply, data: T, message?: string, statusCode: number = 200): FastifyReply => {
     const response: SuccessResponse<T> = {
         success: true,
         data,
         ...(message && { message }),
     };
 
-    return res.status(statusCode).json(response);
+    return reply.status(statusCode).send(response);
 };
 
 // Helper to send error responses
 export const sendError = <T = any>(
-    res: Response,
+    reply: FastifyReply,
     message: string,
     statusCode: number = 500,
     code?: string,
     data?: T,
     details?: string[]
-): Response<ErrorResponse<T>> => {
+): FastifyReply => {
     const response: ErrorResponse<T> = {
         success: false,
         error: {
@@ -33,5 +33,5 @@ export const sendError = <T = any>(
         ...(data !== undefined && { data }),
     };
 
-    return res.status(statusCode).json(response);
+    return reply.status(statusCode).send(response);
 };

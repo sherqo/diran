@@ -1,5 +1,5 @@
 import { sendError } from '#lib/utils/response';
-import { Request, Response, NextFunction } from 'express';
+import { FastifyRequest, FastifyReply, FastifyError } from 'fastify';
 import { isDevelopment } from '#lib/utils/common';
 import { HttpStatus, ErrorCode } from '@diran/shared/constants/errors';
 import { Prisma } from '@prisma/client';
@@ -21,8 +21,8 @@ export class ApiError extends Error {
     }
 }
 
-// Error handling middleware
-export const errorHandler = (error: any, _req: Request, res: Response, _next: NextFunction): void => {
+// Error handling middleware for Fastify
+export const errorHandler = (error: FastifyError | any, request: FastifyRequest, reply: FastifyReply): void => {
     // Log the error (always log in development, minimal in production)
     if (isDevelopment) {
         console.error('🚨 API Error:', {
@@ -30,9 +30,9 @@ export const errorHandler = (error: any, _req: Request, res: Response, _next: Ne
             time: new Date().toISOString(),
             stack: error.stack,
             name: error.name,
-            url: _req.url,
-            method: _req.method,
-            body: _req.body,
+            url: request.url,
+            method: request.method,
+            body: request.body,
         });
     } else {
         console.error('🚨 API Error:', { message: error.message, time: new Date().toISOString() });
@@ -41,44 +41,69 @@ export const errorHandler = (error: any, _req: Request, res: Response, _next: Ne
     // Handle different error types
     if (error instanceof ApiError) {
         // Custom API errors - use proper response utility based on status
-        sendError(res, error.message, error.status, error.code, error.data, error.details);
+        sendError(reply, error.message, error.status, error.code, error.data, error.details);
         return;
     }
 
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        return handlePrismaError(error, _req, res, _next);
+        handlePrismaError(error, request, reply);
+        return;
     }
 
     // Validation errors (Zod)
     if (error.name === 'ZodError') {
-        sendError(res, error.errors, HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR);
+        const details = error.errors?.map((err: any) => `${err.path.join('.')}: ${err.message}`) || [];
+        sendError(reply, 'Validation error', HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR, undefined, details);
+        return;
+    }
+
+    // Fastify validation errors (from Zod type provider)
+    if (error.validation) {
+        const details = error.validation.map((err: any) => {
+            const path = err.instancePath?.replace(/^\//, '').replace(/\//g, '.') || err.params?.issue?.path?.join('.') || 'unknown';
+            return `${path}: ${err.message}`;
+        });
+        sendError(reply, 'Validation error', HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR, undefined, details);
         return;
     }
 
     // JWT errors
     if (error.name === 'JsonWebTokenError') {
-        sendError(res, 'Invalid token', HttpStatus.UNAUTHORIZED, ErrorCode.INVALID_TOKEN);
+        sendError(reply, 'Invalid token', HttpStatus.UNAUTHORIZED, ErrorCode.INVALID_TOKEN);
         return;
     }
 
     if (error.name === 'TokenExpiredError') {
-        sendError(res, 'Token expired', HttpStatus.UNAUTHORIZED, ErrorCode.TOKEN_EXPIRED);
+        sendError(reply, 'Token expired', HttpStatus.UNAUTHORIZED, ErrorCode.TOKEN_EXPIRED);
+        return;
+    }
+
+    // Server under pressure
+    if (error.name === 'FastifyError' && error.message === 'SERVER_NUKED') {
+        sendError(reply, 'Server is under heavy load, try again later', HttpStatus.SERVICE_UNAVAILABLE, ErrorCode.SERVER_OVERLOAD);
+        return;
+    }
+
+    // Rate limit errors
+    if (error.statusCode === 429 || error.code === 'FST_ERR_RATE_LIMIT') {
+        sendError(reply, 'Too many requests, please try again later', HttpStatus.TOO_MANY_REQUESTS, ErrorCode.TOO_MANY_REQUESTS);
         return;
     }
 
     // Timeout errors
     if (error.code === 'ETIMEDOUT' || error.message === 'Request timeout') {
-        sendError(res, 'Request timeout, please try again later', HttpStatus.REQUEST_TIMEOUT, ErrorCode.TIMEOUT);
+        sendError(reply, 'Request timeout, please try again later', HttpStatus.REQUEST_TIMEOUT, ErrorCode.TIMEOUT);
         return;
     }
 
-    if (error instanceof SyntaxError && 'body' in error) {
-        sendError(res, 'Invalid JSON', HttpStatus.BAD_REQUEST, ErrorCode.INVALID_JSON);
+    // Parse errors from Fastify
+    if (error.statusCode === 400 && error.message.includes('JSON')) {
+        sendError(reply, 'Invalid JSON', HttpStatus.BAD_REQUEST, ErrorCode.INVALID_JSON);
         return;
     }
 
     // Generic errors
-    sendError(res, 'Internal server error', HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.INTERNAL_ERROR);
+    sendError(reply, 'Internal server error', HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.INTERNAL_ERROR);
 };
 
 // Map a Prisma error code prefix / exact code to status + message
@@ -95,30 +120,25 @@ const prismaErrorMap: Record<string, { status: number; code: string; message: st
     // etc — include more as needed
 };
 
-export function handlePrismaError(error: unknown, req: Request, res: Response, next: NextFunction): void {
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        const meta = (error.meta ?? {}) as any;
-        const target = Array.isArray(meta.target) ? meta.target.join(', ') : meta.field_name || 'unknown field';
+export function handlePrismaError(error: Prisma.PrismaClientKnownRequestError, request: FastifyRequest, reply: FastifyReply): void {
+    const meta = (error.meta ?? {}) as any;
+    const target = Array.isArray(meta.target) ? meta.target.join(', ') : meta.field_name || 'unknown field';
 
-        const entry = prismaErrorMap[error.code] || {
-            status: HttpStatus.INTERNAL_SERVER_ERROR,
-            code: ErrorCode.DATABASE_ERROR,
-            message: `Database error (${error.code}) on ${target}`,
-        };
+    const entry = prismaErrorMap[error.code] || {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        code: ErrorCode.DATABASE_ERROR,
+        message: `Database error (${error.code}) on ${target}`,
+    };
 
-        // Log in dev
-        if (isDevelopment) {
-            console.error('Prisma error details:', { code: error.code, target, meta, stack: error.stack });
-        }
-
-        sendError(res, entry.message, entry.status, entry.code);
-        return;
+    // Log in dev
+    if (isDevelopment) {
+        console.error('Prisma error details:', { code: error.code, target, meta, stack: error.stack });
     }
-    // Not a PrismaClientKnownRequestError → pass through
-    next(error);
+
+    sendError(reply, entry.message, entry.status, entry.code);
 }
 
-// 404 handler
-export const notFoundHandler = (_req: Request, res: Response): void => {
-    sendError(res, 'Route not found', HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND);
+// 404 handler for Fastify
+export const notFoundHandler = (request: FastifyRequest, reply: FastifyReply): void => {
+    sendError(reply, 'Route not found', HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND);
 };

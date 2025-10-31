@@ -1,4 +1,5 @@
-import { Router } from 'express';
+import { FastifyInstance } from 'fastify';
+import fastifyRateLimit from '@fastify/rate-limit';
 import { validateRequest as vr } from '#lib/middleware/validation.js';
 import { signup, login, forgotPassword, resetPassword, refresh, logout, verifyEmail, resendOTP } from './controller.js';
 import { authRateLimiters as rl } from '#lib/middleware/rateLimiter.js';
@@ -10,18 +11,53 @@ import {
     signupBodySchema,
     verifyEmailBodySchema,
 } from '@diran/shared/validation/auth.js';
-import to from 'connect-timeout';
 
-const router: Router = Router();
+export async function registerAuthRoutes(fastify: FastifyInstance): Promise<void> {
+    fastify.post('/refresh', {
+        handler: refresh,
+    });
 
-// Public routes with specific rate limiting
-router.post('/refresh', to('5s'), refresh);
-router.post('/signup', rl.login, to('5s'), vr({ bodySchema: signupBodySchema }), signup);
-router.post('/login', rl.login, to('5s'), vr({ bodySchema: loginBodySchema }), login);
-router.post('/forgot-password', rl.resetPassword, to('5s'), vr({ bodySchema: forgotPasswordBodySchema }), forgotPassword);
-router.post('/reset-password', rl.resetPassword, to('5s'), vr({ bodySchema: resetPasswordBodySchema }), resetPassword);
-router.post('/verify-email', rl.otp, to('5s'), vr({ bodySchema: verifyEmailBodySchema }), verifyEmail);
-router.post('/resend-otp', rl.resendOTP, to('5s'), vr({ bodySchema: resendOTPBodySchema }), resendOTP);
-router.post('/logout', to('5s'), logout);
+    await fastify.register(fastify => {
+        fastify.register(fastifyRateLimit, rl.login);
+        fastify.post('/signup', {
+            preHandler: vr({ bodySchema: signupBodySchema }),
+            handler: signup,
+        });
+        fastify.post('/login', {
+            preHandler: vr({ bodySchema: loginBodySchema }),
+            handler: login,
+        });
+    });
 
-export default router;
+    await fastify.register(fastify => {
+        fastify.register(fastifyRateLimit, rl.resetPassword);
+        fastify.post('/forgot-password', {
+            preHandler: vr({ bodySchema: forgotPasswordBodySchema }),
+            handler: forgotPassword,
+        });
+        fastify.post('/reset-password', {
+            preHandler: vr({ bodySchema: resetPasswordBodySchema }),
+            handler: resetPassword,
+        });
+    });
+
+    await fastify.register(fastify => {
+        fastify.register(fastifyRateLimit, rl.otp);
+        fastify.post('/verify-email', {
+            preHandler: vr({ bodySchema: verifyEmailBodySchema }),
+            handler: verifyEmail,
+        });
+    });
+
+    await fastify.register(fastify => {
+        fastify.register(fastifyRateLimit, rl.resendOTP);
+        fastify.post('/resend-otp', {
+            preHandler: vr({ bodySchema: resendOTPBodySchema }),
+            handler: resendOTP,
+        });
+    });
+
+    fastify.post('/logout', {
+        handler: logout,
+    });
+}

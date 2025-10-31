@@ -1,4 +1,4 @@
-import { Response, NextFunction } from 'express';
+import { FastifyRequest, FastifyReply, preHandlerHookHandler } from 'fastify';
 import { ApiError } from '#lib/middleware/errorHandler';
 import { HttpStatus, ErrorCode } from '@diran/shared/constants/errors';
 import { AuthenticatedRequest } from '#lib/middleware/auth';
@@ -34,25 +34,23 @@ const canWrite = (role: RoleType): boolean => {
 
 // What this do?
 // just tells if the actor has permission to access the block or not and tells you what can they do!
-export const validatePermission = () => {
-    return async (req: AuthenticatedRequest, _res: Response, next: NextFunction): Promise<void> => {
-        const blockId = req.params.id as string;
-        const userId = req.user!.id as string;
+export const validatePermission: preHandlerHookHandler = async (req: FastifyRequest, _reply: FastifyReply): Promise<void> => {
+    const authReq = req as AuthenticatedRequest;
+    const blockId = (req.params as any).id as string;
+    const userId = authReq.user!.id as string;
 
-        const role = await getRole(userId, blockId);
+    const role = await getRole(userId, blockId);
 
-        if (!role || role === RoleType.NONE) {
-            throw new ApiError('Access denied: No permission for this block', HttpStatus.FORBIDDEN, ErrorCode.PERMISSION_DENIED);
-        }
+    if (!role || role === RoleType.NONE) {
+        throw new ApiError('Access denied: No permission for this block', HttpStatus.FORBIDDEN, ErrorCode.PERMISSION_DENIED);
+    }
 
-        // TODO: maybe then be splited into two middlewares -> reject too early...
-        const perms = {
-            canRead: canRead(role),
-            canWrite: canWrite(role),
-        };
-
-        // Attach
-        req.permissions = perms;
-        next();
+    // TODO: maybe then be splited into two middlewares -> reject too early...
+    const perms = {
+        canRead: canRead(role),
+        canWrite: canWrite(role),
     };
+
+    // Attach
+    authReq.permissions = perms;
 };
