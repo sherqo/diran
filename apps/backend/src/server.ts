@@ -17,7 +17,7 @@ const PORT = Number(process.env.PORT) || 4003;
 
 // Create Fastify instance
 const app = Fastify({
-    logger: isDevelopment, // Simple boolean logger for development
+    logger: isDevelopment, // built-in logger
     bodyLimit: 10485760, // 10MB in bytes
 });
 
