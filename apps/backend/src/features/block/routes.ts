@@ -21,25 +21,25 @@ export async function registerBlockRoutes(fastify: FastifyInstance): Promise<voi
     // All block routes require authentication
 
     // Create block
-    fastify.post('/block', {
+    fastify.post('/', {
         preHandler: [vr({ bodySchema: createBlockBodySchema }), auth],
         handler: createBlock,
     });
 
     // Get block (requires permission)
-    fastify.get('/block/:id', {
+    fastify.get('/:id', {
         preHandler: [vr({ paramsSchema: getBlockParamSchema }), auth, perm],
         handler: getBlock,
     });
 
     // Update block (requires permission)
-    fastify.put('/block/:id', {
+    fastify.put('/:id', {
         preHandler: [vr({ paramsSchema: updateBlockParamSchema }), auth, perm],
         handler: updateBlock,
     });
 
     // Delete block (requires permission)
-    fastify.delete('/block/:id', {
+    fastify.delete('/:id', {
         preHandler: [vr({ paramsSchema: deleteBlockParamSchema }), auth, perm],
         handler: deleteBlock,
     });

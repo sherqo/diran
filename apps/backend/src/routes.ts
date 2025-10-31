@@ -1,6 +1,9 @@
 // THIS FILE IS NO LONGER NEEDED - Routes are now registered directly in server.ts with Fastify
 // Kept for reference during migration
 
+import { FastifyInstance } from 'fastify';
+import { registerAuthRoutes, registerHealthRoutes, registerUserRoutes, registerBlockRoutes } from '#features';
+
 /**
  * OLD EXPRESS ROUTES STRUCTURE (for reference):
  *
@@ -15,4 +18,9 @@
  *  finally. controller
  */
 
-// TODO: Remove this file after complete migration to Fastify
+export const registerAllRoutes = async (fastify: FastifyInstance) => {
+    await fastify.register(registerAuthRoutes, { prefix: '/auth' });
+    await fastify.register(registerHealthRoutes, { prefix: '/health' });
+    await fastify.register(registerUserRoutes, { prefix: '/users' });
+    await fastify.register(registerBlockRoutes, { prefix: '/blocks' });
+};

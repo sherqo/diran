@@ -6,9 +6,9 @@ import fastifyRateLimit from '@fastify/rate-limit';
 import dotenv from 'dotenv';
 import { db } from '#lib/database/connection';
 import { isDevelopment, logStartup } from '#lib/utils/common';
-import { registerAuthRoutes, registerHealthRoutes, registerUserRoutes, registerBlockRoutes } from '#features/index';
 import { errorHandler, notFoundHandler } from '#lib/middleware/errorHandler';
 import { loggerHook } from '#lib/middleware/logger';
+import { registerAllRoutes } from '#routes';
 
 // Load environment variables
 dotenv.config({ debug: isDevelopment });
@@ -57,20 +57,6 @@ async function setupPlugins() {
     app.setNotFoundHandler(notFoundHandler);
 }
 
-// Register routes
-async function setupRoutes() {
-    // All routes automatically get /v1 prefix
-    await app.register(
-        async (fastify) => {
-            await registerAuthRoutes(fastify);
-            await registerHealthRoutes(fastify);
-            await registerUserRoutes(fastify);
-            await registerBlockRoutes(fastify);
-        },
-        { prefix: '/v1' }
-    );
-}
-
 // Graceful shutdown
 const gracefulShutdown = async () => {
     console.log('🔄 Shutting down gracefully...');
@@ -92,7 +78,7 @@ process.on('SIGINT', gracefulShutdown);
 async function start() {
     try {
         await setupPlugins();
-        await setupRoutes();
+        await app.register(registerAllRoutes, { prefix: '/v1' });
 
         await app.listen({ port: PORT, host: '0.0.0.0' });
         logStartup(PORT, !!db);
