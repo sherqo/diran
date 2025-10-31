@@ -6,12 +6,19 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4003/v
 // --- Helpers ---
 async function doFetch(endpoint: string, options: RequestInit = {}): Promise<Response> {
     const url = `${API_BASE_URL}${endpoint}`;
+
+    // Only include Content-Type if there's a body
+    const headers: Record<string, string> = {
+        ...(options.headers as Record<string, string>),
+    };
+
+    if (options.body !== undefined) {
+        headers['Content-Type'] = 'application/json';
+    }
+
     return fetch(url, {
         credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers,
-        },
+        headers,
         ...options,
     });
 }
