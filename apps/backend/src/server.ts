@@ -66,7 +66,7 @@ async function setupPlugins() {
         maxRssBytes: 512 * 1024 * 1024, // 512MB
         retryAfter: 5, // seconds
         message: 'SERVER_NUKED',
-        exposeStatusRoute: '/health',
+        exposeStatusRoute: false,
     });
 
     // Response compression (gzip/brotli)
