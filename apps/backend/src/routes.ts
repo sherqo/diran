@@ -21,6 +21,6 @@ import { registerAuthRoutes, registerHealthRoutes, registerUserRoutes, registerB
 export const registerAllRoutes = async (fastify: FastifyInstance) => {
     await fastify.register(registerAuthRoutes, { prefix: '/auth' });
     await fastify.register(registerHealthRoutes, { prefix: '/health' });
-    await fastify.register(registerUserRoutes, { prefix: '/users' });
-    await fastify.register(registerBlockRoutes, { prefix: '/blocks' });
+    await fastify.register(registerUserRoutes, { prefix: '/user' });
+    await fastify.register(registerBlockRoutes, { prefix: '/block' });
 };
