@@ -1,4 +1,4 @@
-import { FastifyRequest, FastifyReply } from 'fastify';
+import { FastifyReply } from 'fastify';
 import { AuthenticatedRequest } from '#lib/middleware/auth';
 import { CreateBlockBodyInput, GetBlockParamInput, UpdateBlockParamInput, DeleteBlockParamInput } from '@diran/shared/validation/block';
 import { db } from '#lib/database/connection';
