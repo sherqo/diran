@@ -34,8 +34,6 @@ import {
     LogoutResponseData,
 } from '@diran/shared';
 
-export { signup, login, forgotPassword, resetPassword, verifyEmail, refresh, resendOTP, logout };
-
 //? User signup
 const signup = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
     const { email, password, name }: SignupBodyInput = request.body as SignupBodyInput; // Extract user details from request body
@@ -326,3 +324,5 @@ const logout = async (request: FastifyRequest, reply: FastifyReply): Promise<voi
     const data: LogoutResponseData = {};
     sendSuccess(reply, data, 'Logged out successfully');
 };
+
+export { signup, login, forgotPassword, resetPassword, verifyEmail, refresh, resendOTP, logout };
