@@ -4,6 +4,8 @@ import fastifyHelmet from '@fastify/helmet';
 import fastifyCookie from '@fastify/cookie';
 import fastifyRateLimit from '@fastify/rate-limit';
 import fastifyCompress from '@fastify/compress';
+import fastifySwagger from '@fastify/swagger';
+import fastifySwaggerUi from '@fastify/swagger-ui';
 import dotenv from 'dotenv';
 import { serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
 import { db } from '#lib/database/connection';
@@ -29,6 +31,29 @@ app.setSerializerCompiler(serializerCompiler);
 
 // Register plugins
 async function setupPlugins() {
+    // Swagger documentation (register before routes, only in development)
+    if (isDevelopment) {
+        await app.register(fastifySwagger, {
+            openapi: {
+                openapi: '3.1.0',
+                info: {
+                    title: 'Diran API',
+                    description: 'API documentation for Diran backend',
+                    version: '0.1.0',
+                },
+            },
+        });
+
+        await app.register(fastifySwaggerUi, {
+            routePrefix: '/docs',
+            uiConfig: {
+                docExpansion: 'list',
+                deepLinking: true,
+            },
+            staticCSP: true,
+        });
+    }
+
     // Cookie parser MUST be registered first before other plugins
     // This is critical for cookie parsing to work
     await app.register(fastifyCookie);

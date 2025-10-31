@@ -13,15 +13,12 @@ import {
 } from '@diran/shared/validation/auth.js';
 
 export async function registerAuthRoutes(fastify: FastifyInstance): Promise<void> {
-    // Fastify automatically handles async errors, no need for wrapper
-
-    // Public routes with specific rate limiting
     fastify.post('/refresh', {
         handler: refresh,
     });
 
-    await fastify.register(async fastify => {
-        await fastify.register(fastifyRateLimit, rl.login);
+    await fastify.register(fastify => {
+        fastify.register(fastifyRateLimit, rl.login);
         fastify.post('/signup', {
             preHandler: vr({ bodySchema: signupBodySchema }),
             handler: signup,
@@ -32,8 +29,8 @@ export async function registerAuthRoutes(fastify: FastifyInstance): Promise<void
         });
     });
 
-    await fastify.register(async fastify => {
-        await fastify.register(fastifyRateLimit, rl.resetPassword);
+    await fastify.register(fastify => {
+        fastify.register(fastifyRateLimit, rl.resetPassword);
         fastify.post('/forgot-password', {
             preHandler: vr({ bodySchema: forgotPasswordBodySchema }),
             handler: forgotPassword,
@@ -44,16 +41,16 @@ export async function registerAuthRoutes(fastify: FastifyInstance): Promise<void
         });
     });
 
-    await fastify.register(async fastify => {
-        await fastify.register(fastifyRateLimit, rl.otp);
+    await fastify.register(fastify => {
+        fastify.register(fastifyRateLimit, rl.otp);
         fastify.post('/verify-email', {
             preHandler: vr({ bodySchema: verifyEmailBodySchema }),
             handler: verifyEmail,
         });
     });
 
-    await fastify.register(async fastify => {
-        await fastify.register(fastifyRateLimit, rl.resendOTP);
+    await fastify.register(fastify => {
+        fastify.register(fastifyRateLimit, rl.resendOTP);
         fastify.post('/resend-otp', {
             preHandler: vr({ bodySchema: resendOTPBodySchema }),
             handler: resendOTP,

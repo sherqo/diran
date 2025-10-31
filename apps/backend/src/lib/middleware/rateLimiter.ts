@@ -8,7 +8,7 @@ export const globalRateLimiterConfig: RateLimitPluginOptions = {
 export const healthCheckRateLimiterConfig: RateLimitPluginOptions = {
     max: 60,
     timeWindow: '60 minutes',
-};
+} as RateLimitPluginOptions;
 
 // Stricter rate limiters for auth endpoints to prevent abuse
 export const authRateLimiters = {
