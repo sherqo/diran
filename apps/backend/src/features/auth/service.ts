@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { FastifyRequest, FastifyReply } from 'fastify';
 import { db } from '#lib/database/connection.js';
 import { generateOTP, hashOTP, generateResetToken, hashResetToken } from '#lib/utils/auth.js';
 import { sendMail, emailTemplates } from '#lib/services/email.js';
@@ -63,7 +63,7 @@ const sendPasswordResetToken = async (userId: string, email: string): Promise<vo
     }
 };
 
-const createUserSession = async (user: any, req: Request, res: Response): Promise<void> => {
+const createUserSession = async (user: any, request: FastifyRequest, reply: FastifyReply): Promise<void> => {
     // Generate tokens
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user.id);
@@ -78,10 +78,10 @@ const createUserSession = async (user: any, req: Request, res: Response): Promis
     });
 
     // Set cookies
-    setAccessTokenCookie(res, accessToken);
-    setRefreshTokenCookie(res, refreshToken);
+    setAccessTokenCookie(reply, accessToken);
+    setRefreshTokenCookie(reply, refreshToken);
 
-    sendSessionCreatedNotification(user.email, req);
+    sendSessionCreatedNotification(user.email, request);
 };
 
 const clearRefreshTokenSession = async (refreshToken: string): Promise<void> => {
@@ -94,9 +94,9 @@ const clearRefreshTokenSession = async (refreshToken: string): Promise<void> => 
     });
 };
 
-const sendSessionCreatedNotification = async (email: string, req: Request): Promise<void> => {
-    const userAgent = req.headers['user-agent'] || 'Unknown';
-    const ip = req.headers['x-forwarded-for'] || 'Unknown';
+const sendSessionCreatedNotification = async (email: string, request: FastifyRequest): Promise<void> => {
+    const userAgent = request.headers['user-agent'] || 'Unknown';
+    const ip = request.headers['x-forwarded-for'] || 'Unknown';
     // Send friendly notification email (no OTP, just info)
     try {
         await sendMail({

@@ -1,24 +1,35 @@
-import { Router } from 'express';
+import { FastifyInstance } from 'fastify';
+import fastifyRateLimit from '@fastify/rate-limit';
 import { validateRequest as vr } from '#lib/middleware/validation.js';
 import { authenticate } from '#lib/middleware/auth.js';
 import { getProfile, updateProfile, changePassword } from './controller.js';
 import { updateProfileSchema, changePasswordSchema } from '@diran/shared/validation/user.js';
-import to from 'connect-timeout';
 import { profileRateLimiter as rl } from '#lib/middleware/rateLimiter.js';
 
-const router: Router = Router();
+export async function registerUserRoutes(fastify: FastifyInstance): Promise<void> {
+    // All user routes require authentication
+    fastify.get('/v1/user/profile', {
+        preHandler: authenticate,
+        handler: getProfile,
+    });
 
-// All user routes require authentication
-router.get('/profile', to('5s'), authenticate, getProfile);
-router.patch('/profile', rl.bigWindow, rl.updateProfile, to('10s'), vr({ bodySchema: updateProfileSchema }), authenticate, updateProfile);
-router.post(
-    '/change-password',
-    rl.bigWindow,
-    rl.changePassword,
-    to('5s'),
-    vr({ bodySchema: changePasswordSchema }),
-    authenticate,
-    changePassword
-);
+    // Update profile with rate limiting
+    await fastify.register(async (fastify) => {
+        await fastify.register(fastifyRateLimit, rl.updateProfile);
+        
+        fastify.patch('/v1/user/profile', {
+            preHandler: [vr({ bodySchema: updateProfileSchema }), authenticate],
+            handler: updateProfile,
+        });
+    });
 
-export default router;
+    // Change password with rate limiting
+    await fastify.register(async (fastify) => {
+        await fastify.register(fastifyRateLimit, rl.changePassword);
+        
+        fastify.post('/v1/user/change-password', {
+            preHandler: [vr({ bodySchema: changePasswordSchema }), authenticate],
+            handler: changePassword,
+        });
+    });
+}

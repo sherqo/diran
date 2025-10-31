@@ -1,5 +1,6 @@
 // Export all modules from here for easy imports
-export { default as healthRoutes } from './health/routes';
-export { default as authRoutes } from './auth/routes';
-export { default as userRoutes } from './user/routes';
-export { default as blockRoutes } from './block/routes';
+// All modules converted to Fastify
+export { registerAuthRoutes } from './auth/routes';
+export { registerHealthRoutes } from './health/routes';
+export { registerUserRoutes } from './user/routes';
+export { registerBlockRoutes } from './block/routes';

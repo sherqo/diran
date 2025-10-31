@@ -1,53 +1,79 @@
-import express from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
+import Fastify from 'fastify';
+import fastifyCors from '@fastify/cors';
+import fastifyHelmet from '@fastify/helmet';
+import fastifyCookie from '@fastify/cookie';
+import fastifyRateLimit from '@fastify/rate-limit';
 import dotenv from 'dotenv';
-import cookieParser from 'cookie-parser';
-import apiRouter from '#routes';
-import { errorHandler, notFoundHandler } from '#lib/middleware/errorHandler';
-import { logger } from '#lib/middleware/logger';
 import { db } from '#lib/database/connection';
 import { isDevelopment, logStartup } from '#lib/utils/common';
-import { globalRateLimiter } from '#lib/middleware/rateLimiter';
+import { registerAuthRoutes, registerHealthRoutes, registerUserRoutes, registerBlockRoutes } from '#features/index';
+import { errorHandler, notFoundHandler } from '#lib/middleware/errorHandler';
+import { loggerHook } from '#lib/middleware/logger';
 
 // Load environment variables
 dotenv.config({ debug: isDevelopment });
 
-const app = express();
 const PORT = Number(process.env.PORT) || 4003;
 
-// Request logger middleware (only in development)
-if (isDevelopment) {
-    app.use(logger);
-}
+// Create Fastify instance
+const app = Fastify({
+    logger: isDevelopment, // Simple boolean logger for development
+    bodyLimit: 10485760, // 10MB in bytes
+});
 
-app.use(globalRateLimiter);
+// Register plugins
+async function setupPlugins() {
+    // Cookie parser MUST be registered first before other plugins
+    // This is critical for cookie parsing to work
+    await app.register(fastifyCookie);
 
-// Middleware
-app.use(helmet()); // Security headers
-app.use(
-    cors({
+    // Helmet for security headers
+    await app.register(fastifyHelmet, {
+        contentSecurityPolicy: false, // Disable CSP for API
+    });
+
+    // CORS
+    await app.register(fastifyCors, {
         origin: process.env.FRONTEND_URL || 'http://localhost:3000',
         credentials: true,
-    })
-);
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
+        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+        exposedHeaders: ['set-cookie'],
+    });
 
-// Routes with automatic /v1 prefix, it will be hosted on api.diran.app/v1
-app.use('/v1', apiRouter);
+    // Global rate limiter
+    await app.register(fastifyRateLimit, {
+        max: 100,
+        timeWindow: '1 minute',
+    });
 
-// Error handling middleware
-app.use(notFoundHandler); // 404 handler for unknown routes
-app.use(errorHandler); // Global error handler
+    // Custom request logger (only in development)
+    if (isDevelopment) {
+        app.addHook('onRequest', loggerHook);
+    }
+
+    // Register error handlers
+    app.setErrorHandler(errorHandler);
+    app.setNotFoundHandler(notFoundHandler);
+}
+
+// Register routes
+async function setupRoutes() {
+    // Register routes directly on app with prefix
+    // This ensures they have access to cookie parser and other plugins
+    await registerAuthRoutes(app);
+    await registerHealthRoutes(app);
+    await registerUserRoutes(app);
+    await registerBlockRoutes(app);
+}
 
 // Graceful shutdown
 const gracefulShutdown = async () => {
     console.log('🔄 Shutting down gracefully...');
     try {
+        await app.close();
         await db.$disconnect();
-        console.log('✅ Database connection closed');
+        console.log('✅ Server and database connections closed');
         process.exit(0);
     } catch (error) {
         console.error('❌ Error during shutdown:', error);
@@ -59,6 +85,17 @@ process.on('SIGTERM', gracefulShutdown);
 process.on('SIGINT', gracefulShutdown);
 
 // Start server
-app.listen(PORT, () => {
-    logStartup(PORT, !!db);
-});
+async function start() {
+    try {
+        await setupPlugins();
+        await setupRoutes();
+        
+        await app.listen({ port: PORT, host: '0.0.0.0' });
+        logStartup(PORT, !!db);
+    } catch (err) {
+        app.log.error(err);
+        process.exit(1);
+    }
+}
+
+start();

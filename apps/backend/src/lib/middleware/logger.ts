@@ -1,9 +1,9 @@
-import { Request, Response, NextFunction } from 'express';
+import { FastifyRequest, FastifyReply } from 'fastify';
 
-export const logger = (req: Request, res: Response, next: NextFunction): void => {
-    console.log(`🔍 ${req.method} ${req.path}`, {
-        body: req.body && Object.keys(req.body).length > 0 ? req.body : undefined,
-        headers: req.headers['content-type'],
+// Fastify hook for logging requests
+export const loggerHook = async (request: FastifyRequest, _reply: FastifyReply): Promise<void> => {
+    console.log(`🔍 ${request.method} ${request.url}`, {
+        body: request.body && typeof request.body === 'object' && Object.keys(request.body).length > 0 ? request.body : undefined,
+        headers: request.headers['content-type'],
     });
-    next();
 };

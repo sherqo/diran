@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { FastifyRequest, FastifyReply } from 'fastify';
 import { sendVerificationOTP, sendPasswordResetToken, clearRefreshTokenSession, createUserSession } from '#features/auth/service.js';
 import { ApiError } from '#lib/middleware/errorHandler';
 import { sendSuccess } from '#lib/utils/response';
@@ -37,8 +37,8 @@ import {
 export { signup, login, forgotPassword, resetPassword, verifyEmail, refresh, resendOTP, logout };
 
 //? User signup
-const signup = async (req: Request, res: Response): Promise<void> => {
-    const { email, password, name }: SignupBodyInput = req.body; // Extract user details from request body
+const signup = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+    const { email, password, name }: SignupBodyInput = request.body as SignupBodyInput; // Extract user details from request body
 
     // Check if user already exists
     const existingUser = await db.user.findUnique({
@@ -75,12 +75,12 @@ const signup = async (req: Request, res: Response): Promise<void> => {
     const emailToken = generateEmailVerificationToken(user.email);
 
     const data: SignupResponseData = { emailToken };
-    sendSuccess(res, data, 'Check your email for verification code.', 201);
+    sendSuccess(reply, data, 'Check your email for verification code.', 201);
 };
 
 //? User login
-const login = async (req: Request, res: Response): Promise<void> => {
-    const { email, password }: LoginBodyInput = req.body;
+const login = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+    const { email, password }: LoginBodyInput = request.body as LoginBodyInput;
 
     // Find user
     const user = await db.user.findUnique({
@@ -116,7 +116,7 @@ const login = async (req: Request, res: Response): Promise<void> => {
 
     // User is verified, proceed with login
     // Create user session (tokens + cookies)
-    await createUserSession(user, req, res);
+    await createUserSession(user, request, reply);
 
     const userData = {
         id: user.id,
@@ -127,12 +127,12 @@ const login = async (req: Request, res: Response): Promise<void> => {
     };
 
     const data: LoginResponseData = { user: userData };
-    sendSuccess(res, data, 'Login successful');
+    sendSuccess(reply, data, 'Login successful');
 };
 
 //? Forgot password - send reset token to email
-const forgotPassword = async (req: Request, res: Response): Promise<void> => {
-    const { email }: ForgotPasswordBodyInput = req.body;
+const forgotPassword = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+    const { email }: ForgotPasswordBodyInput = request.body as ForgotPasswordBodyInput;
 
     const user = await db.user.findUnique({
         where: { email },
@@ -146,12 +146,12 @@ const forgotPassword = async (req: Request, res: Response): Promise<void> => {
     await sendPasswordResetToken(user.id, email);
 
     const data: ForgotPasswordResponseData = {};
-    sendSuccess(res, data, 'Password reset email sent. Please check your inbox.');
+    sendSuccess(reply, data, 'Password reset email sent. Please check your inbox.');
 };
 
 //? Reset password - with token
-const resetPassword = async (req: Request, res: Response): Promise<void> => {
-    const { token, password }: ResetPasswordBodyInput = req.body;
+const resetPassword = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+    const { token, password }: ResetPasswordBodyInput = request.body as ResetPasswordBodyInput;
 
     // Hash the token to compare with database
     const hashedToken = hashResetToken(token);
@@ -185,15 +185,15 @@ const resetPassword = async (req: Request, res: Response): Promise<void> => {
     });
 
     // Create user session (tokens + cookies)
-    await createUserSession(user, req, res);
+    await createUserSession(user, request, reply);
 
     const data: ResetPasswordResponseData = { email: user.email };
-    sendSuccess(res, data, 'Password reset successfully');
+    sendSuccess(reply, data, 'Password reset successfully');
 };
 
 //? Verify email with OTP
-const verifyEmail = async (req: Request, res: Response): Promise<void> => {
-    const { token, otp }: VerifyEmailBodyInput = req.body;
+const verifyEmail = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+    const { token, otp }: VerifyEmailBodyInput = request.body as VerifyEmailBodyInput;
 
     const decoded = verifyEmailVerificationToken(token);
 
@@ -232,15 +232,15 @@ const verifyEmail = async (req: Request, res: Response): Promise<void> => {
     });
 
     // Create user session (tokens + cookies)
-    await createUserSession(user, req, res);
+    await createUserSession(user, request, reply);
 
     const data: VerifyEmailResponseData = {};
-    sendSuccess(res, data, 'Email verified successfully');
+    sendSuccess(reply, data, 'Email verified successfully');
 };
 
 //? Refresh access token
-const refresh = async (req: Request, res: Response): Promise<void> => {
-    const refreshToken = req.cookies?.refreshToken;
+const refresh = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+    const refreshToken = request.cookies?.refreshToken;
 
     if (!refreshToken) {
         throw new ApiError('Refresh token required', HttpStatus.UNAUTHORIZED, ErrorCode.REFRESH_TOKEN_REQUIRED);
@@ -277,15 +277,15 @@ const refresh = async (req: Request, res: Response): Promise<void> => {
     });
 
     // Set new access token cookie
-    setAccessTokenCookie(res, accessToken);
+    setAccessTokenCookie(reply, accessToken);
 
     const data: RefreshResponseData = {};
-    sendSuccess(res, data, 'Token refreshed successfully');
+    sendSuccess(reply, data, 'Token refreshed successfully');
 };
 
 //? Resend verification OTP - if not verified yet
-const resendOTP = async (req: Request, res: Response): Promise<void> => {
-    const { token }: ResendOTPBodyInput = req.body;
+const resendOTP = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+    const { token }: ResendOTPBodyInput = request.body as ResendOTPBodyInput;
 
     const decoded = verifyEmailVerificationToken(token);
 
@@ -308,15 +308,15 @@ const resendOTP = async (req: Request, res: Response): Promise<void> => {
     const emailToken = generateEmailVerificationToken(user.email);
 
     const data: ResendOTPResponseData = { emailToken };
-    sendSuccess(res, data, 'Verification code sent successfully');
+    sendSuccess(reply, data, 'Verification code sent successfully');
 };
 
 //? Logout user
-const logout = async (req: Request, res: Response): Promise<void> => {
-    const refreshToken = req.cookies?.refreshToken;
+const logout = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+    const refreshToken = request.cookies?.refreshToken;
 
     // Clear cookies
-    clearAuthCookies(res);
+    clearAuthCookies(reply);
 
     // If refresh token exists, clear it from DB
     if (refreshToken) {
@@ -324,5 +324,5 @@ const logout = async (req: Request, res: Response): Promise<void> => {
     }
 
     const data: LogoutResponseData = {};
-    sendSuccess(res, data, 'Logged out successfully');
+    sendSuccess(reply, data, 'Logged out successfully');
 };

@@ -1,4 +1,4 @@
-import { Response } from 'express';
+import { FastifyReply } from 'fastify';
 import { AuthenticatedRequest } from '#lib/middleware/auth';
 import { db } from '#lib/database/connection';
 import { comparePassword, hashPassword } from '#lib/utils/auth';
@@ -8,7 +8,7 @@ import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors';
 import { ChangePasswordInput, UpdateProfileInput } from '@diran/shared/validation/user';
 import { GetProfileResponseData, UpdateProfileResponseData, ChangePasswordResponseData } from '@diran/shared';
 
-const getProfile = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+const getProfile = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     const user = await db.user.findUnique({
         where: { id: req.user!.id },
         select: {
@@ -29,11 +29,11 @@ const getProfile = async (req: AuthenticatedRequest, res: Response): Promise<voi
     };
 
     const data: GetProfileResponseData = { user: userData };
-    sendSuccess(res, data);
+    sendSuccess(reply, data);
 };
 
-const updateProfile = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { name, photo }: UpdateProfileInput = req.body;
+const updateProfile = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
+    const { name, photo }: UpdateProfileInput = req.body as UpdateProfileInput;
 
     const photoValue = !photo ? null : photo; // "" or undefined → null, else actual string
 
@@ -61,11 +61,11 @@ const updateProfile = async (req: AuthenticatedRequest, res: Response): Promise<
     };
 
     const data: UpdateProfileResponseData = { user: userData };
-    sendSuccess(res, data, 'Profile updated successfully');
+    sendSuccess(reply, data, 'Profile updated successfully');
 };
 
-const changePassword = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    const { currentPassword, newPassword }: ChangePasswordInput = req.body;
+const changePassword = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
+    const { currentPassword, newPassword }: ChangePasswordInput = req.body as ChangePasswordInput;
 
     // Get user with password
     const user = await db.user.findUnique({
@@ -93,7 +93,7 @@ const changePassword = async (req: AuthenticatedRequest, res: Response): Promise
     });
 
     const data: ChangePasswordResponseData = {};
-    sendSuccess(res, data, 'Password changed successfully');
+    sendSuccess(reply, data, 'Password changed successfully');
 };
 
 export { getProfile, updateProfile, changePassword };
