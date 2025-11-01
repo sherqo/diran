@@ -21,7 +21,10 @@
         "prisma:pull": "bunx prisma db pull",
         "prisma:push": "bunx prisma db push",
         "start": "bun run dist/server.js",
-        "studio": "bunx prisma studio"
+        "studio": "bunx prisma studio",
+        "test": "NODE_ENV=test bun test",
+        "test:coverage": "NODE_ENV=test bun test --coverage",
+        "test:watch": "NODE_ENV=test bun test --watch"
     },
     "dependencies": {
         "@diran/shared": "workspace:*",

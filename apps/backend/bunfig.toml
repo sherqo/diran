@@ -1,0 +1,14 @@
+# Test Configuration
+# Add to bunfig.toml or create if it doesn't exist
+
+[test]
+# Test setup file runs before all tests
+preload = ["./test/setup.ts"]
+
+# Test coverage settings
+coverage = true
+coverageDir = "./coverage"
+coverageReporter = ["text", "lcov"]
+
+# Exclude from coverage
+coverageSkipTestFiles = true

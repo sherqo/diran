@@ -2,20 +2,16 @@ type: http_request
 model: http_request
 id: rq_F2G2HocGSk
 createdAt: 2025-10-10T15:01:14.032
-updatedAt: 2025-10-10T19:29:35.711
+updatedAt: 2025-11-01T07:44:38.453455739
 workspaceId: wk_xHj4uko5i5
 folderId: fl_8prugxyg8S
 authentication: {}
 authenticationType: null
 body:
   text: ''
-bodyType: application/json
+bodyType: null
 description: ''
 headers:
-- enabled: true
-  name: Content-Type
-  value: application/json
-  id: null
 - enabled: true
   name: User-Agent
   value: insomnia/11.6.1

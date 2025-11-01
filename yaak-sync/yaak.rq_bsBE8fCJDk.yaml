@@ -2,25 +2,30 @@ type: http_request
 model: http_request
 id: rq_bsBE8fCJDk
 createdAt: 2025-10-09T13:42:57.434
-updatedAt: 2025-10-31T18:59:56.691158334
+updatedAt: 2025-10-31T21:18:46.926295774
 workspaceId: wk_xHj4uko5i5
 folderId: fl_6EBTzQCzod
 authentication:
   token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFmOWU2NTA0LTNkMjMtNDZhZS1hOTY5LTUxNzAxZGNkNGU2ZSIsImVtYWlsIjoidGVzdDI2djU0QGdnZy5jb20iLCJwYXNzd29yZCI6IiQyYiQxMiRkZHdpTGE5Ti5RSHRNUHdXN0c4cUx1R2JlNEZDTHhJdUVIUlFZL0Q3bGVNM210WnlQVXJ4bSIsIm5hbWUiOiJoaSIsInBob3RvIjpudWxsLCJjcmVhdGVkQXQiOiIyMDI1LTEwLTA5VDIwOjEwOjI1LjU3MVoiLCJ1cGRhdGVkQXQiOiIyMDI1LTEwLTA5VDIwOjEwOjI1LjU3MVoiLCJyZXNldFBhc3N3b3JkVG9rZW4iOm51bGwsInJlc2V0UGFzc3dvcmRFeHBpcmVzIjpudWxsLCJlbWFpbFZlcmlmaWVkIjpmYWxzZSwiZW1haWxWZXJpZnlUb2tlbiI6bnVsbCwiZW1haWxWZXJpZnlFeHBpcmVzIjpudWxsLCJpYXQiOjE3NjAwNDE5NTYsImV4cCI6MTc2MDY0Njc1Nn0.GudGuXC0OYPNZ4GCQfZisnBYdYpC_HwsYSE86v3GeGI
 authenticationType: bearer
 body:
-  text: "\n\n{\n\t\"name\": \"the New Name\",\n\t\"photo\": \"\"\t\n}"
+  text: |2-
+
+
+    {
+
+    }
 bodyType: application/json
 description: ''
 headers:
 - enabled: true
-  name: Content-Type
-  value: application/json
-  id: null
-- enabled: true
   name: User-Agent
   value: insomnia/11.6.1
   id: null
+- enabled: true
+  name: Content-Type
+  value: application/json
+  id: Y4AbBJS8Yr
 method: PATCH
 name: update profile
 sortPriority: -1760017315484.0
