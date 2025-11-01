@@ -86,7 +86,7 @@ export const errorHandler = (error: FastifyError | any, request: FastifyRequest,
 
     // Rate limit errors
     if (error.statusCode === 429 || error.code === 'FST_ERR_RATE_LIMIT') {
-        sendError(reply, 'Too many requests, please try again later', HttpStatus.TOO_MANY_REQUESTS, ErrorCode.TOO_MANY_REQUESTS);
+        sendError(reply, error.message, HttpStatus.TOO_MANY_REQUESTS, ErrorCode.TOO_MANY_REQUESTS);
         return;
     }
 
