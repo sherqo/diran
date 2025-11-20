@@ -6,111 +6,112 @@ import { sendSuccess } from '#lib/utils/response';
 import { ApiError } from '#lib/middleware/errorHandler';
 import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors';
 import { BlockType, ActorType, EntityType, RoleType } from '@prisma/client';
+import { IndexGenerator } from 'fractional-indexing-jittered';
 
 // CREATE
-const createBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
-    /**
-     * how do we create a block?
-     * ok look:
-     * - the user has two type of blocks: PAGE and non-PAGE
-     * -- if PAGE, then parentId is not required and NO permission is needed
-     * NOTE: I will manage the permission somewhere else...
-     * -- if non-PAGE, then parentId is required
-     *
-     * any data comes to this function, i'm sure the user has the permission to do it!
-     *
-     * for the order, idk, but let the client set it manually,
-     * what if the block has the same order? will be too complex
-     * for now just throw an expection
-     *
-     * i wanna be nice, i'm a nice man, i'm nice :)
-     */
+// const createBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
+//     /**
+//      * how do we create a block?
+//      * ok look:
+//      * - the user has two type of blocks: PAGE and non-PAGE
+//      * -- if PAGE, then parentId is not required and NO permission is needed
+//      * NOTE: I will manage the permission somewhere else...
+//      * -- if non-PAGE, then parentId is required
+//      *
+//      * any data comes to this function, i'm sure the user has the permission to do it!
+//      *
+//      * for the order, idk, but let the client set it manually,
+//      * what if the block has the same order? will be too complex
+//      * for now just throw an expection
+//      *
+//      * i wanna be nice, i'm a nice man, i'm nice :)
+//      */
 
-    // TODO: check on the order uniqueness under the same parentId, done by the DB, just check the error and throw a proper one
-    // Your Creation just sucks, what is the difference between creating pages or blocks? where to add to the db
-    // should we even still treat pages as blocks? yes
-    // how to handle permissions for both creation pages or blocks? no permissoin for blocks, pages only for now
-    // how do you check the parentId validity? i think handled by the foreign key in the db
-    // a lot of Qs here, just do not suck!!
-    // the perm depending on who?? being page or not? or having parentId or not?
-    // imagine a page inside a page and wanna move the inner page, how to handle that? FOCUSSSSS
+//     // TODO: check on the order uniqueness under the same parentId, done by the DB, just check the error and throw a proper one
+//     // Your Creation just sucks, what is the difference between creating pages or blocks? where to add to the db
+//     // should we even still treat pages as blocks? yes
+//     // how to handle permissions for both creation pages or blocks? no permissoin for blocks, pages only for now
+//     // how do you check the parentId validity? i think handled by the foreign key in the db
+//     // a lot of Qs here, just do not suck!!
+//     // the perm depending on who?? being page or not? or having parentId or not?
+//     // imagine a page inside a page and wanna move the inner page, how to handle that? FOCUSSSSS
 
-    /**
-     * the options:
-     *   1. adding a page with no parent, no permission needed, add permission to the creator as OWNER
-     *   2. adding a page with a parent, permission needed on the parent, no permission will added to the new page
-     *   3. adding a block with a parent, permission needed on the parent, no permission will added to the new block
-     *
-     * so, simply:
-     *    - if the block (or page) has a parentId, no permission row (inherited)
-     *    - if the block is a PAGE and has no parentId, add permission to the creator as OWNER (can be shared as well)
-     */
+//     /**
+//      * the options:
+//      *   1. adding a page with no parent, no permission needed, add permission to the creator as OWNER
+//      *   2. adding a page with a parent, permission needed on the parent, no permission will added to the new page
+//      *   3. adding a block with a parent, permission needed on the parent, no permission will added to the new block
+//      *
+//      * so, simply:
+//      *    - if the block (or page) has a parentId, no permission row (inherited)
+//      *    - if the block is a PAGE and has no parentId, add permission to the creator as OWNER (can be shared as well)
+//      */
 
-    /**
-     * i am sure if the type is not PAGE, parentId is defined
-     * so, if the type is PAGE, we should check if parentId is defined or not
-     */
+//     /**
+//      * i am sure if the type is not PAGE, parentId is defined
+//      * so, if the type is PAGE, we should check if parentId is defined or not
+//      */
 
-    // i won't remove any of the comments, they are gold :D
+//     // i won't remove any of the comments, they are gold :D
 
-    const { type, parentId, order, content }: CreateBlockBodyInput = req.body as CreateBlockBodyInput;
+//     const { type, parentId, order, content }: CreateBlockBodyInput = req.body as CreateBlockBodyInput;
 
-    const result = await db.$transaction(async tx => {
-        // Creating the block
-        const created = await tx.block.create({
-            data: {
-                type,
-                parentId: parentId ?? null,
-                order,
-                content,
-                // creatorId: req.user!.id, // TODO: we may need?
-            },
-            select: {
-                id: true,
-                type: true,
-                parentId: true,
-                order: true,
-                content: true,
-                createdAt: true,
-                updatedAt: true,
-            },
-        });
+//     const result = await db.$transaction(async tx => {
+//         // Creating the block
+//         const created = await tx.block.create({
+//             data: {
+//                 type,
+//                 parentId: parentId ?? null,
+//                 order,
+//                 content,
+//                 // creatorId: req.user!.id, // TODO: we may need? idk remove it just for now
+//             },
+//             select: {
+//                 id: true,
+//                 type: true,
+//                 parentId: true,
+//                 order: true,
+//                 content: true,
+//                 createdAt: true,
+//                 updatedAt: true,
+//             },
+//         });
 
-        const block = {
-            id: created.id,
-            type: created.type,
-            parentId: created.parentId,
-            order: created.order,
-            content: created.content,
-            createdAt: created.createdAt.toISOString(),
-            updatedAt: created.updatedAt.toISOString(),
-        };
+//         const block = {
+//             id: created.id,
+//             type: created.type,
+//             parentId: created.parentId,
+//             order: created.order,
+//             content: created.content,
+//             createdAt: created.createdAt.toISOString(),
+//             updatedAt: created.updatedAt.toISOString(),
+//         };
 
-        const needsPermissionAssignment = type === BlockType.PAGE && !parentId;
+//         const needsPermissionAssignment = type === BlockType.PAGE && !parentId;
 
-        if (needsPermissionAssignment) {
-            await tx.permission.create({
-                data: {
-                    actorId: req.user!.id,
-                    actorType: ActorType.USER,
-                    entityId: created.id,
-                    entityType: EntityType.BLOCK,
-                    role: RoleType.OWNER,
-                },
-            });
-        }
+//         if (needsPermissionAssignment) {
+//             await tx.permission.create({
+//                 data: {
+//                     actorId: req.user!.id,
+//                     actorType: ActorType.USER,
+//                     entityId: created.id,
+//                     entityType: EntityType.BLOCK,
+//                     role: RoleType.OWNER,
+//                 },
+//             });
+//         }
 
-        return { block, needsPermissionAssignment };
-    });
+//         return { block, needsPermissionAssignment };
+//     });
 
-    const message = result.needsPermissionAssignment ? 'Parent block created successfully' : 'Children block created successfully';
+//     const message = result.needsPermissionAssignment ? 'Parent block created successfully' : 'Children block created successfully';
 
-    sendSuccess(reply, { block: result.block }, message, HttpStatus.CREATED); // TODO: should i return the block?
-};
+//     sendSuccess(reply, { block: result.block }, message, HttpStatus.CREATED); // TODO: should i return the block?
+// };
 
 // ====== Just placeholder(s) for now ======
 
-// READ
+// READ - not implemented yet
 const getBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     const { id } = req.params as GetBlockParamInput;
 
@@ -145,7 +146,7 @@ const getBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Promise
     sendSuccess(reply, data);
 };
 
-// UPDATE --
+// UPDATE - not yet implemented
 const updateBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     const { id } = req.params as { id: string };
     const payload = req.body as Partial<UpdateBlockParamInput>;
@@ -190,7 +191,7 @@ const updateBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Prom
     );
 };
 
-// DELETE
+// DELETE - not yet implemented
 const deleteBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     const { id } = req.params as DeleteBlockParamInput;
 
