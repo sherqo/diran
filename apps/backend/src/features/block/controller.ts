@@ -20,7 +20,6 @@ import { generateKeyBetween } from 'fractional-indexing';
 //      *
 //      * any data comes to this function, i'm sure the user has the permission to do it!
 //      *
-//      * for the order, idk, but let the client set it manually,
 //      * what if the block has the same order? will be too complex
 //      * for now just throw an expection
 //      *
@@ -109,6 +108,7 @@ import { generateKeyBetween } from 'fractional-indexing';
 //     sendSuccess(reply, { block: result.block }, message, HttpStatus.CREATED); // TODO: should i return the block?
 // };
 
+// TODO: add a service to manage the permissions stuff....
 // our new style create function that let the server handle the order generation
 const createBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     const { type, parentId, prevId, nextId, content }: CreateBlockBodyInput = req.body as CreateBlockBodyInput;

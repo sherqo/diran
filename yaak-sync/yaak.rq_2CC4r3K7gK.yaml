@@ -2,7 +2,7 @@ type: http_request
 model: http_request
 id: rq_2CC4r3K7gK
 createdAt: 2025-10-27T12:16:15.076977261
-updatedAt: 2025-10-31T19:27:14.324631819
+updatedAt: 2025-11-21T01:40:28.683428823
 workspaceId: wk_xHj4uko5i5
 folderId: fl_ATSPWaW5T7
 authentication: {}
@@ -10,11 +10,10 @@ authenticationType: null
 body:
   text: |-
     {
-      "type": "HEADING_1",
-      "order": "xx",
-      "parentId": "30e5c353-2de0-442d-8c86-18c4cc376537",
+      "type": "PAGE",
+      "order":"fucker",
       "content": {
-        "title" : "the good title"
+        "title" : "the good title 3"
       }
     }
 bodyType: application/json

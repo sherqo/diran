@@ -18,7 +18,7 @@ export const createBlockBodySchema = z
       // If type is "PAGE", parentId must be undefined. -> this is wrong! (i keep the wrong for reference and not to make the same mistake again)
       // If not "PAGE", parentId must exist.
       // if (data.type === BlockTypeEnum.PAGE) return data.parentId === undefined;
-      return typeof data.parentId === 'string' && data.parentId.trim() !== '';
+      return (typeof data.parentId === 'string' && data.parentId.trim() !== '') || data.type === BlockTypeEnum.PAGE; //? where do u check for PAGE then?!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     },
     {
       message: "parentId is required unless type='PAGE'",
