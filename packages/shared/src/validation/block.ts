@@ -36,7 +36,9 @@ export const updateBlockParamSchema = z.object({
   // same block but optional
   type: BlockTypeEnumSchema.optional(),
   parentId: z.uuid().nullable().optional(),
-  order: z.string().min(1).max(100), // a lot of Qs here...
+  prevId: z.string().optional().nullable(),
+  nextId: z.string().optional().nullable(),
+  // order: z.string().min(1).max(100), // a lot of Qs here...
   content: z.record(z.string(), z.any()).optional(),
 });
 
