@@ -6,7 +6,7 @@ import { sendSuccess } from '#lib/utils/response';
 import { ApiError } from '#lib/middleware/errorHandler';
 import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors';
 import { BlockType, ActorType, EntityType, RoleType } from '@prisma/client';
-import { IndexGenerator } from 'fractional-indexing-jittered';
+import { generateKeyBetween } from 'fractional-indexing';
 
 // CREATE
 // const createBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
@@ -108,6 +108,69 @@ import { IndexGenerator } from 'fractional-indexing-jittered';
 
 //     sendSuccess(reply, { block: result.block }, message, HttpStatus.CREATED); // TODO: should i return the block?
 // };
+
+// our new style create function that let the server handle the order generation
+const createBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
+    const { type, parentId, prevId, nextId, content }: CreateBlockBodyInput = req.body as CreateBlockBodyInput;
+
+    const result = await db.$transaction(async tx => {
+        // Fetch prev and next block orders if IDs are provided
+        const prevOrder = prevId ? ((await tx.block.findUnique({ where: { id: prevId }, select: { order: true } }))?.order ?? null) : null;
+        const nextOrder = nextId ? ((await tx.block.findUnique({ where: { id: nextId }, select: { order: true } }))?.order ?? null) : null;
+
+        // Generate order between prev and next (handles nulls for first/last positions)
+        const order = generateKeyBetween(prevOrder, nextOrder);
+
+        // Create the block
+        const created = await tx.block.create({
+            data: {
+                type,
+                parentId: parentId ?? null,
+                order,
+                content,
+            },
+            select: {
+                id: true,
+                type: true,
+                parentId: true,
+                order: true,
+                content: true,
+                createdAt: true,
+                updatedAt: true,
+            },
+        });
+
+        const block = {
+            id: created.id,
+            type: created.type,
+            parentId: created.parentId,
+            order: created.order,
+            content: created.content,
+            createdAt: created.createdAt.toISOString(),
+            updatedAt: created.updatedAt.toISOString(),
+        };
+
+        const needsPermissionAssignment = type === BlockType.PAGE && !parentId; // only the page with no parent
+
+        if (needsPermissionAssignment) {
+            await tx.permission.create({
+                data: {
+                    actorId: req.user!.id,
+                    actorType: ActorType.USER,
+                    entityId: created.id,
+                    entityType: EntityType.BLOCK,
+                    role: RoleType.OWNER,
+                },
+            });
+        }
+
+        return { block, needsPermissionAssignment };
+    });
+
+    const message = result.needsPermissionAssignment ? 'Page created successfully' : 'Block created successfully';
+
+    sendSuccess(reply, { block: result.block }, message, HttpStatus.CREATED);
+};
 
 // ====== Just placeholder(s) for now ======
 

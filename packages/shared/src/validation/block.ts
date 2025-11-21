@@ -8,12 +8,14 @@ export const createBlockBodySchema = z
     // i need a full block here but without id, createdAt, updatedAt
     type: BlockTypeEnumSchema,
     parentId: z.uuid().optional().nullable(),
-    order: z.string().min(1).max(100), // a lot of Qs here...
+    prevId: z.string().optional().nullable(),
+    nextId: z.string().optional().nullable(),
+    // order: z.string().min(1).max(100), // a lot of Qs here... ! NO LONGER REQUIRED (i think ^_^)
     content: z.record(z.string(), z.any()),
   })
   .refine(
     data => {
-      // If type is "PAGE", parentId must be undefined. -> this is wrong!
+      // If type is "PAGE", parentId must be undefined. -> this is wrong! (i keep the wrong for reference and not to make the same mistake again)
       // If not "PAGE", parentId must exist.
       // if (data.type === BlockTypeEnum.PAGE) return data.parentId === undefined;
       return typeof data.parentId === 'string' && data.parentId.trim() !== '';
