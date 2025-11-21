@@ -7,7 +7,7 @@ export async function registerExtrasRoutes(fastify: FastifyInstance): Promise<vo
         config: {
             rateLimit: {
                 max: 5,
-                timeWindow: '1 minute',
+                timeWindow: '1 hour',
             },
         },
         handler: addEmailToWaitlist,

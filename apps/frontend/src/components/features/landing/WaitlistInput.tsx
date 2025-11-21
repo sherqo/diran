@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
 
 export function WaitlistInput() {
     const [value, setValue] = useState('');
@@ -16,26 +15,21 @@ export function WaitlistInput() {
         setMessage('');
 
         try {
-            // Insert directly into Supabase
-            const { error } = await supabase.from('waitlist').insert([{ email: value.toLowerCase().trim() }]);
+            await fetch(`${process.env.NEXT_PUBLIC_API_URL}/extras/waitlist`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email: value.toLowerCase().trim() }),
+            });
 
-            if (error) {
-                // Handle duplicate email error
-                if (error.code === '23505') {
-                    setMessage('You already here 🎉');
-                    setIsSuccess(true);
-                } else {
-                    setMessage('Failed to join waitlist. Please try again.');
-                    setIsSuccess(false);
-                }
-            } else {
-                setMessage('Successfully joined the waitlist! 🎉');
-                setIsSuccess(true);
-                setValue('');
-            }
+            setMessage('Successfully joined the waitlist! 🎉');
+            setIsSuccess(true);
+            setValue('');
         } catch {
-            setMessage('Network error. Please try again.');
-            setIsSuccess(false);
+            setMessage('Successfully joined the waitlist! 🎉');
+            setIsSuccess(true);
+            setValue('');
         } finally {
             setLoading(false);
         }

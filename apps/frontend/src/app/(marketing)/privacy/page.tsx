@@ -76,7 +76,6 @@ export default function PrivacyPage() {
                     <h2 className="mb-4 text-2xl font-semibold text-gray-900">4. Third-Party Services</h2>
                     <p className="mb-4 text-gray-700">We use trusted services to operate the app:</p>
                     <ul className="list-inside list-disc space-y-2 text-gray-700">
-                        <li>Supabase</li>
                         <li>Vercel</li>
                         <li>Google OAuth</li>
                         <li>AWS</li>
