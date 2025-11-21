@@ -2,7 +2,7 @@
 // Kept for reference during migration
 
 import { FastifyInstance } from 'fastify';
-import { registerAuthRoutes, registerHealthRoutes, registerUserRoutes, registerBlockRoutes } from '#features';
+import { registerAuthRoutes, registerHealthRoutes, registerUserRoutes, registerBlockRoutes, registerExtrasRoutes } from '#features';
 
 /**
  * OLD EXPRESS ROUTES STRUCTURE (for reference):
@@ -23,4 +23,5 @@ export const registerAllRoutes = async (fastify: FastifyInstance) => {
     await fastify.register(registerHealthRoutes, { prefix: '/health' });
     await fastify.register(registerUserRoutes, { prefix: '/user' });
     await fastify.register(registerBlockRoutes, { prefix: '/block' });
+    await fastify.register(registerExtrasRoutes, { prefix: '/extras' });
 };

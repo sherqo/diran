@@ -1,0 +1,27 @@
+type: http_request
+model: http_request
+id: rq_VSQgfCYjYS
+createdAt: 2025-11-21T04:27:48.528157454
+updatedAt: 2025-11-21T04:33:35.910720437
+workspaceId: wk_xHj4uko5i5
+folderId: null
+authentication: {}
+authenticationType: null
+body:
+  text: "\n\n{\n\t\"email\": \"fdsharf2fdawy#\"\n}"
+bodyType: application/json
+description: ''
+headers:
+- enabled: true
+  name: Content-Type
+  value: application/json
+  id: null
+- enabled: true
+  name: User-Agent
+  value: insomnia/11.6.1
+  id: null
+method: POST
+name: waitlist emails
+sortPriority: 5000.001
+url: ${[base_url]}/extras/waitlist
+urlParameters: []

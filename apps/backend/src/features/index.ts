@@ -4,3 +4,4 @@ export { registerAuthRoutes } from './auth/routes';
 export { registerHealthRoutes } from './health/routes';
 export { registerUserRoutes } from './user/routes';
 export { registerBlockRoutes } from './block/routes';
+export { registerExtrasRoutes } from './extras/router';
