@@ -2,7 +2,7 @@
 
 // // Minimal initial value used by the Yoopta demo page.
 // // Keep it small — it purposely avoids any upload-related content.
-// export const WITH_BASIC_INIT_VALUE: YooptaContentValue = [
+// export const WITH_BASIC_INIT_VALUE: YooptaContentValue =ima [
 //     {
 //         type: 'heading-one',
 //         children: [{ text: 'Example — Yoopta editor' }],
@@ -514,36 +514,36 @@ export const WITH_BASIC_INIT_VALUE: any = {
             },
         ],
     },
-    '78c8e461-d7cd-474d-97c9-773550bd2ca9': {
-        id: '78c8e461-d7cd-474d-97c9-773550bd2ca9',
-        value: [
-            {
-                id: 'c734ccd2-38f1-4f7b-9c84-45098100f901',
-                type: 'image',
-                children: [
-                    {
-                        text: '',
-                    },
-                ],
-                props: {
-                    nodeType: 'void',
-                    src: 'https://res.cloudinary.com/ench-app/image/upload/v1713028758/Cheems_doge_fx8yvq.jpg',
-                    alt: 'cloudinary',
-                    srcSet: null,
-                    fit: 'contain',
-                    sizes: {
-                        width: 334,
-                        height: 368,
-                    },
-                },
-            },
-        ],
-        type: 'Image',
-        meta: {
-            order: 43,
-            depth: 0,
-        },
-    },
+    // '78c8e461-d7cd-474d-97c9-773550bd2ca9': {
+    //     id: '78c8e461-d7cd-474d-97c9-773550bd2ca9',
+    //     value: [
+    //         {
+    //             id: 'c734ccd2-38f1-4f7b-9c84-45098100f901',
+    //             type: 'image',
+    //             children: [
+    //                 {
+    //                     text: '',
+    //                 },
+    //             ],
+    //             props: {
+    //                 nodeType: 'void',
+    //                 src: 'https://res.cloudinary.com/ench-app/image/upload/v1713028758/Cheems_doge_fx8yvq.jpg',
+    //                 alt: 'cloudinary',
+    //                 srcSet: null,
+    //                 fit: 'contain',
+    //                 sizes: {
+    //                     width: 334,
+    //                     height: 368,
+    //                 },
+    //             },
+    //         },
+    //     ],
+    //     type: 'Image',
+    //     meta: {
+    //         order: 43,
+    //         depth: 0,
+    //     },
+    // },
     'cec531df-cb6a-473e-807b-26be460cb391': {
         id: 'cec531df-cb6a-473e-807b-26be460cb391',
         value: [
@@ -648,36 +648,36 @@ export const WITH_BASIC_INIT_VALUE: any = {
             depth: 0,
         },
     },
-    'ea205e9e-2a9e-4a99-ab52-6d713d423860': {
-        id: 'ea205e9e-2a9e-4a99-ab52-6d713d423860',
-        value: [
-            {
-                id: '269a9bf3-34e9-4def-98e7-5ecd94110cd4',
-                type: 'image',
-                children: [
-                    {
-                        text: '',
-                    },
-                ],
-                props: {
-                    nodeType: 'void',
-                    src: 'https://res.cloudinary.com/ench-app/image/upload/v1713029072/ImageTransformer_hlr9eo.jpg',
-                    alt: 'cloudinary',
-                    srcSet: null,
-                    fit: 'contain',
-                    sizes: {
-                        width: 448,
-                        height: 379,
-                    },
-                },
-            },
-        ],
-        type: 'Image',
-        meta: {
-            order: 45,
-            depth: 0,
-        },
-    },
+    // 'ea205e9e-2a9e-4a99-ab52-6d713d423860': {
+    //     id: 'ea205e9e-2a9e-4a99-ab52-6d713d423860',
+    //     value: [
+    //         {
+    //             id: '269a9bf3-34e9-4def-98e7-5ecd94110cd4',
+    //             type: 'image',
+    //             children: [
+    //                 {
+    //                     text: '',
+    //                 },
+    //             ],
+    //             props: {
+    //                 nodeType: 'void',
+    //                 src: 'https://res.cloudinary.com/ench-app/image/upload/v1713029072/ImageTransformer_hlr9eo.jpg',
+    //                 alt: 'cloudinary',
+    //                 srcSet: null,
+    //                 fit: 'contain',
+    //                 sizes: {
+    //                     width: 448,
+    //                     height: 379,
+    //                 },
+    //             },
+    //         },
+    //     ],
+    //     type: 'Image',
+    //     meta: {
+    //         order: 45,
+    //         depth: 0,
+    //     },
+    // },
     '7d3f395b-656d-46af-924c-b88b9974f631': {
         id: '7d3f395b-656d-46af-924c-b88b9974f631',
         type: 'HeadingThree',
@@ -938,42 +938,42 @@ export const WITH_BASIC_INIT_VALUE: any = {
             depth: 0,
         },
     },
-    '28dac558-f474-4198-b267-3b95bdd1016c': {
-        id: '28dac558-f474-4198-b267-3b95bdd1016c',
-        value: [
-            {
-                id: '3ea8b393-70dc-4c69-a370-17373cc4dab5',
-                type: 'bulleted-list',
-                children: [
-                    {
-                        text: 'Optimizations for media components (',
-                    },
-                    {
-                        text: 'srcSet ',
-                        bold: true,
-                    },
-                    {
-                        text: 'for image and ',
-                    },
-                    {
-                        text: 'sources',
-                        bold: true,
-                    },
-                    {
-                        text: ' for video)',
-                    },
-                ],
-                props: {
-                    nodeType: 'block',
-                },
-            },
-        ],
-        type: 'BulletedList',
-        meta: {
-            order: 38,
-            depth: 0,
-        },
-    },
+    // '28dac558-f474-4198-b267-3b95bdd1016c': {
+    //     id: '28dac558-f474-4198-b267-3b95bdd1016c',
+    //     value: [
+    //         {
+    //             id: '3ea8b393-70dc-4c69-a370-17373cc4dab5',
+    //             type: 'bulleted-list',
+    //             children: [
+    //                 {
+    //                     text: 'Optimizations for media components (',
+    //                 },
+    //                 {
+    //                     text: 'srcSet ',
+    //                     bold: true,
+    //                 },
+    //                 {
+    //                     text: 'for image and ',
+    //                 },
+    //                 {
+    //                     text: 'sources',
+    //                     bold: true,
+    //                 },
+    //                 {
+    //                     text: ' for video)',
+    //                 },
+    //             ],
+    //             props: {
+    //                 nodeType: 'block',
+    //             },
+    //         },
+    //     ],
+    //     type: 'BulletedList',
+    //     meta: {
+    //         order: 38,
+    //         depth: 0,
+    //     },
+    // },
     'f33fc1b8-bf3b-4e63-b540-41f257410719': {
         id: 'f33fc1b8-bf3b-4e63-b540-41f257410719',
         value: [
