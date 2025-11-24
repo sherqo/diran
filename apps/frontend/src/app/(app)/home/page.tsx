@@ -25,9 +25,7 @@ const PageHeader = ({ className }: { className?: string }) => (
 );
 
 const PageBody = ({ className }: { className?: string }) => (
-    <div className={`flex flex-col gap-4 px-4 py-10 ${className || ''}`}>
-        <SimpleEditor />
-    </div>
+    <div className={`flex flex-col gap-4 px-4 py-10 ${className || ''}`}>{/* <SimpleEditor /> */}</div>
 );
 
 export default function Page() {
@@ -35,7 +33,7 @@ export default function Page() {
         <SidebarProvider>
             <AppSidebar />
             <SidebarInset className="flex h-screen flex-col">
-                <PageHeader className="flex-shrink-0" />
+                <PageHeader className="shrink-0" />
                 <PageBody className="flex-1 overflow-y-auto" />
             </SidebarInset>
         </SidebarProvider>
