@@ -33,11 +33,11 @@ import YooptaEditor, { createYooptaEditor, YooptaContentValue } from '@yoopta/ed
 import Paragraph from '@yoopta/paragraph';
 import Blockquote from '@yoopta/blockquote';
 import Embed from '@yoopta/embed';
+import Image from '@yoopta/image';
 import Link from '@yoopta/link';
 import Callout from '@yoopta/callout';
-// import Image from '@yoopta/image';
-// import Video from '@yoopta/video';
-// import File from '@yoopta/file';
+import Video from '@yoopta/video';
+import File from '@yoopta/file';
 import Accordion from '@yoopta/accordion';
 import { NumberedList, BulletedList, TodoList } from '@yoopta/lists';
 import { Bold, Italic, CodeMark, Underline, Strike, Highlight } from '@yoopta/marks';
@@ -73,15 +73,8 @@ const uploadToCloudinary = async () => {
 import { useMemo, useRef, useState } from 'react';
 import { WITH_BASIC_INIT_VALUE } from './initValue';
 
-const PLUGINS = [
-    Paragraph.extend({
-        events: {
-            // It will be fired after the block is created
-            onCreate: (editor, blockId) => {
-                console.log('onCreate', blockId);
-            },
-        },
-    }),
+const plugins = [
+    Paragraph,
     Table,
     Divider.extend({
         elementProps: {
@@ -104,55 +97,55 @@ const PLUGINS = [
     Link,
     Embed,
     // Image upload handler removed / commented out
-    // Image.extend({
-    //     // options: {
-    //     //     async onUpload(file) {
-    //     //         const data = await uploadToCloudinary(file, 'image');
-    //     //         return {
-    //     //             src: data.secure_url,
-    //     //             alt: 'cloudinary',
-    //     //             sizes: {
-    //     //                 width: data.width,
-    //     //                 height: data.height,
-    //     //             },
-    //     //         };
-    //     //     },
-    //     // },
-    // }),
-    // // Video upload handlers removed / commented out
-    // Video.extend({
-    //     // options: {
-    //     //     onUpload: async file => {
-    //     //         const data = await uploadToCloudinary(file, 'video');
-    //     //         return {
-    //     //             src: data.secure_url,
-    //     //             alt: 'cloudinary',
-    //     //             sizes: {
-    //     //                 width: data.width,
-    //     //                 height: data.height,
-    //     //             },
-    //     //         };
-    //     //     },
-    //     //     onUploadPoster: async file => {
-    //     //         const image = await uploadToCloudinary(file, 'image');
-    //     //         return image.secure_url;
-    //     //     },
-    //     // },
-    // }),
-    // // File upload handler removed / commented out
-    // File.extend({
-    //     // options: {
-    //     //     onUpload: async file => {
-    //     //         const response = await uploadToCloudinary(file, 'auto');
-    //     //         return {
-    //     //             src: response.secure_url,
-    //     //             format: response.format,
-    //     //             name: response.name,
-    //     //             size: response.bytes,
-    //     //         };
-    //     //     },
-    //     // },
-    // }),
+    Image.extend({
+        // options: {
+        //     async onUpload(file) {
+        //         const data = await uploadToCloudinary(file, 'image');
+        //         return {
+        //             src: data.secure_url,
+        //             alt: 'cloudinary',
+        //             sizes: {
+        //                 width: data.width,
+        //                 height: data.height,
+        //             },
+        //         };
+        //     },
+        // },
+    }),
+    // Video upload handlers removed / commented out
+    Video.extend({
+        // options: {
+        //     onUpload: async file => {
+        //         const data = await uploadToCloudinary(file, 'video');
+        //         return {
+        //             src: data.secure_url,
+        //             alt: 'cloudinary',
+        //             sizes: {
+        //                 width: data.width,
+        //                 height: data.height,
+        //             },
+        //         };
+        //     },
+        //     onUploadPoster: async file => {
+        //         const image = await uploadToCloudinary(file, 'image');
+        //         return image.secure_url;
+        //     },
+        // },
+    }),
+    // File upload handler removed / commented out
+    File.extend({
+        // options: {
+        //     onUpload: async file => {
+        //         const response = await uploadToCloudinary(file, 'auto');
+        //         return {
+        //             src: response.secure_url,
+        //             format: response.format,
+        //             name: response.name,
+        //             size: response.bytes,
+        //         };
+        //     },
+        // },
+    }),
 ];
 
 const TOOLS = {
@@ -182,11 +175,13 @@ function WithBaseFullSetup() {
     };
 
     return (
-        <div className="bg-background min-h-screen w-full" ref={selectionRef}>
+        <div className="px-auto flex w-full justify-center" ref={selectionRef}>
+            {/* editor surface — tuned for light / dark modes and responsive widths */}
+            {/* <div className="w-full rounded-xl bg-white p-6 text-slate-900 shadow-sm transition-colors duration-150 dark:bg-slate-900 dark:text-slate-100"> */}
             <YooptaEditor
-                className="mx-auto w-full! max-w-5xl! px-4 py-8 md:px-8 md:py-12"
+                className="w-full"
                 editor={editor}
-                plugins={PLUGINS}
+                plugins={plugins}
                 tools={TOOLS}
                 marks={MARKS}
                 selectionBoxRoot={selectionRef}
@@ -194,6 +189,7 @@ function WithBaseFullSetup() {
                 onChange={onChange}
                 autoFocus
             />
+            {/* </div> */}
         </div>
     );
 }
