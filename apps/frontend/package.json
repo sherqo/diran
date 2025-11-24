@@ -13,6 +13,7 @@
     },
     "dependencies": {
         "@diran/shared": "workspace:*",
+        "@editorjs/editorjs": "^2.31.0",
         "@floating-ui/react": "^0.27.16",
         "@fontsource-variable/inter": "^5.2.8",
         "@next/eslint-plugin-next": "^15.5.6",
