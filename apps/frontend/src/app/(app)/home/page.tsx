@@ -1,14 +1,11 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import { AppSidebar } from '@/components/app-sidebar';
 import { NavActions } from '@/components/nav-actions';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from '@/components/ui/breadcrumb';
 import { Separator } from '@/components/ui/separator';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-
-import EditorJS from '@editorjs/editorjs';
-import Header from '@editorjs/header';
-import List from '@editorjs/list';
 
 const PageHeader = ({ className }: { className?: string }) => (
     <header className={`bg-sidebar flex h-14 shrink-0 items-center gap-2 border-b ${className || ''}`}>
@@ -39,38 +36,61 @@ const PageBody = ({ className }: { className?: string }) => {
 };
 
 export default function Page() {
-    const editor = new EditorJS({
-        /**
-         * Id of Element that should contain the Editor
-         */
-        holder: 'editorjs',
+    const editorRef = useRef<{ destroy?: () => void } | null>(null);
 
-        /**
-         * Available Tools list.
-         * Pass Tool's class or Settings object for each Tool you want to use
-         */
-        tools: {
-            header: Header,
-            list: List,
-        },
+    useEffect(() => {
+        const initEditor = async () => {
+            if (!editorRef.current) {
+                // Dynamic imports to avoid SSR issues
+                const EditorJS = (await import('@editorjs/editorjs')).default;
+                const Header = (await import('@editorjs/header')).default;
+                const List = (await import('@editorjs/list')).default;
 
-        onReady: () => {
-            console.log('Editor.js is ready to work!');
-        },
+                const editor = new EditorJS({
+                    /**
+                     * Id of Element that should contain the Editor
+                     */
+                    holder: 'editorjs',
 
-        onChange: (api, event) => {
-            console.log("Now I know that Editor's content changed!", event);
-        },
-    });
+                    /**
+                     * Available Tools list.
+                     * Pass Tool's class or Settings object for each Tool you want to use
+                     */
+                    tools: {
+                        header: Header,
+                        list: List,
+                    },
 
-    editor.isReady
-        .then(() => {
-            console.log('Editor.js is ready to work!');
-            /** Do anything you need after editor initialization */
-        })
-        .catch(reason => {
-            console.log(`Editor.js initialization failed because of ${reason}`);
-        });
+                    onReady: () => {
+                        console.log('Editor.js is ready to work!');
+                    },
+
+                    onChange: (api, event) => {
+                        console.log("Now I know that Editor's content changed!", event);
+                    },
+                });
+
+                editor.isReady
+                    .then(() => {
+                        console.log('Editor.js is ready to work!');
+                        /** Do anything you need after editor initialization */
+                    })
+                    .catch(reason => {
+                        console.log(`Editor.js initialization failed because of ${reason}`);
+                    });
+
+                editorRef.current = editor;
+            }
+        };
+
+        initEditor();
+
+        return () => {
+            if (editorRef.current && editorRef.current.destroy) {
+                editorRef.current.destroy();
+            }
+        };
+    }, []);
 
     return (
         <SidebarProvider>
