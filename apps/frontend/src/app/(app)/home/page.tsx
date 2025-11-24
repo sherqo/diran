@@ -24,9 +24,7 @@ const PageHeader = ({ className }: { className?: string }) => (
 );
 
 const PageBody = ({ className }: { className?: string }) => (
-    <div className={`flex flex-col gap-4 px-4 py-10 ${className || ''}`}>
-        {/* Content will go here */}
-    </div>
+    <div className={`flex flex-col gap-4 px-4 py-10 ${className || ''}`}>{/* Content will go here */}</div>
 );
 
 export default function Page() {
