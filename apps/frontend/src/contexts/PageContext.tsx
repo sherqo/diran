@@ -42,18 +42,7 @@ export function PageProvider({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         // Load pages on mount
-        const loadInitialPages = async () => {
-            setLoading(true);
-            const result = await getAllPagesApi();
-
-            if (result.success && result.data?.pages) {
-                setPages(result.data.pages);
-            }
-
-            setLoading(false);
-        };
-
-        loadInitialPages();
+        fetchPages();
     }, []);
 
     const value = {
