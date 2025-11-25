@@ -1,0 +1,23 @@
+type: http_request
+model: http_request
+id: rq_RhaBETjh2f
+createdAt: 2025-11-25T16:12:46.612961819
+updatedAt: 2025-11-25T16:20:57.987937807
+workspaceId: wk_xHj4uko5i5
+folderId: fl_ATSPWaW5T7
+authentication: {}
+authenticationType: null
+body:
+  text: ''
+bodyType: application/json
+description: ''
+headers:
+- enabled: true
+  name: Content-Type
+  value: application/json
+  id: ZfzahTJKUU
+method: GET
+name: all pages
+sortPriority: -1760017295647.999
+url: ${[ base_url ]}/page
+urlParameters: []

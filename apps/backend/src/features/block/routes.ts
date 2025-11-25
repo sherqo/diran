@@ -2,7 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { validateRequest as vr } from '#lib/middleware/validation.js';
 import { authenticate as auth } from '#lib/middleware/auth.js';
 import { validatePermission as perm } from './middlewares.js';
-import { createBlock, getBlock, updateBlock, deleteBlock } from './controller.js';
+import { createBlock, getBlock, updateBlock, deleteBlock, getAllPages } from './controller.js';
 import {
     createBlockBodySchema,
     getBlockParamSchema,
@@ -46,10 +46,11 @@ export async function registerBlockRoutes(fastify: FastifyInstance): Promise<voi
 }
 
 export async function registerPageRoutes(fastify: FastifyInstance): Promise<void> {
-    // All block routes require authentication
-    // Create block
-    // fastify.post('/', {
-    //     preHandler: [vr({ bodySchema: createBlockBodySchema }), auth],
-    //     handler: createBlock,
-    // });
+    // creating, updating, deleting pages is ez and can be done via blocks
+    // these routes will be for smth like: getting all pages, getting all blocks in a page, etc.
+
+    fastify.get('/', {
+        preHandler: [auth],
+        handler: getAllPages,
+    });
 }

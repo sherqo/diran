@@ -269,4 +269,66 @@ const deleteBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Prom
     sendSuccess(reply, {}, 'Block deleted successfully');
 };
 
-export { createBlock, getBlock, updateBlock, deleteBlock };
+// GET ALL PAGES - returns all top-level pages the user has access to
+const getAllPages = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
+    const userId = req.user!.id;
+
+    // First, get all page IDs where user has permission
+    const permissions = await db.permission.findMany({
+        where: {
+            actorId: userId,
+            actorType: ActorType.USER,
+            entityType: EntityType.BLOCK,
+            role: {
+                in: [RoleType.OWNER, RoleType.EDITOR, RoleType.VIEWER],
+            },
+        },
+        select: {
+            entityId: true,
+            role: true,
+        },
+    });
+
+    const pageIdsWithRoles = new Map(permissions.map(p => [p.entityId, p.role]));
+    const pageIds = Array.from(pageIdsWithRoles.keys());
+
+    // If no permissions found, return empty array
+    if (pageIds.length === 0) {
+        return sendSuccess(reply, { pages: [] }, 'No pages found');
+    }
+
+    // Fetch all top-level pages that user has access to
+    const pages = await db.block.findMany({
+        where: {
+            id: { in: pageIds },
+            type: BlockType.PAGE,
+            parentId: null,
+        },
+        select: {
+            id: true,
+            type: true,
+            content: true,
+            order: true,
+            createdAt: true,
+            updatedAt: true,
+        },
+        orderBy: {
+            order: 'asc',
+        },
+    });
+
+    // Transform the response and attach roles
+    const transformedPages = pages.map(page => ({
+        id: page.id,
+        type: page.type,
+        content: page.content,
+        order: page.order,
+        role: pageIdsWithRoles.get(page.id),
+        createdAt: page.createdAt.toISOString(),
+        updatedAt: page.updatedAt.toISOString(),
+    }));
+
+    return sendSuccess(reply, { length: transformedPages.length, pages: transformedPages }, 'Pages retrieved successfully');
+};
+
+export { createBlock, getBlock, updateBlock, deleteBlock, getAllPages };

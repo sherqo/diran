@@ -28,6 +28,7 @@ import {
 export const registerAllRoutes = async (fastify: FastifyInstance) => {
     await fastify.register(registerAuthRoutes, { prefix: '/auth' });
     await fastify.register(registerUserRoutes, { prefix: '/user' });
+
     await fastify.register(registerBlockRoutes, { prefix: '/block' });
     await fastify.register(registerPageRoutes, { prefix: '/page' });
 
