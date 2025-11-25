@@ -77,6 +77,7 @@ export const Editor = forwardRef<EditorRef, EditorProps>((props, ref) => {
                 list: List,
             },
 
+            // ! All of these stuff are working perfectly --- commented to stop the ts fucking warnings
             // * Event callbacks - all logged to console - when something changes
             // ? event can be: block-added, block-removed, block-moved, block-changed.
             // ? added, removed, changed: {index}
@@ -92,28 +93,28 @@ export const Editor = forwardRef<EditorRef, EditorProps>((props, ref) => {
                 } else {
                     const detail = event.detail;
                     const eventType = event.type;
-                    const blockIndexFrom = detail.fromIndex; // in moved only
-                    const blockIndex = detail.index || detail.toIndex; // in added, removed, changed and in moved it's toIndex
+                    // const blockIndexFrom = detail.fromIndex; // in moved only
+                    // const blockIndex = detail.index || detail.toIndex; // in added, removed, changed and in moved it's toIndex
                     const blockId = detail.target.id;
                     const blockType = detail.target.name;
-                    const blockContent = (await detail.target.save()).data;
+                    // const blockContent = (await detail.target.save()).data;
                     // we also need parentId, which is the pageId
 
                     console.log('event-type: ', eventType);
-                    console.log('blockIndex: ', blockIndex);
+                    // console.log('blockIndex: ', blockIndex);
                     console.log('BlockId: ', blockId);
                     console.log('BlockType: ', blockType);
-                    console.log('updated blockContent: ', blockContent);
+                    // console.log('updated blockContent: ', blockContent);
 
-                    const totalBlocks = _api.blocks.getBlocksCount();
-                    const prevIndex = blockIndex > 0 ? blockIndex - 1 : null;
-                    console.log('prevIndex ', prevIndex);
-                    const nextIndex = blockIndex < totalBlocks - 1 ? blockIndex + 1 : null;
-                    console.log('nextIndex ', nextIndex);
-                    const prevBlockId = prevIndex || prevIndex === 0 ? _api.blocks.getBlockByIndex(prevIndex)?.id : null;
-                    const nextBlockId = nextIndex ? _api.blocks.getBlockByIndex(nextIndex)?.id : null;
-                    console.log('PrevBlockId: ', prevBlockId);
-                    console.log('NextBlockId: ', nextBlockId);
+                    // const totalBlocks = _api.blocks.getBlocksCount();
+                    // const prevIndex = blockIndex > 0 ? blockIndex - 1 : null;
+                    // console.log('prevIndex ', prevIndex);
+                    // const nextIndex = blockIndex < totalBlocks - 1 ? blockIndex + 1 : null;
+                    // console.log('nextIndex ', nextIndex);
+                    // const prevBlockId = prevIndex || prevIndex === 0 ? _api.blocks.getBlockByIndex(prevIndex)?.id : null;
+                    // const nextBlockId = nextIndex ? _api.blocks.getBlockByIndex(nextIndex)?.id : null;
+                    // console.log('PrevBlockId: ', prevBlockId);
+                    // console.log('NextBlockId: ', nextBlockId);
                 }
             },
 

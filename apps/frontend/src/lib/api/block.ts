@@ -32,3 +32,20 @@ export const deleteBlockApi = (id: string) =>
     apiRequest<DeleteBlockResponseData>(`/block/${id}`, {
         method: 'DELETE',
     });
+
+/**
+ * Get all pages (blocks with type=PAGE)
+ */
+export const getAllPagesApi = () =>
+    apiRequest<{
+        pages: Array<{
+            id: string;
+            type: string;
+            content: Record<string, unknown>;
+            order: string;
+            role: string;
+            createdAt: string;
+            updatedAt: string;
+        }>;
+        length: number;
+    }>('/page');
