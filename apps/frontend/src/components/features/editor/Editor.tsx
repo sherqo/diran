@@ -5,7 +5,6 @@ import EditorJS, { OutputData } from '@sharqawycs/editorjs';
 import Header from '@editorjs/header';
 import List from '@editorjs/list';
 import { isDevelopment } from '@/lib/utils';
-import { Construction } from 'lucide-react';
 
 interface EditorProps {
     initialData?: OutputData;
