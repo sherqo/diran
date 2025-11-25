@@ -63,26 +63,6 @@ export default function EditorTestPage() {
                     <pre className="overflow-auto text-xs">{JSON.stringify(savedData, null, 2)}</pre>
                 </div>
             )}
-
-            {/* Explanation */}
-            <div className="mt-8 space-y-4">
-                <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950">
-                    <h3 className="mb-2 font-semibold">How to use:</h3>
-                    <ol className="list-inside list-decimal space-y-1 text-sm">
-                        <li>Type in the editor above</li>
-                        <li>Click &quot;Get Data&quot; when you want the content</li>
-                        <li>See the JSON output below</li>
-                        <li>Do whatever you want with that data!</li>
-                    </ol>
-                </div>
-
-                <div className="rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-900 dark:bg-green-950">
-                    <h3 className="mb-2 font-semibold">What you get:</h3>
-                    <p className="text-sm">
-                        The editor gives you a JSON object with all the content. You decide when and how to save it to your backend.
-                    </p>
-                </div>
-            </div>
         </div>
     );
 }

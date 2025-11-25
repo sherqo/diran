@@ -39,20 +39,6 @@ const DEFAULT_EDITOR_DATA: OutputData = {
     ],
 };
 
-/**
- * SUPER SIMPLE Editor.js wrapper
- *
- * Usage:
- * ```tsx
- * const editorRef = useRef<SimpleEditorRef>(null);
- *
- * <SimpleEditor ref={editorRef} />
- *
- * // Get data when you want it:
- * const data = await editorRef.current?.save();
- * console.log(data); // This is your Editor.js output
- * ```
- */
 export const Editor = forwardRef<EditorRef, EditorProps>((props, ref) => {
     const { initialData = DEFAULT_EDITOR_DATA, placeholder = 'Start typing...', readOnly = false } = props;
     const editorInstance = useRef<EditorJS | null>(null);
@@ -90,25 +76,43 @@ export const Editor = forwardRef<EditorRef, EditorProps>((props, ref) => {
                 list: List,
             },
 
-            // Event callbacks - all logged to console - when something changes
+            // * Event callbacks - all logged to console - when something changes
+            // ? event can be: block-added, block-removed, block-moved, block-changed.
+            // ? added, removed, changed: {index}
+            // ? moved: {fromIndex, toIndex}
+            // ? all of them provide 'target' in detail - the block element affected
             onChange: async (api, event) => {
-                // console.log('📝 CHANGED', event.type);
-                // console.log('🔧 Element:', { details: event.detail.target });
+                console.log('=======================');
+                console.log('THE API:', api);
+                console.log('THE EVENT:', event);
+                console.log('=======================');
 
-                try {
-                    const content = await api.saver.save();
+                if (Array.isArray(event)) {
+                    console.log('omg we have an array');
+                    for (const ev of event) {
+                        console.log('📝 CHANGED', ev.type);
+                        console.log('🔧 Element:', { details: ev.detail.target });
+                    }
+                } else {
+                    console.log('📝 CHANGED', event.type);
+                    console.log('🔧 Element:', { details: event.detail.target });
 
-                    // Readable summary
-                    console.log(`📦 Total Blocks: ${content.blocks.length}`);
+                    try {
+                        const content = await api.saver.save();
 
-                    // Full JSON - copy this for backend
-                    console.log('📄 FULL JSON:', content);
-                    console.log('---');
-                } catch (err) {
-                    console.error('Error getting content:', err);
+                        // Readable summary
+                        console.log(`📦 Total Blocks: ${content.blocks.length}`);
+
+                        // Full JSON - copy this for backend
+                        console.log('📄 FULL JSON:', content);
+                        console.log('---');
+                    } catch (err) {
+                        console.error('Error getting content:', err);
+                    }
                 }
             },
 
+            // TODO: i think this can be used later on loading or smth...
             onReady: () => {
                 if (isDevelopment) {
                     console.log('✅ Editor.js is READY!');
