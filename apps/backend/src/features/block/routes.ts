@@ -44,3 +44,12 @@ export async function registerBlockRoutes(fastify: FastifyInstance): Promise<voi
         handler: deleteBlock,
     });
 }
+
+export async function registerPageRoutes(fastify: FastifyInstance): Promise<void> {
+    // All block routes require authentication
+    // Create block
+    // fastify.post('/', {
+    //     preHandler: [vr({ bodySchema: createBlockBodySchema }), auth],
+    //     handler: createBlock,
+    // });
+}

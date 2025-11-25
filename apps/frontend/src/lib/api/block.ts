@@ -1,11 +1,5 @@
 import { apiRequest } from './helpers';
-import type {
-    Block,
-    CreateBlockResponseData,
-    GetBlockResponseData,
-    UpdateBlockResponseData,
-    DeleteBlockResponseData,
-} from '@/shared/types/block';
+import type { CreateBlockResponseData, GetBlockResponseData, UpdateBlockResponseData, DeleteBlockResponseData } from '@/shared/types/block';
 import type { CreateBlockBodyInput, UpdateBlockParamInput } from '@/shared/validation/block';
 
 /**
