@@ -81,12 +81,7 @@ export const Editor = forwardRef<EditorRef, EditorProps>((props, ref) => {
             // ? added, removed, changed: {index}
             // ? moved: {fromIndex, toIndex}
             // ? all of them provide 'target' in detail - the block element affected
-            onChange: async (api, event) => {
-                console.log('=======================');
-                console.log('THE API:', api);
-                console.log('THE EVENT:', event);
-                console.log('=======================');
-
+            onChange: async (_api, event) => {
                 if (Array.isArray(event)) {
                     console.log('omg we have an array');
                     for (const ev of event) {
@@ -94,21 +89,18 @@ export const Editor = forwardRef<EditorRef, EditorProps>((props, ref) => {
                         console.log('🔧 Element:', { details: ev.detail.target });
                     }
                 } else {
-                    console.log('📝 CHANGED', event.type);
-                    console.log('🔧 Element:', { details: event.detail.target });
+                    const detail = event.detail;
+                    const eventType = event.type;
+                    const blockIndex = detail.index;
+                    const blockId = detail.target.id;
+                    const blockType = detail.target.name;
+                    const blockContent = (await _api.blocks.getBlockByIndex(blockIndex)?.save()).data;
 
-                    try {
-                        const content = await api.saver.save();
-
-                        // Readable summary
-                        console.log(`📦 Total Blocks: ${content.blocks.length}`);
-
-                        // Full JSON - copy this for backend
-                        console.log('📄 FULL JSON:', content);
-                        console.log('---');
-                    } catch (err) {
-                        console.error('Error getting content:', err);
-                    }
+                    console.log('event-type: ', eventType);
+                    console.log('blockIndex: ', blockIndex);
+                    console.log('BlockId: ', blockId);
+                    console.log('BlockType: ', blockType);
+                    console.log('updated blockContent: ', blockContent);
                 }
             },
 
