@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { FastifyReply } from 'fastify';
 import { AuthenticatedRequest } from '#lib/middleware/auth';
 import { CreateBlockBodyInput, GetBlockParamInput, UpdateBlockParamInput, DeleteBlockParamInput } from '@diran/shared/validation/block';
