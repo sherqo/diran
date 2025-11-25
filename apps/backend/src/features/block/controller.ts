@@ -111,7 +111,7 @@ import { generateKeyBetween } from 'fractional-indexing';
 // TODO: add a service to manage the permissions stuff....
 // our new style create function that let the server handle the order generation
 const createBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
-    const { type, parentId, prevId, nextId, content }: CreateBlockBodyInput = req.body as CreateBlockBodyInput;
+    const { id, type, content, parentId, prevId, nextId }: CreateBlockBodyInput = req.body as CreateBlockBodyInput;
 
     const result = await db.$transaction(async tx => {
         // Fetch prev and next block orders if IDs are provided
@@ -124,6 +124,7 @@ const createBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Prom
         // Create the block
         const created = await tx.block.create({
             data: {
+                id: id ?? undefined,
                 type,
                 parentId: parentId ?? null,
                 order,
