@@ -42,6 +42,7 @@ export function PageProvider({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         // Load pages on mount
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchPages();
     }, []);
 
