@@ -1,11 +1,15 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { SimpleEditor, SimpleEditorRef } from '@/components/features/editor';
-import { OutputData } from '@editorjs/editorjs';
+import dynamic from 'next/dynamic';
+import { EditorRef } from '@/components/features/editor';
+import { OutputData } from '@sharqawycs/editorjs';
+
+// Dynamically import the editor to avoid SSR issues
+const Editor = dynamic(() => import('@/components/features/editor').then(mod => mod.Editor), { ssr: false });
 
 export default function EditorTestPage() {
-    const editorRef = useRef<SimpleEditorRef>(null);
+    const editorRef = useRef<EditorRef>(null);
     const [savedData, setSavedData] = useState<OutputData | null>(null);
 
     // When you want to get the data from the editor
@@ -33,12 +37,12 @@ export default function EditorTestPage() {
 
     return (
         <div className="container mx-auto max-w-4xl py-8">
-            <h1 className="mb-6 text-3xl font-bold">Simple Editor Example</h1>
-
             {/* The Editor - that's it! */}
             <div className="bg-card mb-4 rounded-lg border p-6">
-                <SimpleEditor ref={editorRef} placeholder="Type something..." />
+                <Editor ref={editorRef} placeholder="Type something..." />
             </div>
+
+            {/* deadass dickhead stuff --- do not care about it at all for now */}
 
             {/* Manual controls - YOU decide when to save */}
             <div className="flex gap-2">

@@ -1,1 +1,1 @@
-export { SimpleEditor, type SimpleEditorRef } from './BlockEditor';
+export { Editor, type EditorRef } from './Editor';

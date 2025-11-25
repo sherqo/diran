@@ -5,7 +5,7 @@ import EditorJS, { OutputData } from '@sharqawycs/editorjs';
 import Header from '@editorjs/header';
 import List from '@editorjs/list';
 
-interface SimpleEditorProps {
+interface EditorProps {
     initialData?: OutputData;
     placeholder?: string;
     readOnly?: boolean;
@@ -15,7 +15,6 @@ interface SimpleEditorProps {
 const DEFAULT_EDITOR_DATA: OutputData = {
     blocks: [
         {
-            id: 'idid1',
             type: 'header',
             data: {
                 text: 'Welcome to Editor.js',
@@ -23,14 +22,12 @@ const DEFAULT_EDITOR_DATA: OutputData = {
             },
         },
         {
-            id: 'idid2',
             type: 'paragraph',
             data: {
                 text: 'This is a simple paragraph. Start editing by clicking here.',
             },
         },
         {
-            id: 'idid3',
             type: 'list',
             data: {
                 fuck: 'yes',
@@ -55,7 +52,7 @@ const DEFAULT_EDITOR_DATA: OutputData = {
  * console.log(data); // This is your Editor.js output
  * ```
  */
-export const SimpleEditor = forwardRef<SimpleEditorRef, SimpleEditorProps>((props, ref) => {
+export const Editor = forwardRef<EditorRef, EditorProps>((props, ref) => {
     const { initialData = DEFAULT_EDITOR_DATA, placeholder = 'Start typing...', readOnly = false } = props;
     const editorInstance = useRef<EditorJS | null>(null);
     const holderRef = useRef<HTMLDivElement>(null);
@@ -153,10 +150,10 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, SimpleEditorProps>((prop
     return <div ref={holderRef} className="min-h-[200px]" />;
 });
 
-SimpleEditor.displayName = 'SimpleEditor';
+Editor.displayName = 'Editor';
 
 // Type for the ref so you know what methods you can call
-export interface SimpleEditorRef {
+export interface EditorRef {
     save: () => Promise<OutputData>;
     destroy: () => void;
     clear: () => Promise<void>;

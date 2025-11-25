@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
 import { AppSidebar } from '@/components/app-sidebar';
 import { NavActions } from '@/components/nav-actions';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from '@/components/ui/breadcrumb';
@@ -30,68 +29,12 @@ const PageBody = ({ className }: { className?: string }) => {
     return (
         <div className={`flex flex-col gap-4 px-4 py-10 ${className || ''}`}>
             {/* Content will go here */}
-            this editor should be her <div id="editorjs" className="w-full max-w-3xl" />
+            this editor should be her
         </div>
     );
 };
 
 export default function Page() {
-    const editorRef = useRef<{ destroy?: () => void } | null>(null);
-
-    useEffect(() => {
-        const initEditor = async () => {
-            if (!editorRef.current) {
-                // Dynamic imports to avoid SSR issues
-                const EditorJS = (await import('@sharqawycs/editorjs')).default;
-                const Header = (await import('@editorjs/header')).default;
-                const List = (await import('@editorjs/list')).default;
-
-                const editor = new EditorJS({
-                    /**
-                     * Id of Element that should contain the Editor
-                     */
-                    holder: 'editorjs',
-
-                    /**
-                     * Available Tools list.
-                     * Pass Tool's class or Settings object for each Tool you want to use
-                     */
-                    tools: {
-                        header: Header,
-                        list: List,
-                    },
-
-                    onReady: () => {
-                        console.log('Editor.js is ready to work!');
-                    },
-
-                    onChange: (api, event) => {
-                        console.log("Now I know that Editor's content changed!", event);
-                    },
-                });
-
-                editor.isReady
-                    .then(() => {
-                        console.log('Editor.js is ready to work!');
-                        /** Do anything you need after editor initialization */
-                    })
-                    .catch(reason => {
-                        console.log(`Editor.js initialization failed because of ${reason}`);
-                    });
-
-                editorRef.current = editor;
-            }
-        };
-
-        initEditor();
-
-        return () => {
-            if (editorRef.current && editorRef.current.destroy) {
-                editorRef.current.destroy();
-            }
-        };
-    }, []);
-
     return (
         <SidebarProvider>
             <AppSidebar />
