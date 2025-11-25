@@ -5,6 +5,7 @@ import EditorJS, { OutputData } from '@sharqawycs/editorjs';
 import Header from '@editorjs/header';
 import List from '@editorjs/list';
 import { isDevelopment } from '@/lib/utils';
+import { Construction } from 'lucide-react';
 
 interface EditorProps {
     initialData?: OutputData;
@@ -85,22 +86,33 @@ export const Editor = forwardRef<EditorRef, EditorProps>((props, ref) => {
                 if (Array.isArray(event)) {
                     console.log('omg we have an array');
                     for (const ev of event) {
-                        console.log('📝 CHANGED', ev.type);
-                        console.log('🔧 Element:', { details: ev.detail.target });
+                        console.log('CHANGED', ev.type);
+                        console.log('Element:', { details: ev.detail.target });
                     }
                 } else {
                     const detail = event.detail;
                     const eventType = event.type;
-                    const blockIndex = detail.index;
+                    const blockIndexFrom = detail.fromIndex; // in moved only
+                    const blockIndex = detail.index || detail.toIndex; // in added, removed, changed and in moved it's toIndex
                     const blockId = detail.target.id;
                     const blockType = detail.target.name;
-                    const blockContent = (await _api.blocks.getBlockByIndex(blockIndex)?.save()).data;
+                    const blockContent = (await detail.target.save()).data;
 
                     console.log('event-type: ', eventType);
                     console.log('blockIndex: ', blockIndex);
                     console.log('BlockId: ', blockId);
                     console.log('BlockType: ', blockType);
                     console.log('updated blockContent: ', blockContent);
+
+                    const totalBlocks = _api.blocks.getBlocksCount();
+                    const prevIndex = blockIndex > 0 ? blockIndex - 1 : null;
+                    console.log('prevIndex ', prevIndex);
+                    const nextIndex = blockIndex < totalBlocks - 1 ? blockIndex + 1 : null;
+                    console.log('nextIndex ', nextIndex);
+                    const prevBlockId = prevIndex || prevIndex === 0 ? _api.blocks.getBlockByIndex(prevIndex)?.id : null;
+                    const nextBlockId = nextIndex ? _api.blocks.getBlockByIndex(nextIndex)?.id : null;
+                    console.log('PrevBlockId: ', prevBlockId);
+                    console.log('NextBlockId: ', nextBlockId);
                 }
             },
 
