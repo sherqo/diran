@@ -42,7 +42,7 @@ export default function Page() {
         const initEditor = async () => {
             if (!editorRef.current) {
                 // Dynamic imports to avoid SSR issues
-                const EditorJS = (await import('@editorjs/editorjs')).default;
+                const EditorJS = (await import('@sharqawycs/editorjs')).default;
                 const Header = (await import('@editorjs/header')).default;
                 const List = (await import('@editorjs/list')).default;
 

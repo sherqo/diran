@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
-import EditorJS, { OutputData } from '@editorjs/editorjs';
+import EditorJS, { OutputData } from '@sharqawycs/editorjs';
 import Header from '@editorjs/header';
 import List from '@editorjs/list';
 
@@ -94,8 +94,8 @@ export const SimpleEditor = forwardRef<SimpleEditorRef, SimpleEditorProps>((prop
 
             // Event callbacks - all logged to console
             onChange: async (api, event) => {
-                console.log('📝 CHANGED', event.type);
-                console.log('🔧 Element:', { idx: event.detail.index, details: event.detail.target });
+                // console.log('📝 CHANGED', event.type);
+                // console.log('🔧 Element:', { details: event.detail.target });
 
                 try {
                     const content = await api.saver.save();
