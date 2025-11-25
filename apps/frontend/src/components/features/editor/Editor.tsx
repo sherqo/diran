@@ -97,6 +97,7 @@ export const Editor = forwardRef<EditorRef, EditorProps>((props, ref) => {
                     const blockId = detail.target.id;
                     const blockType = detail.target.name;
                     const blockContent = (await detail.target.save()).data;
+                    // we also need parentId, which is the pageId
 
                     console.log('event-type: ', eventType);
                     console.log('blockIndex: ', blockIndex);

@@ -5,7 +5,8 @@ const BlockTypeEnumSchema = z.enum(BlockTypeEnum);
 
 export const createBlockBodySchema = z
   .object({
-    // i need a full block here but without id, createdAt, updatedAt
+    // i need a full block here but without createdAt, updatedAt
+    id: z.uuid(),
     type: BlockTypeEnumSchema,
     parentId: z.uuid().optional().nullable(),
     prevId: z.string().optional().nullable(),
