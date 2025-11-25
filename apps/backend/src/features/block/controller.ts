@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { FastifyReply } from 'fastify';
 import { AuthenticatedRequest } from '#lib/middleware/auth';
 import { CreateBlockBodyInput, GetBlockParamInput, UpdateBlockParamInput, DeleteBlockParamInput } from '@diran/shared/validation/block';
@@ -125,7 +124,7 @@ const createBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Prom
         // Create the block
         const created = await tx.block.create({
             data: {
-                id: id ?? undefined,
+                ...(id && { id }), // Only include id if it exists
                 type,
                 parentId: parentId ?? null,
                 order,
