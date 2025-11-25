@@ -4,6 +4,7 @@ import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import EditorJS, { OutputData } from '@sharqawycs/editorjs';
 import Header from '@editorjs/header';
 import List from '@editorjs/list';
+import { isDevelopment } from '@/lib/utils';
 
 interface EditorProps {
     initialData?: OutputData;
@@ -89,7 +90,7 @@ export const Editor = forwardRef<EditorRef, EditorProps>((props, ref) => {
                 list: List,
             },
 
-            // Event callbacks - all logged to console
+            // Event callbacks - all logged to console - when something changes
             onChange: async (api, event) => {
                 // console.log('📝 CHANGED', event.type);
                 // console.log('🔧 Element:', { details: event.detail.target });
@@ -109,36 +110,38 @@ export const Editor = forwardRef<EditorRef, EditorProps>((props, ref) => {
             },
 
             onReady: () => {
-                console.log('✅ Editor.js is READY!');
-                console.log('🛠️ Available API methods:', {
-                    saver: 'api.saver.save() - Get all content',
-                    blocks: 'api.blocks - Manipulate blocks',
-                    caret: 'api.caret - Control cursor position',
-                    sanitizer: 'api.sanitizer - Clean HTML',
-                    toolbar: 'api.toolbar - Control toolbar',
-                    inlineToolbar: 'api.inlineToolbar - Control inline tools',
-                    notifier: 'api.notifier - Show notifications',
-                    tooltip: 'api.tooltip - Show tooltips',
-                    i18n: 'api.i18n - Translations',
-                    readOnly: 'api.readOnly - Toggle read-only mode',
-                });
-                console.log('📚 Block methods:', {
-                    'api.blocks.getBlocksCount()': 'Get number of blocks',
-                    'api.blocks.getCurrentBlockIndex()': 'Get current block index',
-                    'api.blocks.getBlockByIndex(index)': 'Get block by index',
-                    'api.blocks.insert(type, data)': 'Insert new block',
-                    'api.blocks.delete(index)': 'Delete block',
-                    'api.blocks.clear()': 'Delete all blocks',
-                    'api.blocks.render(data)': 'Render blocks from data',
-                    'api.blocks.move(from, to)': 'Move block',
-                    'api.blocks.swap(from, to)': 'Swap blocks',
-                });
+                if (isDevelopment) {
+                    console.log('✅ Editor.js is READY!');
+                    console.log('🛠️ Available API methods:', {
+                        saver: 'api.saver.save() - Get all content',
+                        blocks: 'api.blocks - Manipulate blocks',
+                        caret: 'api.caret - Control cursor position',
+                        sanitizer: 'api.sanitizer - Clean HTML',
+                        toolbar: 'api.toolbar - Control toolbar',
+                        inlineToolbar: 'api.inlineToolbar - Control inline tools',
+                        notifier: 'api.notifier - Show notifications',
+                        tooltip: 'api.tooltip - Show tooltips',
+                        i18n: 'api.i18n - Translations',
+                        readOnly: 'api.readOnly - Toggle read-only mode',
+                    });
+                    console.log('📚 Block methods:', {
+                        'api.blocks.getBlocksCount()': 'Get number of blocks',
+                        'api.blocks.getCurrentBlockIndex()': 'Get current block index',
+                        'api.blocks.getBlockByIndex(index)': 'Get block by index',
+                        'api.blocks.insert(type, data)': 'Insert new block',
+                        'api.blocks.delete(index)': 'Delete block',
+                        'api.blocks.clear()': 'Delete all blocks',
+                        'api.blocks.render(data)': 'Render blocks from data',
+                        'api.blocks.move(from, to)': 'Move block',
+                        'api.blocks.swap(from, to)': 'Swap blocks',
+                    });
+                }
             },
         });
 
         return () => {
             if (editorInstance.current?.destroy) {
-                console.log('🗑️ Editor destroyed');
+                if (isDevelopment) console.log('🗑️ Editor destroyed');
                 editorInstance.current.destroy();
                 editorInstance.current = null;
             }
