@@ -15,6 +15,7 @@ import { NavFavorites } from '@/components/nav-favorites';
 import { NavMain } from '@/components/nav-main';
 // import { NavSecondary } from '@/components/nav-secondary';
 import { NavWorkspaces } from '@/components/nav-workspaces';
+import { NavPages } from '@/components/nav-pages';
 
 import { Sidebar, SidebarContent, SidebarHeader } from '@/components/ui/sidebar';
 import { NavUser } from './nav-user';
@@ -246,6 +247,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <NavMain items={data.navMain} onSearchClick={handleSearchClick} />
             </SidebarHeader>
             <SidebarContent>
+                <NavPages />
                 <NavFavorites favorites={data.favorites} />
                 <NavWorkspaces workspaces={data.workspaces} />
                 {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}

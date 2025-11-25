@@ -1,6 +1,7 @@
 import { db } from '#lib/database/connection';
 import { sendError, sendSuccess } from '#lib/utils/response';
 import { FastifyRequest, FastifyReply } from 'fastify';
+import { GetHealthResponseData } from '@diran/shared';
 
 export const addEmailToWaitlist = async (req: FastifyRequest, reply: FastifyReply) => {
     const { email } = req.body as { email: string };
@@ -21,4 +22,18 @@ export const addEmailToWaitlist = async (req: FastifyRequest, reply: FastifyRepl
     });
 
     sendSuccess(reply, { waitlistEntry: result }, 'Email added to waitlist successfully');
+};
+
+export const getHealth = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+    // Check database connection
+    await db.$queryRaw`SELECT 1`;
+
+    const data: GetHealthResponseData = {
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        database: 'connected',
+    };
+
+    sendSuccess(reply, data);
 };

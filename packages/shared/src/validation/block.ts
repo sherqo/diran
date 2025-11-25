@@ -5,20 +5,27 @@ const BlockTypeEnumSchema = z.enum(BlockTypeEnum);
 
 export const createBlockBodySchema = z
   .object({
-    // i need a full block here but without id, createdAt, updatedAt
+    // i need a full block here but without createdAt, updatedAt
+    id: z.uuid().optional(),
     type: BlockTypeEnumSchema,
     parentId: z.uuid().optional().nullable(),
-    prevId: z.string().optional().nullable(),
-    nextId: z.string().optional().nullable(),
+    prevId: z.uuid().optional().nullable(),
+    nextId: z.uuid().optional().nullable(),
     // order: z.string().min(1).max(100), // a lot of Qs here... ! NO LONGER REQUIRED (i think ^_^)
     content: z.record(z.string(), z.any()),
   })
   .refine(
     data => {
+      const hasParent = typeof data.parentId === 'string' && data.parentId.trim() !== '';
+      // no need for the id if it's a parent page
+      if (data.type === BlockTypeEnum.PAGE && !hasParent) {
+        return !data.id;
+      }
+
       // If type is "PAGE", parentId must be undefined. -> this is wrong! (i keep the wrong for reference and not to make the same mistake again)
       // If not "PAGE", parentId must exist.
       // if (data.type === BlockTypeEnum.PAGE) return data.parentId === undefined;
-      return (typeof data.parentId === 'string' && data.parentId.trim() !== '') || data.type === BlockTypeEnum.PAGE; //? where do u check for PAGE then?!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      return hasParent || data.type === BlockTypeEnum.PAGE; //? where do u check for PAGE then?!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     },
     {
       message: "parentId is required unless type='PAGE'",
