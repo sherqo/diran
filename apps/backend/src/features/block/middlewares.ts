@@ -2,25 +2,12 @@ import { FastifyRequest, FastifyReply, preHandlerHookHandler } from 'fastify';
 import { ApiError } from '#lib/middleware/errorHandler';
 import { HttpStatus, ErrorCode } from '@diran/shared/constants/errors';
 import { AuthenticatedRequest } from '#lib/middleware/auth';
+import { RoleType } from '@prisma/client';
+import { getRoleWithInheritance } from '#lib/services/permission';
 
 /**
- * when we need it:
- * accessing, modifying, deleting blocks
- *
- * blocks have id, comes from req.params.id
- * actor comes from req.user.id (added by authentication middleware)
- *
- * Users have roles, roles have permissions
- *
- * so the flow will be:
- * 1. get block type from url
- * 2. get block id from req.params.id
- * 3. get actor id from req.user.id
- * 4. check if actor has permission to access block
+ * Permission helpers
  */
-
-import { RoleType } from '@prisma/client';
-import { getRole } from '#lib/services/permission';
 
 // Read: just view the block
 const canRead = (role: RoleType): boolean => {
@@ -32,25 +19,68 @@ const canWrite = (role: RoleType): boolean => {
     return role === RoleType.OWNER || role === RoleType.EDITOR;
 };
 
-// What this do?
-// just tells if the actor has permission to access the block or not and tells you what can they do!
-export const validatePermission: preHandlerHookHandler = async (req: FastifyRequest, _reply: FastifyReply): Promise<void> => {
-    const authReq = req as AuthenticatedRequest;
+/**
+ * Middleware: Require read permission on a block.
+ * Checks permission with inheritance from parent blocks.
+ * Used for: GET operations
+ */
+export const requireReadPermission: preHandlerHookHandler = async (req: AuthenticatedRequest, _reply: FastifyReply): Promise<void> => {
     const blockId = (req.params as any).id as string;
-    const userId = authReq.user!.id as string;
+    const userId = req.user!.id as string;
 
-    const role = await getRole(userId, blockId);
+    const role = await getRoleWithInheritance(userId, blockId);
 
-    if (!role || role === RoleType.NONE) {
-        throw new ApiError('Access denied: No permission for this block', HttpStatus.FORBIDDEN, ErrorCode.PERMISSION_DENIED);
+    if (!role || role === RoleType.NONE || !canRead(role)) {
+        throw new ApiError('Access denied: No read permission for this block', HttpStatus.FORBIDDEN, ErrorCode.PERMISSION_DENIED);
     }
 
-    // TODO: maybe then be splited into two middlewares -> reject too early...
-    const perms = {
-        canRead: canRead(role),
+    // Attach
+    req.permissions = {
+        canRead: true,
         canWrite: canWrite(role),
     };
+};
+
+/**
+ * Middleware: Require write permission on a block.
+ * Checks permission with inheritance from parent blocks.
+ * Used for: PUT, DELETE operations
+ */
+export const requireWritePermission: preHandlerHookHandler = async (req: AuthenticatedRequest, _reply: FastifyReply): Promise<void> => {
+    const blockId = (req.params as any).id as string;
+    const userId = req.user!.id as string;
+
+    const role = await getRoleWithInheritance(userId, blockId);
+
+    if (!role || role === RoleType.NONE || !canWrite(role)) {
+        throw new ApiError('Access denied: No write permission for this block', HttpStatus.FORBIDDEN, ErrorCode.PERMISSION_DENIED);
+    }
 
     // Attach
-    authReq.permissions = perms;
+    req.permissions = {
+        canRead: true,
+        canWrite: true,
+    };
+};
+
+/**
+ * Middleware: Require write permission on parent block.
+ * Used when creating a new block with a parentId.
+ * Checks that user has write permission on the parent block.
+ * Used for: POST operations with parentId in body
+ */
+export const requireParentPermission: preHandlerHookHandler = async (req: AuthenticatedRequest, _reply: FastifyReply): Promise<void> => {
+    const parentId = (req.body as any)?.parentId;
+
+    // If no parentId, skip this check (creating a root page)
+    if (!parentId) {
+        return;
+    }
+
+    const userId = req.user!.id as string;
+    const role = await getRoleWithInheritance(userId, parentId);
+
+    if (!role || role === RoleType.NONE || !canWrite(role)) {
+        throw new ApiError('Access denied: No write permission on parent block', HttpStatus.FORBIDDEN, ErrorCode.PERMISSION_DENIED);
+    }
 };

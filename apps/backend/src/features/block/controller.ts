@@ -9,6 +9,7 @@ import { BlockType, ActorType, EntityType, RoleType } from '@prisma/client';
 import { generateKeyBetween } from 'fractional-indexing';
 
 // CREATE
+// !note: today is 27-Nov-2025, 3:42 AM. i'm keeping these comments for remebering how i thought about the creation process :)
 // const createBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
 //     /**
 //      * how do we create a block?
@@ -108,8 +109,18 @@ import { generateKeyBetween } from 'fractional-indexing';
 //     sendSuccess(reply, { block: result.block }, message, HttpStatus.CREATED); // TODO: should i return the block?
 // };
 
+/**
+ *
+ * let's think about permissions:
+ * - when creating anything, you can create anything with no parent (basically a root page) and you'll be the owner
+ * - when creating anything that has a parent, you need to have at least editor permission on the parent (no permission assignment needed)
+ * - when updating or deleting anything, you need to have at least editor permission on it (no permission assignment needed)
+ * - when getting anything, you need to have at least viewer permission on it (no permission assignment needed)
+ */
+
 // TODO: add a service to manage the permissions stuff....
 // our new style create function that let the server handle the order generation
+// CREATE - creates a new block, an important and complex function
 const createBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     const { id, type, content, parentId, prevId, nextId }: CreateBlockBodyInput = req.body as CreateBlockBodyInput;
 
@@ -151,9 +162,8 @@ const createBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Prom
             updatedAt: created.updatedAt.toISOString(),
         };
 
-        const needsPermissionAssignment = type === BlockType.PAGE && !parentId; // only the page with no parent
-
-        if (needsPermissionAssignment) {
+        // only the page with no parent
+        if (!parentId) {
             await tx.permission.create({
                 data: {
                     actorId: req.user!.id,
@@ -165,17 +175,17 @@ const createBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Prom
             });
         }
 
-        return { block, needsPermissionAssignment };
+        return { block };
     });
 
-    const message = result.needsPermissionAssignment ? 'Page created successfully' : 'Block created successfully';
+    const message = !result.block.parentId ? 'Page (very parent block) created successfully' : 'Child block created successfully';
 
-    sendSuccess(reply, { block: result.block }, message, HttpStatus.CREATED);
+    sendSuccess(reply, { block: result.block }, message, HttpStatus.CREATED); // TODO: should i return the block? i think the id and order or just id maybe enough
 };
 
 // ====== Just placeholder(s) for now ======
 
-// READ - not implemented yet
+// READ - gets a single block data by providing its id - not implemented yet
 const getBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     const { id } = req.params as GetBlockParamInput;
 
@@ -210,7 +220,7 @@ const getBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Promise
     sendSuccess(reply, data);
 };
 
-// UPDATE - not yet implemented
+// UPDATE - update the block data by providing its id and the new data (needs permission) - not yet implemented
 const updateBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     const { id } = req.params as { id: string };
     const payload = req.body as Partial<UpdateBlockParamInput>;
@@ -255,7 +265,7 @@ const updateBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Prom
     );
 };
 
-// DELETE - not yet implemented
+// DELETE - remove a block from the db (or flag it) by providing its id and remove all of its children (needs permission) - not yet implemented
 const deleteBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     const { id } = req.params as DeleteBlockParamInput;
 
