@@ -22,6 +22,7 @@ interface PageContextType {
     loadPage: (id: string) => Promise<void>;
     setCurrentPage: (page: Page | null) => void;
     fetchPages: () => Promise<void>;
+    setPages: (value: Page[] | ((prev: Page[]) => Page[])) => void; // added after copilot code review PR #38 for optimistic ui update
 }
 
 export type { Page };
@@ -75,6 +76,7 @@ export function PageProvider({ children }: { children: ReactNode }) {
         loadPage,
         setCurrentPage,
         fetchPages,
+        setPages,
     };
 
     return <PageContext.Provider value={value}>{children}</PageContext.Provider>;

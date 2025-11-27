@@ -38,7 +38,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 export function NavPages() {
-    const { pages, loading, currentPage, fetchPages } = usePage();
+    const { pages, loading, currentPage, setPages } = usePage();
     const router = useRouter();
     const { isMobile } = useSidebar();
     const [createDialogOpen, setCreateDialogOpen] = React.useState(false);
@@ -71,21 +71,27 @@ export function NavPages() {
         setDeletingPageId(pageToDelete.id);
         setPageToDelete(null);
 
+        // Optimistic update: remove the page locally before the API call and keep a copy for rollback
+        const previousPages = [...pages];
+        setPages(prev => prev.filter(p => p.id !== pageToDelete.id));
+
         try {
             const result = await deleteBlockApi(pageToDelete.id);
             if (result.success) {
                 if (currentPage?.id === pageToDelete.id) {
                     router.push('/home');
                 }
-                // Refresh the pages list
-                await fetchPages();
                 showToast('Page deleted successfully', 'success');
             } else {
                 console.error('Failed to delete page:', result.error);
+                // rollback optimistic removal
+                setPages(previousPages);
                 showToast('Failed to delete page', 'error');
             }
         } catch (error) {
             console.error('Error deleting page:', error);
+            // rollback optimistic removal on exception
+            setPages(previousPages);
             showToast('An error occurred while deleting the page', 'error');
         } finally {
             setDeletingPageId(null);
