@@ -233,14 +233,18 @@ const updateBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Prom
     // Check permission on new parent if parentId is being changed
     if ('parentId' in payload && payload.parentId !== existing.parentId) {
         const newParentId = payload.parentId;
-        
+
         // If moving to a new parent (not making it a root), check write permission on new parent
         if (newParentId) {
             const { getRoleWithInheritance } = await import('#lib/services/permission');
             const role = await getRoleWithInheritance(req.user!.id, newParentId);
-            
+
             if (!role || role === RoleType.NONE || (role !== RoleType.OWNER && role !== RoleType.EDITOR)) {
-                throw new ApiError('Access denied: No write permission on new parent block', HttpStatus.FORBIDDEN, ErrorCode.PERMISSION_DENIED);
+                throw new ApiError(
+                    'Access denied: No write permission on new parent block',
+                    HttpStatus.FORBIDDEN,
+                    ErrorCode.PERMISSION_DENIED
+                );
             }
         }
     }
