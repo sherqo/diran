@@ -220,7 +220,7 @@ const getBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Promise
     sendSuccess(reply, data);
 };
 
-// UPDATE - update the block data by providing its id and the new data (needs permission) - not yet implemented
+// UPDATE - update the block data by providing its id and the new data (needs permission)
 const updateBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     const { id } = req.params as { id: string };
     const payload = req.body as Partial<UpdateBlockParamInput>;
@@ -230,42 +230,59 @@ const updateBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Prom
         throw new ApiError('Block not found', HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND);
     }
 
-    // Only include defined fields
-    const dataToUpdate = Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== undefined));
+    const result = await db.$transaction(async tx => {
+        // Prepare update data
+        const dataToUpdate: any = {};
 
-    // Handle parentId separately because null is valid
-    if ('parentId' in payload) {
-        dataToUpdate.parentId = payload.parentId ?? null;
-    }
+        // Handle basic fields
+        if (payload.type !== undefined) dataToUpdate.type = payload.type;
+        if (payload.content !== undefined) dataToUpdate.content = payload.content;
 
-    const updated = await db.block.update({
-        where: { id },
-        data: dataToUpdate,
-        select: {
-            id: true,
-            type: true,
-            parentId: true,
-            order: true,
-            content: true,
-            createdAt: true,
-            updatedAt: true,
-        },
-    });
+        // Handle parentId (null is valid)
+        if ('parentId' in payload) {
+            dataToUpdate.parentId = payload.parentId ?? null;
+        }
 
-    sendSuccess(
-        reply,
-        {
+        // Handle order changes (moving blocks)
+        if ('prevId' in payload || 'nextId' in payload) {
+            const [prevBlock, nextBlock] = await Promise.all([
+                payload.prevId ? tx.block.findUnique({ where: { id: payload.prevId }, select: { order: true } }) : null,
+                payload.nextId ? tx.block.findUnique({ where: { id: payload.nextId }, select: { order: true } }) : null,
+            ]);
+
+            const prevOrder = prevBlock?.order ?? null;
+            const nextOrder = nextBlock?.order ?? null;
+            dataToUpdate.order = generateKeyBetween(prevOrder, nextOrder);
+        }
+
+        // Perform the update
+        const updated = await tx.block.update({
+            where: { id },
+            data: dataToUpdate,
+            select: {
+                id: true,
+                type: true,
+                parentId: true,
+                order: true,
+                content: true,
+                createdAt: true,
+                updatedAt: true,
+            },
+        });
+
+        return {
             block: {
                 ...updated,
                 createdAt: updated.createdAt.toISOString(),
                 updatedAt: updated.updatedAt.toISOString(),
             },
-        },
-        'Block updated successfully'
-    );
+        };
+    });
+
+    sendSuccess(reply, result, 'Block updated successfully');
 };
 
-// DELETE - remove a block from the db (or flag it) by providing its id and remove all of its children (needs permission) - not yet implemented
+// DELETE - remove a block and all its children recursively (cascade delete)
 const deleteBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     const { id } = req.params as DeleteBlockParamInput;
 
@@ -274,72 +291,93 @@ const deleteBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Prom
         throw new ApiError('Block not found', HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND);
     }
 
-    await db.block.delete({ where: { id } });
+    await db.$transaction(async tx => {
+        // Use recursive CTE to get all descendants in a single query
+        // This is WAY more efficient than N+1 queries
+        const allBlockIds: string[] = await tx.$queryRaw`
+            WITH RECURSIVE descendants AS (
+                -- Base case: the block we want to delete
+                SELECT id FROM blocks WHERE id = ${id}::uuid
+                
+                UNION ALL
+                
+                -- Recursive case: children of blocks we've already found
+                SELECT b.id
+                FROM blocks b
+                INNER JOIN descendants d ON b.parent_id = d.id
+            )
+            SELECT id FROM descendants
+        `;
 
-    sendSuccess(reply, {}, 'Block deleted successfully');
+        const blockIds = allBlockIds.map((row: any) => row.id);
+
+        // Delete in batch - much more efficient
+        await Promise.all([
+            tx.permission.deleteMany({
+                where: {
+                    entityId: { in: blockIds },
+                    entityType: EntityType.BLOCK,
+                },
+            }),
+            tx.block.deleteMany({
+                where: { id: { in: blockIds } },
+            }),
+        ]);
+    });
+
+    sendSuccess(reply, {}, 'Block and all children deleted successfully');
 };
 
-// TODO: optimize
-// GET ALL PAGES - returns all top-level pages the user has access to
+// GET ALL PAGES - returns all top-level pages the user has access to (optimized with single query)
 const getAllPages = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     const userId = req.user!.id;
 
-    // First, get all page IDs where user has permission
-    const permissions = await db.permission.findMany({
-        where: {
-            actorId: userId,
-            actorType: ActorType.USER,
-            entityType: EntityType.BLOCK,
-            role: {
-                in: [RoleType.OWNER, RoleType.EDITOR, RoleType.VIEWER],
-            },
-        },
-        select: {
-            entityId: true,
-            role: true,
-        },
-    });
+    // Single optimized query with JOIN instead of two separate queries
+    const pagesWithRoles: Array<{
+        id: string;
+        type: string;
+        content: any;
+        order: string;
+        createdAt: Date;
+        updatedAt: Date;
+        role: string;
+    }> = await db.$queryRaw`
+        SELECT 
+            b.id,
+            b.type,
+            b.content,
+            b."order",
+            b.created_at as "createdAt",
+            b.updated_at as "updatedAt",
+            p.role
+        FROM blocks b
+        INNER JOIN permissions p ON p.entity_id = b.id
+        WHERE 
+            b.type = 'PAGE'
+            AND b.parent_id IS NULL
+            AND p.actor_id = ${userId}::uuid
+            AND p."actorType" = 'USER'
+            AND p."entityType" = 'BLOCK'
+            AND p.role IN ('OWNER', 'EDITOR', 'VIEWER')
+        ORDER BY b."order" ASC
+    `;
 
-    const pageIdsWithRoles = new Map(permissions.map(p => [p.entityId, p.role]));
-    const pageIds = Array.from(pageIdsWithRoles.keys());
-
-    // If no permissions found, return empty array
-    if (pageIds.length === 0) {
+    if (pagesWithRoles.length === 0) {
         return sendSuccess(reply, { pages: [] }, 'No pages found');
     }
 
-    // Fetch all top-level pages that user has access to
-    const pages = await db.block.findMany({
-        where: {
-            id: { in: pageIds },
-            type: BlockType.PAGE,
-            parentId: null,
-        },
-        select: {
-            id: true,
-            type: true,
-            content: true,
-            order: true,
-            createdAt: true,
-            updatedAt: true,
-        },
-        orderBy: {
-            order: 'asc',
-        },
-    });
-
-    // Transform the response and attach roles
-    const transformedPages = pages.map(page => ({
+    // Transform the response
+    const transformedPages = pagesWithRoles.map(page => ({
         id: page.id,
         type: page.type,
         content: page.content,
         order: page.order,
-        role: pageIdsWithRoles.get(page.id),
-        createdAt: page.createdAt.toISOString(),
-        updatedAt: page.updatedAt.toISOString(),
+        role: page.role,
+        createdAt: new Date(page.createdAt).toISOString(),
+        updatedAt: new Date(page.updatedAt).toISOString(),
     }));
 
-    return sendSuccess(reply, { length: transformedPages.length, pages: transformedPages }, 'Pages retrieved successfully');
+    return sendSuccess(reply, { pages: transformedPages }, 'Pages retrieved successfully');
 };
 
 export { createBlock, getBlock, updateBlock, deleteBlock, getAllPages };
