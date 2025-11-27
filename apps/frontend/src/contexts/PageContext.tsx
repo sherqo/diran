@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, useMemo, type ReactNode } from 'react';
 import { getAllPagesApi, getBlockApi } from '@/lib/api/block';
 
 // TODO: Define Page type properly in diran/shared and import here and define the inner content
@@ -35,7 +35,7 @@ export function PageProvider({ children }: { children: ReactNode }) {
     const [loading, setLoading] = useState(false);
     const [pageLoading, setPageLoading] = useState(true);
 
-    const fetchPages = async () => {
+    const fetchPages = useCallback(async () => {
         setLoading(true);
         const result = await getAllPagesApi();
 
@@ -44,9 +44,10 @@ export function PageProvider({ children }: { children: ReactNode }) {
         }
 
         setLoading(false);
-    };
+    }, []);
 
-    const loadPage = async (id: string) => {
+    // useCallback to avoid recreating the function on every render - PR #38 - copilot code review
+    const loadPage = useCallback(async (id: string) => {
         setPageLoading(true);
         try {
             const result = await getBlockApi(id);
@@ -61,23 +62,26 @@ export function PageProvider({ children }: { children: ReactNode }) {
         } finally {
             setPageLoading(false);
         }
-    };
+    }, []);
 
     useEffect(() => {
         // Load pages on mount
         fetchPages();
-    }, []);
+    }, [fetchPages]);
 
-    const value = {
-        pages,
-        currentPage,
-        loading,
-        pageLoading,
-        loadPage,
-        setCurrentPage,
-        fetchPages,
-        setPages,
-    };
+    const value = useMemo(
+        () => ({
+            pages,
+            currentPage,
+            loading,
+            pageLoading,
+            loadPage,
+            setCurrentPage,
+            fetchPages,
+            setPages,
+        }),
+        [pages, currentPage, loading, pageLoading, loadPage, fetchPages]
+    );
 
     return <PageContext.Provider value={value}>{children}</PageContext.Provider>;
 }

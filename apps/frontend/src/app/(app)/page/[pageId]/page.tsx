@@ -13,8 +13,7 @@ export default function PageView() {
 
     useEffect(() => {
         loadPage(pageId);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [pageId]);
+    }, [pageId, loadPage]);
 
     const pageTitle =
         currentPage?.content && typeof currentPage.content === 'object' && 'title' in currentPage.content
