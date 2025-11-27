@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { createBlockApi } from '@/lib/api/block';
 import { usePage } from '@/contexts/PageContext';
 import { BlockTypeEnum } from '@/shared/types/block';
+import { showToast } from '@/lib/toast';
 
 export function CreatePageDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
     const { fetchPages, setCurrentPageId, pages } = usePage();
@@ -55,10 +56,13 @@ export function CreatePageDialog({ open, onOpenChange }: { open: boolean; onOpen
                 await fetchPages();
                 // Set the newly created page as current
                 setCurrentPageId(result.data.block.id);
+                // Show success message
+                showToast('Page created successfully', 'success');
                 // Close dialog
                 onOpenChange(false);
             } else {
                 setError(result.error?.message || 'Failed to create page');
+                showToast('Failed to create page', 'error');
             }
         } catch (err) {
             setError('An unexpected error occurred');
