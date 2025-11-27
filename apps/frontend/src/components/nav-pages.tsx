@@ -1,6 +1,7 @@
 'use client';
 
-import { FileText, Loader2 } from 'lucide-react';
+import { FileText, Loader2, Plus } from 'lucide-react';
+import * as React from 'react';
 import { usePage } from '@/contexts/PageContext';
 import {
     SidebarGroup,
@@ -10,9 +11,12 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { Button } from '@/components/ui/button';
+import { CreatePageDialog } from '@/components/features/create-page-dialog';
 
 export function NavPages() {
     const { pages, loading, currentPageId, setCurrentPageId } = usePage();
+    const [createDialogOpen, setCreateDialogOpen] = React.useState(false);
 
     if (loading) {
         return (
@@ -28,26 +32,42 @@ export function NavPages() {
     }
 
     return (
-        <SidebarGroup>
-            <SidebarGroupLabel>Pages</SidebarGroupLabel>
-            <SidebarGroupContent>
-                <SidebarMenu>
-                    {pages.map(page => {
-                        const pageName = (page.content as { title?: string }).title || 'Untitled';
-                        return (
-                            <SidebarMenuItem key={page.id}>
-                                <SidebarMenuButton asChild isActive={currentPageId === page.id} onClick={() => setCurrentPageId(page.id)}>
-                                    <a href="#">
-                                        <FileText className="h-4 w-4" />
-                                        <span>{pageName}</span>
-                                    </a>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                        );
-                    })}
-                    {pages.length === 0 && <div className="text-muted-foreground px-2 py-4 text-sm">No pages yet</div>}
-                </SidebarMenu>
-            </SidebarGroupContent>
-        </SidebarGroup>
+        <>
+            <SidebarGroup>
+                <SidebarGroupLabel>
+                    <div className="flex items-center justify-between w-full">
+                        <span>Pages</span>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0"
+                            onClick={() => setCreateDialogOpen(true)}
+                            title="Create new page"
+                        >
+                            <Plus className="h-4 w-4" />
+                        </Button>
+                    </div>
+                </SidebarGroupLabel>
+                <SidebarGroupContent>
+                    <SidebarMenu>
+                        {pages.map(page => {
+                            const pageName = (page.content as { title?: string }).title || 'Untitled';
+                            return (
+                                <SidebarMenuItem key={page.id}>
+                                    <SidebarMenuButton asChild isActive={currentPageId === page.id} onClick={() => setCurrentPageId(page.id)}>
+                                        <a href="#">
+                                            <FileText className="h-4 w-4" />
+                                            <span>{pageName}</span>
+                                        </a>
+                                    </SidebarMenuButton>
+                                </SidebarMenuItem>
+                            );
+                        })}
+                        {pages.length === 0 && <div className="text-muted-foreground px-2 py-4 text-sm">No pages yet</div>}
+                    </SidebarMenu>
+                </SidebarGroupContent>
+            </SidebarGroup>
+            <CreatePageDialog open={createDialogOpen} onOpenChange={setCreateDialogOpen} />
+        </>
     );
 }
