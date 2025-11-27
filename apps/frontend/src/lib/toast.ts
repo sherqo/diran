@@ -27,7 +27,7 @@ export function showToast(message: string, type: ToastType = 'info') {
     // Create toast element
     const toast = document.createElement('div');
     toast.textContent = message;
-    
+
     const bgColors = {
         success: 'hsl(142.1 76.2% 36.3%)',
         error: 'hsl(0 84.2% 60.2%)',

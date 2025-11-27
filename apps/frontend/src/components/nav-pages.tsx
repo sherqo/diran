@@ -170,7 +170,7 @@ export function NavPages() {
                 </SidebarGroupContent>
             </SidebarGroup>
             <CreatePageDialog open={createDialogOpen} onOpenChange={setCreateDialogOpen} />
-            
+
             <AlertDialog open={!!pageToDelete} onOpenChange={() => setPageToDelete(null)}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
