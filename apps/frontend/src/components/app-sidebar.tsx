@@ -1,15 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import {
-    // AudioWaveform,Blocks,Calendar,MessageCircleQuestion,Command,
-    Home,
-    Inbox,
-    Search,
-    Settings2,
-    Sparkles,
-    Trash2,
-} from 'lucide-react';
+import { Settings2, Trash2 } from 'lucide-react';
 
 import { NavFavorites } from '@/components/nav-favorites';
 import { NavMain } from '@/components/nav-main';
@@ -18,44 +10,14 @@ import { NavWorkspaces } from '@/components/nav-workspaces';
 import { NavPages } from '@/components/nav-pages';
 
 import { Sidebar, SidebarContent, SidebarHeader } from '@/components/ui/sidebar';
+// removed - NavMain handles pathname logic
 import { NavUser } from './nav-user';
 import { useAuth } from '@/contexts/AuthContext';
 import { CreatePageDialog } from '@/components/features/create-page-dialog';
 
 // This is sample data.
 const data = {
-    user: {
-        name: 'shadcn',
-        email: 'm@example.com',
-        avatar: '/avatars/shadcn.jpg',
-    },
-
-    navMain: [
-        {
-            title: 'Search',
-            url: '#',
-            icon: Search,
-            kbd: 'K',
-        },
-        {
-            title: 'Ask AI',
-            url: '#',
-            icon: Sparkles,
-            kbd: 'A',
-        },
-        {
-            title: 'Home',
-            url: '#',
-            icon: Home,
-            isActive: true,
-        },
-        {
-            title: 'Inbox',
-            url: '#',
-            icon: Inbox,
-            badge: '10',
-        },
-    ],
+    // navMain removed - NavMain renders explicit items (Search, Ask AI, Home, Inbox)
     navSecondary: [
         // {title: 'Calendar',url: '#',icon: Calendar,},
         {
@@ -233,6 +195,7 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+    // pathname no longer needed in AppSidebar. NavMain determines active state itself.
     const { user, loading, logout } = useAuth();
     const [createDialogOpen, setCreateDialogOpen] = React.useState(false);
 
@@ -242,12 +205,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         window.dispatchEvent(event);
     };
 
+    // navMainItems is not used anymore since NavMain is rendered with explicit buttons
+
     return (
         <>
             <Sidebar collapsible="offcanvas" variant="sidebar" className="border-r-0" {...props}>
                 <SidebarHeader>
                     <NavUser user={user} loading={loading} logout={logout} />
-                    <NavMain items={data.navMain} onSearchClick={handleSearchClick} />
+                    <NavMain onSearchClick={handleSearchClick} />
                 </SidebarHeader>
                 <SidebarContent>
                     <NavPages />
