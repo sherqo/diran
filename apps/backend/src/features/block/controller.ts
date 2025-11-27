@@ -269,6 +269,7 @@ const deleteBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Prom
     sendSuccess(reply, {}, 'Block deleted successfully');
 };
 
+// TODO: optimize
 // GET ALL PAGES - returns all top-level pages the user has access to
 const getAllPages = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     const userId = req.user!.id;

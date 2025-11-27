@@ -22,6 +22,8 @@ interface PageContextType {
     fetchPages: () => Promise<void>;
 }
 
+export type { Page };
+
 const PageContext = createContext<PageContextType | undefined>(undefined);
 
 export function PageProvider({ children }: { children: ReactNode }) {

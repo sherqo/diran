@@ -20,6 +20,7 @@ import { NavPages } from '@/components/nav-pages';
 import { Sidebar, SidebarContent, SidebarHeader } from '@/components/ui/sidebar';
 import { NavUser } from './nav-user';
 import { useAuth } from '@/contexts/AuthContext';
+import { CreatePageDialog } from '@/components/features/create-page-dialog';
 
 // This is sample data.
 const data = {
@@ -233,6 +234,7 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const { user, loading, logout } = useAuth();
+    const [createDialogOpen, setCreateDialogOpen] = React.useState(false);
 
     const handleSearchClick = () => {
         // Dispatch custom event to open command palette
@@ -241,17 +243,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     };
 
     return (
-        <Sidebar collapsible="offcanvas" variant="sidebar" className="border-r-0" {...props}>
-            <SidebarHeader>
-                <NavUser user={user} loading={loading} logout={logout} />
-                <NavMain items={data.navMain} onSearchClick={handleSearchClick} />
-            </SidebarHeader>
-            <SidebarContent>
-                <NavPages />
-                <NavFavorites favorites={data.favorites} />
-                <NavWorkspaces workspaces={data.workspaces} />
-                {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
-            </SidebarContent>
-        </Sidebar>
+        <>
+            <Sidebar collapsible="offcanvas" variant="sidebar" className="border-r-0" {...props}>
+                <SidebarHeader>
+                    <NavUser user={user} loading={loading} logout={logout} />
+                    <NavMain items={data.navMain} onSearchClick={handleSearchClick} />
+                </SidebarHeader>
+                <SidebarContent>
+                    <NavPages />
+                    <NavFavorites favorites={data.favorites} />
+                    <NavWorkspaces workspaces={data.workspaces} />
+                    {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
+                </SidebarContent>
+            </Sidebar>
+            <CreatePageDialog open={createDialogOpen} onOpenChange={setCreateDialogOpen} />
+        </>
     );
 }
