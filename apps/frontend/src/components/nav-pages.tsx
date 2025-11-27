@@ -38,7 +38,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 export function NavPages() {
-    const { pages, loading, currentPage, fetchPages, setCurrentPage } = usePage();
+    const { pages, loading, currentPage, fetchPages } = usePage();
     const router = useRouter();
     const { isMobile } = useSidebar();
     const [createDialogOpen, setCreateDialogOpen] = React.useState(false);

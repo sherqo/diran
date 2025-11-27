@@ -22,7 +22,7 @@ import {
     AlertDialogCancel,
 } from './ui/alert-dialog';
 
-export function NavMain({ onSearchClick, inboxCount }: { onSearchClick?: () => void; inboxCount?: string | number }) {
+export function NavMain({ onSearchClick }: { onSearchClick?: () => void }) {
     const pathname = usePathname();
     const isHomeActive = pathname === '/home';
     const [askOpen, setAskOpen] = React.useState(false);
