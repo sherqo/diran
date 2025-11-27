@@ -13,9 +13,10 @@ import {
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { CreatePageDialog } from '@/components/features/create-page-dialog';
+import Link from 'next/link';
 
 export function NavPages() {
-    const { pages, loading, currentPageId, setCurrentPageId } = usePage();
+    const { pages, loading, currentPageId } = usePage();
     const [createDialogOpen, setCreateDialogOpen] = React.useState(false);
 
     if (loading) {
@@ -35,15 +36,14 @@ export function NavPages() {
         <>
             <SidebarGroup>
                 <SidebarGroupLabel>
-                    <div className="flex items-center justify-between w-full">
+                    <div className="flex w-full items-center justify-between">
                         <span>Pages</span>
                         <Button
                             variant="ghost"
                             size="sm"
                             className="h-6 w-6 p-0"
                             onClick={() => setCreateDialogOpen(true)}
-                            title="Create new page"
-                        >
+                            title="Create new page">
                             <Plus className="h-4 w-4" />
                         </Button>
                     </div>
@@ -54,11 +54,11 @@ export function NavPages() {
                             const pageName = (page.content as { title?: string }).title || 'Untitled';
                             return (
                                 <SidebarMenuItem key={page.id}>
-                                    <SidebarMenuButton asChild isActive={currentPageId === page.id} onClick={() => setCurrentPageId(page.id)}>
-                                        <a href="#">
+                                    <SidebarMenuButton asChild isActive={currentPageId === page.id}>
+                                        <Link href={`/page/${page.id}`}>
                                             <FileText className="h-4 w-4" />
                                             <span>{pageName}</span>
-                                        </a>
+                                        </Link>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
                             );
