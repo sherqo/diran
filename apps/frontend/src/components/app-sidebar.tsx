@@ -3,17 +3,14 @@
 import * as React from 'react';
 import { Settings2, Trash2 } from 'lucide-react';
 
-import { NavFavorites } from '@/components/nav-favorites';
 import { NavMain } from '@/components/nav-main';
 // import { NavSecondary } from '@/components/nav-secondary';
 import { NavWorkspaces } from '@/components/nav-workspaces';
 import { NavPages } from '@/components/nav-pages';
 
 import { Sidebar, SidebarContent, SidebarHeader } from '@/components/ui/sidebar';
-// removed - NavMain handles pathname logic
 import { NavUser } from './nav-user';
 import { useAuth } from '@/contexts/AuthContext';
-import { CreatePageDialog } from '@/components/features/create-page-dialog';
 
 // This is sample data.
 const data = {
@@ -33,58 +30,7 @@ const data = {
         },
         // {title: 'Help',url: '#',icon: MessageCircleQuestion,},
     ],
-    favorites: [
-        {
-            name: 'Project Management & Task Tracking',
-            url: '#',
-            emoji: '📊',
-        },
-        {
-            name: 'Family Recipe Collection & Meal Planning',
-            url: '#',
-            emoji: '🍳',
-        },
-        {
-            name: 'Fitness Tracker & Workout Routines',
-            url: '#',
-            emoji: '💪',
-        },
-        {
-            name: 'Book Notes & Reading List',
-            url: '#',
-            emoji: '📚',
-        },
-        {
-            name: 'Sustainable Gardening Tips & Plant Care',
-            url: '#',
-            emoji: '🌱',
-        },
-        {
-            name: 'Language Learning Progress & Resources',
-            url: '#',
-            emoji: '🗣️',
-        },
-        {
-            name: 'Home Renovation Ideas & Budget Tracker',
-            url: '#',
-            emoji: '🏠',
-        },
-        {
-            name: 'Personal Finance & Investment Portfolio',
-            url: '#',
-            emoji: '💰',
-        },
-        {
-            name: 'Movie & TV Show Watchlist with Reviews',
-            url: '#',
-            emoji: '🎬',
-        },
-        {
-            name: 'Daily Habit Tracker & Goal Setting',
-            url: '#',
-            emoji: '✅',
-        },
-    ],
+
     workspaces: [
         {
             name: 'Personal Life Management',
@@ -195,17 +141,13 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-    // pathname no longer needed in AppSidebar. NavMain determines active state itself.
     const { user, loading, logout } = useAuth();
-    const [createDialogOpen, setCreateDialogOpen] = React.useState(false);
 
     const handleSearchClick = () => {
         // Dispatch custom event to open command palette
         const event = new CustomEvent('openCommandPalette');
         window.dispatchEvent(event);
     };
-
-    // navMainItems is not used anymore since NavMain is rendered with explicit buttons
 
     return (
         <>
@@ -216,12 +158,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </SidebarHeader>
                 <SidebarContent>
                     <NavPages />
-                    <NavFavorites favorites={data.favorites} />
+                    {/* this workspace thing can be for tags later... */}
                     <NavWorkspaces workspaces={data.workspaces} />
                     {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
                 </SidebarContent>
             </Sidebar>
-            <CreatePageDialog open={createDialogOpen} onOpenChange={setCreateDialogOpen} />
+            {/* CreatePageDialog removed — NavPages handles page-creation dialog itself */}
         </>
     );
 }
