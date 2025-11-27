@@ -7,6 +7,7 @@ import { ApiError } from '#lib/middleware/errorHandler';
 import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors';
 import { BlockType, ActorType, EntityType, RoleType } from '@prisma/client';
 import { generateKeyBetween } from 'fractional-indexing';
+import { canWrite } from './middlewares';
 
 // CREATE
 // !note: today is 27-Nov-2025, 3:42 AM. i'm keeping these comments for remebering how i thought about the creation process :)
@@ -239,7 +240,7 @@ const updateBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Prom
             const { getRoleWithInheritance } = await import('#lib/services/permission');
             const role = await getRoleWithInheritance(req.user!.id, newParentId);
 
-            if (!role || role === RoleType.NONE || (role !== RoleType.OWNER && role !== RoleType.EDITOR)) {
+            if (!role || role === RoleType.NONE || !canWrite(role)) {
                 throw new ApiError(
                     'Access denied: No write permission on new parent block',
                     HttpStatus.FORBIDDEN,

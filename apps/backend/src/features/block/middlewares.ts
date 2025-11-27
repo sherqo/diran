@@ -15,7 +15,7 @@ const canRead = (role: RoleType): boolean => {
 };
 
 // Write: modify, delete the block
-const canWrite = (role: RoleType): boolean => {
+export const canWrite = (role: RoleType): boolean => {
     return role === RoleType.OWNER || role === RoleType.EDITOR;
 };
 
