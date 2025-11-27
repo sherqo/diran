@@ -24,57 +24,48 @@ export const getRole = async (actorId: string, entityId: string): Promise<RoleTy
  * Only checks USER actor type and BLOCK entity type.
  */
 export const getRoleWithInheritance = async (userId: string, blockId: string): Promise<RoleType | undefined> => {
-    // check if user has direct permission
+    // first, try the direct permission (fast path)
     const directPermission = await db.permission.findUnique({
         where: {
             actorId_entityId: {
                 actorId: userId,
                 entityId: blockId,
             },
-            actorType: ActorType.USER,
-            entityType: EntityType.BLOCK,
         },
-        select: {
-            role: true,
-        },
+        select: { role: true },
     });
 
     if (directPermission) {
         return directPermission.role;
     }
 
-    // if no direct permission, traverse up the parent chain
-    let currentBlock = await db.block.findUnique({
-        where: { id: blockId },
-        select: { parentId: true },
-    });
+    // use a recursive CTE to fetch the block and all its ancestors in one go,
+    // ordered by distance from the original block (closest first)
+    const rows = await db.$queryRaw<Array<{ role: RoleType | null }>>`
+        WITH RECURSIVE ancestors AS (
+            SELECT id, parent_id, 0 AS depth
+            FROM blocks
+            WHERE id = ${blockId}::uuid
+            UNION ALL
+            SELECT b.id, b.parent_id, a.depth + 1
+            FROM blocks b
+            INNER JOIN ancestors a ON b.id = a.parent_id
+        )
+        SELECT p.role
+        FROM ancestors a
+        JOIN permissions p
+          ON p.entity_id = a.id
+         AND p.actor_id = ${userId}::uuid
+         AND p.actor_type = ${ActorType.USER}
+         AND p.entity_type = ${EntityType.BLOCK}
+        ORDER BY a.depth ASC
+        LIMIT 1
+    `;
 
-    while (currentBlock?.parentId) {
-        const parentPermission = await db.permission.findUnique({
-            where: {
-                actorId_entityId: {
-                    actorId: userId,
-                    entityId: currentBlock.parentId,
-                },
-                actorType: ActorType.USER,
-                entityType: EntityType.BLOCK,
-            },
-            select: {
-                role: true,
-            },
-        });
-
-        if (parentPermission) {
-            return parentPermission.role;
-        }
-
-        // move to the next parent
-        currentBlock = await db.block.findUnique({
-            where: { id: currentBlock.parentId },
-            select: { parentId: true },
-        });
+    const first = rows[0];
+    if (first?.role != null) {
+        return first.role as RoleType;
     }
 
-    // no permission found
     return undefined;
 };
