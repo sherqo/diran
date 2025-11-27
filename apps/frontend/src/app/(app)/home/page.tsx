@@ -1,8 +1,16 @@
 'use client';
 
 import { PageHeader } from '@/components/page-header';
+import { usePage } from '@/contexts/PageContext';
+import { useEffect } from 'react';
 
 export default function HomePage() {
+    const { setCurrentPage } = usePage();
+
+    useEffect(() => {
+        setCurrentPage(null);
+    }, [setCurrentPage]);
+
     return (
         <>
             <PageHeader title="Welcome" />
