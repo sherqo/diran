@@ -35,9 +35,11 @@ import { CreatePageDialog } from '@/components/features/create-page-dialog';
 import { deleteBlockApi } from '@/lib/api/block';
 import { showToast } from '@/lib/toast';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export function NavPages() {
-    const { pages, loading, currentPageId, fetchPages, setCurrentPageId } = usePage();
+    const { pages, loading, currentPage, fetchPages, setCurrentPage } = usePage();
+    const router = useRouter();
     const { isMobile } = useSidebar();
     const [createDialogOpen, setCreateDialogOpen] = React.useState(false);
     const [deletingPageId, setDeletingPageId] = React.useState<string | null>(null);
@@ -72,9 +74,8 @@ export function NavPages() {
         try {
             const result = await deleteBlockApi(pageToDelete.id);
             if (result.success) {
-                // If we're deleting the current page, clear the selection
-                if (currentPageId === pageToDelete.id) {
-                    setCurrentPageId(null);
+                if (currentPage?.id === pageToDelete.id) {
+                    router.push('/home');
                 }
                 // Refresh the pages list
                 await fetchPages();
@@ -127,7 +128,7 @@ export function NavPages() {
                             const isDeleting = deletingPageId === page.id;
                             return (
                                 <SidebarMenuItem key={page.id}>
-                                    <SidebarMenuButton asChild isActive={currentPageId === page.id}>
+                                    <SidebarMenuButton asChild isActive={currentPage?.id === page.id}>
                                         <Link href={`/page/${page.id}`}>
                                             <FileText className="h-4 w-4" />
                                             <span>{pageName}</span>

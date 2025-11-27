@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import { getAllPagesApi } from '@/lib/api/block';
+import { getAllPagesApi, getBlockApi } from '@/lib/api/block';
 
 // TODO: Define Page type properly in diran/shared and import here and define the inner content
 interface Page {
@@ -16,9 +16,11 @@ interface Page {
 
 interface PageContextType {
     pages: Page[];
-    currentPageId: string | null;
+    currentPage: Page | null;
     loading: boolean;
-    setCurrentPageId: (id: string | null) => void;
+    pageLoading: boolean;
+    loadPage: (id: string) => Promise<void>;
+    setCurrentPage: (page: Page | null) => void;
     fetchPages: () => Promise<void>;
 }
 
@@ -28,8 +30,9 @@ const PageContext = createContext<PageContextType | undefined>(undefined);
 
 export function PageProvider({ children }: { children: ReactNode }) {
     const [pages, setPages] = useState<Page[]>([]);
-    const [currentPageId, setCurrentPageId] = useState<string | null>(null);
+    const [currentPage, setCurrentPage] = useState<Page | null>(null);
     const [loading, setLoading] = useState(false);
+    const [pageLoading, setPageLoading] = useState(true);
 
     const fetchPages = async () => {
         setLoading(true);
@@ -42,17 +45,35 @@ export function PageProvider({ children }: { children: ReactNode }) {
         setLoading(false);
     };
 
+    const loadPage = async (id: string) => {
+        setPageLoading(true);
+        try {
+            const result = await getBlockApi(id);
+            if (result.success && result.data?.block) {
+                setCurrentPage(result.data.block as unknown as Page);
+            } else {
+                setCurrentPage(null);
+            }
+        } catch (error) {
+            console.error('Error loading page:', error);
+            setCurrentPage(null);
+        } finally {
+            setPageLoading(false);
+        }
+    };
+
     useEffect(() => {
         // Load pages on mount
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchPages();
     }, []);
 
     const value = {
         pages,
-        currentPageId,
+        currentPage,
         loading,
-        setCurrentPageId,
+        pageLoading,
+        loadPage,
+        setCurrentPage,
         fetchPages,
     };
 

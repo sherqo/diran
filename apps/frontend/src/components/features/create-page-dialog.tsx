@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -13,7 +14,8 @@ import { BlockTypeEnum } from '@/shared/types/block';
 import { showToast } from '@/lib/toast';
 
 export function CreatePageDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
-    const { fetchPages, setCurrentPageId, pages } = usePage();
+    const router = useRouter();
+    const { fetchPages, pages } = usePage();
     const [pageName, setPageName] = React.useState('');
     const [isCreating, setIsCreating] = React.useState(false);
     const [error, setError] = React.useState('');
@@ -54,8 +56,8 @@ export function CreatePageDialog({ open, onOpenChange }: { open: boolean; onOpen
             if (result.success) {
                 // Refresh pages list
                 await fetchPages();
-                // Set the newly created page as current
-                setCurrentPageId(result.data.block.id);
+                // Navigate to the newly created page
+                router.push(`/page/${result.data.block.id}`);
                 // Show success message
                 showToast('Page created successfully', 'success');
                 // Close dialog
