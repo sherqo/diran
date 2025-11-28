@@ -1,6 +1,9 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
-@import '../styles/editor.css';
+/* @import '../styles/editor.css'; */
+
+/* Path to BlockNote ShadCN package for Tailwind to generate necessary CSS */
+@source '../node_modules/@blocknote/shadcn';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -125,6 +128,49 @@
     --sidebar-ring: #cc5200;
 }
 
+/* BlockNote ShadCN variables on root so portal elements inherit the theme */
+:root {
+    --bn-colors-editor-text: var(--color-foreground);
+    --bn-colors-editor-background: transparent;
+
+    --bn-colors-menu-text: var(--color-foreground);
+    --bn-colors-menu-background: var(--color-popover);
+    --bn-colors-tooltip-text: var(--color-foreground);
+    --bn-colors-tooltip-background: var(--color-popover);
+    --bn-colors-hovered-text: var(--color-foreground);
+    --bn-colors-hovered-background: var(--input);
+    --bn-colors-selected-text: var(--primary-foreground);
+    --bn-colors-selected-background: var(--primary);
+    --bn-colors-disabled-text: var(--muted-foreground);
+    --bn-colors-disabled-background: var(--muted);
+
+    --bn-colors-shadow: var(--shadow, #00000030);
+    --bn-colors-border: var(--color-border);
+    --bn-colors-side-menu: var(--color-sidebar);
+
+    --bn-colors-highlights-gray-text: var(--muted-foreground);
+    --bn-colors-highlights-gray-background: var(--muted);
+    --bn-colors-highlights-brown-text: var(--color-foreground);
+    --bn-colors-highlights-brown-background: var(--card);
+    --bn-colors-highlights-red-text: var(--destructive);
+    --bn-colors-highlights-red-background: var(--card-foreground);
+    --bn-colors-highlights-orange-text: var(--primary);
+    --bn-colors-highlights-orange-background: var(--card);
+    --bn-colors-highlights-yellow-text: var(--primary);
+    --bn-colors-highlights-yellow-background: var(--card);
+    --bn-colors-highlights-green-text: var(--chart-3);
+    --bn-colors-highlights-green-background: var(--card);
+    --bn-colors-highlights-blue-text: var(--chart-4);
+    --bn-colors-highlights-blue-background: var(--card);
+    --bn-colors-highlights-purple-text: var(--accent);
+    --bn-colors-highlights-purple-background: var(--card);
+    --bn-colors-highlights-pink-text: var(--accent);
+    --bn-colors-highlights-pink-background: var(--card);
+
+    --bn-font-family: var(--font-sans);
+    --bn-border-radius: var(--radius);
+}
+
 /* .dark {
     --background: #13161b;
     --foreground: #e8eaed;
@@ -196,6 +242,46 @@
     --sidebar-accent-foreground: #ffffff;
     --sidebar-border: #1c1e22; /* before: #2c2f36 */
     --sidebar-ring: #ef6306;
+}
+
+/* BlockNote ShadCN variables - dark mode (apply site-level dark theme variables) */
+.dark {
+    --bn-colors-editor-text: var(--foreground);
+    --bn-colors-editor-background: transparent;
+
+    --bn-colors-menu-text: var(--popover-foreground);
+    --bn-colors-menu-background: var(--popover);
+    --bn-colors-tooltip-text: var(--popover-foreground);
+    --bn-colors-tooltip-background: var(--popover);
+    --bn-colors-hovered-text: var(--popover-foreground);
+    --bn-colors-hovered-background: var(--card);
+    --bn-colors-selected-text: var(--primary-foreground);
+    --bn-colors-selected-background: var(--primary);
+    --bn-colors-disabled-text: var(--muted-foreground);
+    --bn-colors-disabled-background: var(--muted);
+
+    --bn-colors-shadow: var(--shadow);
+    --bn-colors-border: var(--border);
+    --bn-colors-side-menu: var(--sidebar);
+
+    --bn-colors-highlights-gray-text: var(--muted-foreground);
+    --bn-colors-highlights-gray-background: var(--muted);
+    --bn-colors-highlights-brown-text: var(--foreground);
+    --bn-colors-highlights-brown-background: var(--card);
+    --bn-colors-highlights-red-text: var(--destructive);
+    --bn-colors-highlights-red-background: var(--card-foreground);
+    --bn-colors-highlights-orange-text: var(--primary);
+    --bn-colors-highlights-orange-background: var(--card);
+    --bn-colors-highlights-yellow-text: var(--primary);
+    --bn-colors-highlights-yellow-background: var(--card);
+    --bn-colors-highlights-green-text: var(--chart-3);
+    --bn-colors-highlights-green-background: var(--card);
+    --bn-colors-highlights-blue-text: var(--chart-4);
+    --bn-colors-highlights-blue-background: var(--card);
+    --bn-colors-highlights-purple-text: var(--accent);
+    --bn-colors-highlights-purple-background: var(--card);
+    --bn-colors-highlights-pink-text: var(--accent);
+    --bn-colors-highlights-pink-background: var(--card);
 }
 
 body {

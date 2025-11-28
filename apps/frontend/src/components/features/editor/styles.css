@@ -1,0 +1,71 @@
+/* .bn-shadcn .bn-editor {
+    box-shadow: none !important;
+    background-color: transparent !important;
+}
+
+.bn-shadcn .bn-editor * {
+    color: var(--color-foreground) !important;
+}
+
+.bn-shadcn .bn-side-menu {
+    background-color: transparent !important;
+}
+
+.\[\&_svg\]\:pointer-events-none svg {
+    margin: 0;
+    padding: 0;
+    width: 5px;
+    color: #b4b0ab;
+} */
+/* button {
+    width: 5px;
+} */
+
+/* Base theme */
+.bn-container[data-theming-css-variables-demo][data-color-scheme] {
+    --bn-colors-editor-text: var(--color-foreground) !important;
+    --bn-colors-editor-background: transparent !important; /* keep editor background transparent */
+    --bn-colors-menu-text: var(--color-foreground) !important;
+    --bn-colors-menu-background: var(--color-background) !important;
+    --bn-colors-tooltip-text: var(--color-foreground) !important;
+    --bn-colors-tooltip-background: var(--color-background) !important;
+    --bn-colors-hovered-text: var(--color-foreground) !important;
+    --bn-colors-hovered-background: var(--color-background) !important;
+    --bn-colors-selected-text: var(--color-primary) !important;
+    --bn-colors-selected-background: var(--color-background) !important;
+    --bn-colors-disabled-text: var(--color-secondary-foreground) !important;
+    --bn-colors-disabled-background: var(--color-background) !important;
+    --bn-colors-shadow: var(--color-shadow) !important;
+    --bn-colors-border: var(--color-border) !important;
+    --bn-colors-side-menu: var(--color-background) !important;
+    --bn-color-highlight-colors: red !important;
+    --bn-border-radius: var(--radius);
+    --bn-font-family: var(--font-sans);
+}
+
+/* Force editor background and text color to follow the --bn colors */
+.bn-container[data-theming-css-variables-demo] .bn-editor {
+    background-color: var(--bn-colors-editor-background) !important;
+    color: var(--bn-colors-editor-text) !important;
+}
+
+/* Ensure editor child text uses the editor text color */
+.bn-container[data-theming-css-variables-demo] .bn-editor,
+.bn-container[data-theming-css-variables-demo] .bn-editor * {
+    color: var(--bn-colors-editor-text) !important;
+}
+
+/* Ensure block backgrounds are transparent unless set by highlight */
+.bn-container[data-theming-css-variables-demo] .bn-editor .bn-block,
+.bn-container[data-theming-css-variables-demo] .bn-editor .bn-block-content {
+    background: transparent !important;
+}
+
+/* Explicit overrides for common elements and inline styles */
+.bn-container[data-theming-css-variables-demo] .bn-editor p,
+.bn-container[data-theming-css-variables-demo] .bn-editor div,
+.bn-container[data-theming-css-variables-demo] .bn-editor span,
+.bn-container[data-theming-css-variables-demo] .bn-editor *[style] {
+    background: transparent !important;
+    color: var(--bn-colors-editor-text) !important;
+}
