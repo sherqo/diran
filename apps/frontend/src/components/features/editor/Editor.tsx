@@ -17,7 +17,7 @@ import * as Input from '@/components/ui/input';
 import * as Label from '@/components/ui/label';
 import * as Popover from '@/components/ui/popover';
 import * as Tooltip from '@/components/ui/tooltip';
-import { BlockNoteEditor, PartialBlock } from '@blocknote/core';
+import { BlockNoteEditor, createHeadingBlockSpec, PartialBlock } from '@blocknote/core';
 
 // import { useEffect } from 'react';
 
@@ -29,8 +29,14 @@ interface EditorProps {
 }
 
 export default function Editor({ editable = true, initialContent, onChange, onEditorReady }: EditorProps) {
+    const heading = createHeadingBlockSpec({
+        // Sets the block to support only heading levels 1-3.
+        levels: [1, 2, 3],
+    });
+
     const editor = useCreateBlockNote({
         initialContent,
+        blockSpecs: { heading },
     });
 
     // Inform consumer when editor instance is ready
