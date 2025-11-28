@@ -5,9 +5,10 @@ import { db } from '#lib/database/connection';
 import { sendSuccess } from '#lib/utils/response';
 import { ApiError } from '#lib/middleware/errorHandler';
 import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors';
-import { BlockType, ActorType, EntityType, RoleType } from '@prisma/client';
+import { ActorType, EntityType, RoleType } from '@prisma/client';
 import { generateKeyBetween } from 'fractional-indexing';
 import { canWrite } from './middlewares';
+import { getRoleWithInheritance } from '#lib/services/permission';
 
 // CREATE
 // !note: today is 27-Nov-2025, 3:42 AM. i'm keeping these comments for remebering how i thought about the creation process :)
@@ -237,7 +238,6 @@ const updateBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Prom
 
         // If moving to a new parent (not making it a root), check write permission on new parent
         if (newParentId) {
-            const { getRoleWithInheritance } = await import('#lib/services/permission');
             const role = await getRoleWithInheritance(req.user!.id, newParentId);
 
             if (!role || role === RoleType.NONE || !canWrite(role)) {
