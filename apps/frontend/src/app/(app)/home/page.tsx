@@ -1,54 +1,27 @@
 'use client';
 
-import { AppSidebar } from '@/components/app-sidebar';
-import { NavActions } from '@/components/nav-actions';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from '@/components/ui/breadcrumb';
+import { PageHeader } from '@/components/page-header';
 import { usePage } from '@/contexts/PageContext';
-import { Separator } from '@/components/ui/separator';
-import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { useEffect } from 'react';
 
-const PageHeader = ({ className }: { className?: string }) => {
-    const { pages, currentPageId } = usePage();
-    const currentPage = pages.find(p => p.id === currentPageId);
-    const pageName = currentPage ? (currentPage.content as { title?: string }).title || 'Untitled' : 'Welcome';
+export default function HomePage() {
+    const { setCurrentPage } = usePage();
+
+    useEffect(() => {
+        setCurrentPage(null);
+    }, [setCurrentPage]);
 
     return (
-        <header className={`bg-sidebar flex h-14 shrink-0 items-center gap-2 border-b ${className || ''}`}>
-            <div className="flex flex-1 items-center gap-2 px-3">
-                <SidebarTrigger />
-                <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
-                <Breadcrumb>
-                    <BreadcrumbList>
-                        <BreadcrumbItem>
-                            <BreadcrumbPage className="line-clamp-1">{pageName}</BreadcrumbPage>
-                        </BreadcrumbItem>
-                    </BreadcrumbList>
-                </Breadcrumb>
+        <>
+            <PageHeader title="Welcome" />
+            <div className="flex-1 overflow-y-auto">
+                <div className="flex flex-col gap-4 p-6">
+                    <div className="bg-card rounded-lg border p-6">
+                        <h2 className="mb-2 text-2xl font-semibold">Welcome to Diran</h2>
+                        <p className="text-muted-foreground">Select a page from the sidebar to get started, or create a new page.</p>
+                    </div>
+                </div>
             </div>
-            <div className="ml-auto px-3">
-                <NavActions />
-            </div>
-        </header>
-    );
-};
-
-const PageBody = ({ className }: { className?: string }) => {
-    return (
-        <div className={`flex flex-col gap-4 px-4 py-10 ${className || ''}`}>
-            {/* Content will go here */}
-            this editor should be her
-        </div>
-    );
-};
-
-export default function Page() {
-    return (
-        <SidebarProvider>
-            <AppSidebar />
-            <SidebarInset className="flex h-screen flex-col">
-                <PageHeader className="shrink-0" />
-                <PageBody className="flex-1 overflow-y-auto" />
-            </SidebarInset>
-        </SidebarProvider>
+        </>
     );
 }

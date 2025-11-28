@@ -2,17 +2,11 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { PageProvider } from '@/contexts/PageContext';
 import { CommandPalette } from '@/components/command-palette';
-import { Metadata } from 'next';
 import { ThemeProvider } from 'next-themes';
+import { AppSidebar } from '@/components/app-sidebar';
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 
-export const metadata: Metadata = {
-    robots: {
-        index: false,
-        follow: false,
-    },
-};
-
-export default function RootLayout({
+export default function AppLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
@@ -23,7 +17,10 @@ export default function RootLayout({
                 <AuthProvider>
                     <ProtectedRoute>
                         <PageProvider>
-                            {children}
+                            <SidebarProvider>
+                                <AppSidebar />
+                                <SidebarInset className="flex h-screen flex-col">{children}</SidebarInset>
+                            </SidebarProvider>
                             <CommandPalette />
                         </PageProvider>
                     </ProtectedRoute>

@@ -1,17 +1,8 @@
 'use client';
 
 import * as React from 'react';
-import {
-    // AudioWaveform,Blocks,Calendar,MessageCircleQuestion,Command,
-    Home,
-    Inbox,
-    Search,
-    Settings2,
-    Sparkles,
-    Trash2,
-} from 'lucide-react';
+import { Settings2, Trash2 } from 'lucide-react';
 
-import { NavFavorites } from '@/components/nav-favorites';
 import { NavMain } from '@/components/nav-main';
 // import { NavSecondary } from '@/components/nav-secondary';
 import { NavWorkspaces } from '@/components/nav-workspaces';
@@ -23,38 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 // This is sample data.
 const data = {
-    user: {
-        name: 'shadcn',
-        email: 'm@example.com',
-        avatar: '/avatars/shadcn.jpg',
-    },
-
-    navMain: [
-        {
-            title: 'Search',
-            url: '#',
-            icon: Search,
-            kbd: 'K',
-        },
-        {
-            title: 'Ask AI',
-            url: '#',
-            icon: Sparkles,
-            kbd: 'A',
-        },
-        {
-            title: 'Home',
-            url: '#',
-            icon: Home,
-            isActive: true,
-        },
-        {
-            title: 'Inbox',
-            url: '#',
-            icon: Inbox,
-            badge: '10',
-        },
-    ],
+    // navMain removed - NavMain renders explicit items (Search, Ask AI, Home, Inbox)
     navSecondary: [
         // {title: 'Calendar',url: '#',icon: Calendar,},
         {
@@ -70,58 +30,7 @@ const data = {
         },
         // {title: 'Help',url: '#',icon: MessageCircleQuestion,},
     ],
-    favorites: [
-        {
-            name: 'Project Management & Task Tracking',
-            url: '#',
-            emoji: '📊',
-        },
-        {
-            name: 'Family Recipe Collection & Meal Planning',
-            url: '#',
-            emoji: '🍳',
-        },
-        {
-            name: 'Fitness Tracker & Workout Routines',
-            url: '#',
-            emoji: '💪',
-        },
-        {
-            name: 'Book Notes & Reading List',
-            url: '#',
-            emoji: '📚',
-        },
-        {
-            name: 'Sustainable Gardening Tips & Plant Care',
-            url: '#',
-            emoji: '🌱',
-        },
-        {
-            name: 'Language Learning Progress & Resources',
-            url: '#',
-            emoji: '🗣️',
-        },
-        {
-            name: 'Home Renovation Ideas & Budget Tracker',
-            url: '#',
-            emoji: '🏠',
-        },
-        {
-            name: 'Personal Finance & Investment Portfolio',
-            url: '#',
-            emoji: '💰',
-        },
-        {
-            name: 'Movie & TV Show Watchlist with Reviews',
-            url: '#',
-            emoji: '🎬',
-        },
-        {
-            name: 'Daily Habit Tracker & Goal Setting',
-            url: '#',
-            emoji: '✅',
-        },
-    ],
+
     workspaces: [
         {
             name: 'Personal Life Management',
@@ -241,17 +150,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     };
 
     return (
-        <Sidebar collapsible="offcanvas" variant="sidebar" className="border-r-0" {...props}>
-            <SidebarHeader>
-                <NavUser user={user} loading={loading} logout={logout} />
-                <NavMain items={data.navMain} onSearchClick={handleSearchClick} />
-            </SidebarHeader>
-            <SidebarContent>
-                <NavPages />
-                <NavFavorites favorites={data.favorites} />
-                <NavWorkspaces workspaces={data.workspaces} />
-                {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
-            </SidebarContent>
-        </Sidebar>
+        <>
+            <Sidebar collapsible="offcanvas" variant="sidebar" className="border-r-0" {...props}>
+                <SidebarHeader>
+                    <NavUser user={user} loading={loading} logout={logout} />
+                    <NavMain onSearchClick={handleSearchClick} />
+                </SidebarHeader>
+                <SidebarContent>
+                    <NavPages />
+                    {/* this workspace thing can be for tags later... */}
+                    <NavWorkspaces workspaces={data.workspaces} />
+                    {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
+                </SidebarContent>
+            </Sidebar>
+            {/* CreatePageDialog removed — NavPages handles page-creation dialog itself */}
+        </>
     );
 }

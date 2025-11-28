@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { validateRequest as vr } from '#lib/middleware/validation.js';
 import { authenticate as auth } from '#lib/middleware/auth.js';
-import { validatePermission as perm } from './middlewares.js';
+import { requireReadPermission, requireWritePermission, requireParentPermission } from './middlewares.js';
 import { createBlock, getBlock, updateBlock, deleteBlock, getAllPages } from './controller.js';
 import {
     createBlockBodySchema,
@@ -20,27 +20,27 @@ import {
 export async function registerBlockRoutes(fastify: FastifyInstance): Promise<void> {
     // All block routes require authentication
 
-    // Create block
+    // Create block - requires parent permission if parentId is provided
     fastify.post('/', {
-        preHandler: [vr({ bodySchema: createBlockBodySchema }), auth],
+        preHandler: [vr({ bodySchema: createBlockBodySchema }), auth, requireParentPermission],
         handler: createBlock,
     });
 
-    // Get block (requires permission)
+    // Get block - requires read permission
     fastify.get('/:id', {
-        preHandler: [vr({ paramsSchema: getBlockParamSchema }), auth, perm],
+        preHandler: [vr({ paramsSchema: getBlockParamSchema }), auth, requireReadPermission],
         handler: getBlock,
     });
 
-    // Update block (requires permission)
+    // Update block - requires write permission
     fastify.put('/:id', {
-        preHandler: [vr({ paramsSchema: updateBlockParamSchema }), auth, perm],
+        preHandler: [vr({ paramsSchema: updateBlockParamSchema }), auth, requireWritePermission],
         handler: updateBlock,
     });
 
-    // Delete block (requires permission)
+    // Delete block - requires write permission
     fastify.delete('/:id', {
-        preHandler: [vr({ paramsSchema: deleteBlockParamSchema }), auth, perm],
+        preHandler: [vr({ paramsSchema: deleteBlockParamSchema }), auth, requireWritePermission],
         handler: deleteBlock,
     });
 }
