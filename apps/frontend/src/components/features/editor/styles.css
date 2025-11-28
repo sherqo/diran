@@ -23,7 +23,7 @@
 
 /* Force editor background and text color to follow the --bn colors */
 .bn-container[data-theming-css-variables-editor] .bn-editor {
-    background-color: var(--bn-colors-editor-background);
+    background-color: transparent;
 }
 
 /* Ensure editor child text uses the editor text color */
