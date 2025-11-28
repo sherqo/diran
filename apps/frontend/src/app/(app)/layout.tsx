@@ -1,5 +1,3 @@
-'use client';
-
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { PageProvider } from '@/contexts/PageContext';
