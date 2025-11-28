@@ -35,7 +35,7 @@ export default function Editor() {
     const colorScheme = resolvedTheme === 'dark' ? 'dark' : 'light';
 
     return (
-        <div className="bn-container bn-shadcn" data-theming-css-variables-demo data-color-scheme={colorScheme}>
+        <div className="bn-container bn-shadcn" data-theming-css-variables-editor data-color-scheme={colorScheme}>
             {/* This is the options: https://www.blocknotejs.org/docs/reference/editor/overview#options
                 another options: https://www.blocknotejs.org/docs/react/overview */}
             <BlockNoteView
