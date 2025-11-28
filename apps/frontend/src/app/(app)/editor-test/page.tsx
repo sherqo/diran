@@ -48,8 +48,6 @@ export default function EditorTestPage() {
 
     return (
         <div className="container mx-auto p-8">
-            <h1 className="mb-4 text-2xl font-bold">BlockNote Editor Test</h1>
-            <p className="text-muted-foreground mb-4 text-sm">Open the browser console to see detailed change logs</p>
             <Editor
             //  onEditorReady={handleEditorReady}
             />

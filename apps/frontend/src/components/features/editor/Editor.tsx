@@ -8,6 +8,7 @@ import '@blocknote/shadcn/style.css';
 
 import './styles.css';
 import { useTheme } from 'next-themes';
+
 import * as Button from '@/components/ui/button';
 import * as DropdownMenu from '@/components/ui/dropdown-menu';
 import * as Card from '@/components/ui/card';
@@ -34,23 +35,28 @@ export default function Editor() {
     const { resolvedTheme } = useTheme();
     const colorScheme = resolvedTheme === 'dark' ? 'dark' : 'light';
 
+    {
+        /* This is the options: https://www.blocknotejs.org/docs/reference/editor/overview#options
+    another options: https://www.blocknotejs.org/docs/react/overview */
+    }
     return (
-        <div className="bn-container bn-shadcn" data-theming-css-variables-editor data-color-scheme={colorScheme}>
-            {/* This is the options: https://www.blocknotejs.org/docs/reference/editor/overview#options
-                another options: https://www.blocknotejs.org/docs/react/overview */}
-            <BlockNoteView
-                editor={editor}
-                shadCNComponents={{
-                    Button,
-                    DropdownMenu,
-                    Card,
-                    Input,
-                    Label,
-                    Popover,
-                    Tooltip,
-                }}
-                theme={colorScheme}
-            />
-        </div>
+        // <div>
+        <BlockNoteView
+            className="bn-container bn-shadcn"
+            data-theming-css-variables-editor
+            data-color-scheme={colorScheme}
+            editor={editor}
+            shadCNComponents={{
+                Button,
+                DropdownMenu,
+                Card,
+                Input,
+                Label,
+                Popover,
+                Tooltip,
+            }}
+            theme={colorScheme}
+        />
+        // </div>
     );
 }

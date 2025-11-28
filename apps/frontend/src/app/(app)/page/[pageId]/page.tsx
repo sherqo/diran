@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { usePage } from '@/contexts/PageContext';
 import { PageHeader } from '@/components/page-header';
 import { Loader2 } from 'lucide-react';
+import { Editor } from '@/components/features/editor/DynamicEditor';
 
 export default function PageView() {
     const params = useParams();
@@ -47,14 +48,16 @@ export default function PageView() {
     return (
         <>
             <PageHeader title={pageTitle} />
-            <div className="flex-1 overflow-y-auto">
-                <div className="flex flex-col gap-4 p-6">
-                    <div className="bg-card rounded-lg border p-6">
-                        <h2 className="mb-4 text-xl font-semibold">Page Data (Raw)</h2>
-                        <pre className="bg-muted overflow-auto rounded p-4 text-sm">{JSON.stringify(currentPage, null, 2)}</pre>
-                    </div>
-                </div>
+            {/* <div className="flex-1 overflow-y-auto"> */}
+            <div className="container mx-auto max-w-4xl pt-10 pb-40">
+                <Editor
+
+                //  onEditorReady={handleEditorReady}
+                />
             </div>
+            {/* <h2 className="mb-4 text-xl font-semibold">Page Data (Raw)</h2> */}
+            {/* <pre className="bg-muted overflow-auto rounded p-4 text-sm">{JSON.stringify(currentPage, null, 2)}</pre> */}
+            {/* </div> */}
         </>
     );
 }
