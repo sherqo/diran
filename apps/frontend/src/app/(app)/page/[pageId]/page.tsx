@@ -51,12 +51,16 @@ export default function PageView() {
             {/* <div className="flex-1 overflow-y-auto"> */}
             <div className="container mx-auto max-w-4xl pt-10 pb-40">
                 <Editor
-
-                //  onEditorReady={handleEditorReady}
+                    initialContent={[
+                        {
+                            type: 'paragraph',
+                            content: [{ type: 'text', text: `Page ID: ${pageId}` }],
+                        },
+                    ]}
                 />
             </div>
-            {/* <h2 className="mb-4 text-xl font-semibold">Page Data (Raw)</h2> */}
-            {/* <pre className="bg-muted overflow-auto rounded p-4 text-sm">{JSON.stringify(currentPage, null, 2)}</pre> */}
+            <h2 className="mb-4 text-xl font-semibold">Page Data (Raw)</h2>
+            <pre className="bg-muted overflow-auto rounded p-4 text-sm">{JSON.stringify(currentPage, null, 2)}</pre>
             {/* </div> */}
         </>
     );
