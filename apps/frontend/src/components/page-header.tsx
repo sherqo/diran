@@ -11,7 +11,7 @@ interface PageHeaderProps {
 
 export function PageHeader({ title }: PageHeaderProps) {
     return (
-        <header className="bg-sidebar/95 sticky top-0 z-40 flex h-12 w-full shrink-0 items-center gap-2 border-b backdrop-blur-sm">
+        <header className="bg-sidebar/20 sticky top-0 z-40 flex h-12 w-full shrink-0 items-center gap-2 border-b backdrop-blur-sm">
             <div className="flex flex-1 items-center gap-2 px-3">
                 <SidebarTrigger />
                 <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
