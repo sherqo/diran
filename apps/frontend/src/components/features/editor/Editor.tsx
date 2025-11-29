@@ -18,6 +18,8 @@ import * as Label from '@/components/ui/label';
 import * as Popover from '@/components/ui/popover';
 import * as Tooltip from '@/components/ui/tooltip';
 
+import { handleChanges } from './changes-engine';
+
 interface EditorProps {
     editable?: boolean;
     className?: string;
@@ -40,36 +42,9 @@ export default function Editor({ editable = true, className, initialContent }: E
     useEffect(() => {
         const removeListener = editor.onChange((editor, { getChanges }) => {
             const changes = getChanges();
+            const content = editor.document;
 
-            if (changes.length === 0) return;
-
-            console.log('📝 Document changed! Total changes:', changes.length);
-
-            changes.forEach((change, index) => {
-                console.log(`\n🔸 Change ${index + 1}:`);
-                console.log('  Type:', change.type);
-                console.log('  Source:', change.source.type);
-                console.log('  Block ID:', change.block.id);
-                console.log('  Block Type:', change.block.type);
-
-                if (change.type === 'insert') {
-                    console.log('  ✅ Inserted new block');
-                    console.log('  Content:', change.block.content);
-                } else if (change.type === 'delete') {
-                    console.log('  ❌ Deleted block');
-                    console.log('  Was:', change.block.content);
-                } else if (change.type === 'update') {
-                    console.log('  ✏️  Updated block');
-                    console.log('  Previous content:', change.prevBlock.content);
-                    console.log('  New content:', change.block.content);
-                } else if (change.type === 'move') {
-                    console.log('  🔄 Moved block');
-                    console.log('  Previous parent:', change.prevParent?.id || 'root');
-                    console.log('  Current parent:', change.currentParent?.id || 'root');
-                }
-            });
-
-            console.log('\n📄 Full document:', editor.document);
+            handleChanges(changes, content);
         });
 
         // Cleanup listener on unmount
