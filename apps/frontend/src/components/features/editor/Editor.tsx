@@ -6,9 +6,8 @@ import '@blocknote/shadcn/style.css';
 import './styles.css';
 
 import { useTheme } from 'next-themes';
-import { useEditor } from '@/contexts/EditorContext';
-import { useEffect } from 'react';
-import { PartialBlock } from '@blocknote/core';
+import { useState, useEffect } from 'react';
+import { BlockNoteEditor, createHeadingBlockSpec, PartialBlock } from '@blocknote/core';
 
 import * as Button from '@/components/ui/button';
 import * as DropdownMenu from '@/components/ui/dropdown-menu';
@@ -27,29 +26,45 @@ interface EditorProps {
 }
 
 export default function Editor({ editable = true, className, initialContent }: EditorProps) {
-    const { editor, setContent } = useEditor();
+    const [editor, setEditor] = useState<BlockNoteEditor | null>(null);
     const { resolvedTheme } = useTheme();
     const colorScheme = resolvedTheme === 'dark' ? 'dark' : 'light';
 
-    // Set initial content when provided
+    // Create new editor for each page
     useEffect(() => {
-        if (initialContent) {
-            setContent(initialContent);
-        }
-    }, [initialContent, setContent]);
+        const heading = createHeadingBlockSpec({
+            levels: [1, 2, 3],
+        });
 
-    // Setup onChange listener with detailed logging
+        const editorInstance = BlockNoteEditor.create({
+            initialContent: initialContent,
+            blockSpecs: { heading },
+        });
+
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setEditor(editorInstance);
+
+        return () => {
+            editorInstance._tiptapEditor.destroy();
+            setEditor(null);
+        };
+    }, [initialContent]);
+    // Listen to changes
     useEffect(() => {
-        const removeListener = editor.onChange((editor, { getChanges }) => {
+        if (!editor) return;
+
+        const unsubscribe = editor.onChange((editor, { getChanges }) => {
             const changes = getChanges();
             const content = editor.document;
-
             handleChanges(changes, content);
         });
 
-        // Cleanup listener on unmount
-        return removeListener;
+        return unsubscribe;
     }, [editor]);
+
+    if (!editor) {
+        return null;
+    }
 
     return (
         <BlockNoteView

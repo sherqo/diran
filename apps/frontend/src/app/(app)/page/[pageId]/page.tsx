@@ -6,6 +6,7 @@ import { usePage } from '@/contexts/PageContext';
 import { PageHeader } from '@/components/page-header';
 import { Loader2 } from 'lucide-react';
 import { Editor } from '@/components/features/editor/DynamicEditor';
+import type { PartialBlock } from '@blocknote/core';
 
 export default function PageView() {
     const params = useParams();
@@ -51,12 +52,15 @@ export default function PageView() {
             {/* <div className="flex-1 overflow-y-auto"> */}
             <div className="container mx-auto max-w-4xl pt-10 pb-40">
                 <Editor
-                    initialContent={[
-                        {
-                            type: 'paragraph',
-                            content: [{ type: 'text', text: `Page ID: ${pageId}` }],
-                        },
-                    ]}
+                    key={pageId}
+                    initialContent={
+                        [
+                            {
+                                type: 'paragraph',
+                                content: [{ type: 'text', text: `Page ID: ${pageId}`, styles: {} }],
+                            },
+                        ] as unknown as PartialBlock[]
+                    }
                 />
             </div>
             <h2 className="mb-4 text-xl font-semibold">Page Data (Raw)</h2>

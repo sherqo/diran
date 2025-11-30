@@ -1,14 +1,13 @@
 'use client';
 
-import { BlockNoteEditor, createHeadingBlockSpec, PartialBlock } from '@blocknote/core';
-import { useCreateBlockNote } from '@blocknote/react';
-import { createContext, useContext, ReactNode, useCallback } from 'react';
+import { BlockNoteEditor } from '@blocknote/core';
+import { createContext, useContext, ReactNode, useState } from 'react';
 
 interface EditorContextType {
-    editor: BlockNoteEditor;
-    setContent: (content: PartialBlock[]) => void;
-    getContent: () => PartialBlock[];
-    clearContent: () => void;
+    editor: BlockNoteEditor | null;
+    isLoading: boolean;
+    setEditor: (editor: BlockNoteEditor) => void;
+    setIsLoading: (loading: boolean) => void;
 }
 
 const EditorContext = createContext<EditorContextType | undefined>(undefined);
@@ -23,40 +22,11 @@ export function useEditor() {
 
 interface EditorProviderProps {
     children: ReactNode;
-    initialContent?: PartialBlock[];
 }
 
-export function EditorProvider({ children, initialContent }: EditorProviderProps) {
-    const heading = createHeadingBlockSpec({
-        levels: [1, 2, 3],
-    });
+export function EditorProvider({ children }: EditorProviderProps) {
+    const [editor, setEditor] = useState<BlockNoteEditor | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const editor = useCreateBlockNote({
-        initialContent,
-        blockSpecs: { heading },
-    });
-
-    const setContent = useCallback(
-        (content: PartialBlock[]) => {
-            editor.replaceBlocks(editor.document, content);
-        },
-        [editor]
-    );
-
-    const getContent = useCallback(() => {
-        return editor.document;
-    }, [editor]);
-
-    const clearContent = useCallback(() => {
-        editor.replaceBlocks(editor.document, []);
-    }, [editor]);
-
-    const value: EditorContextType = {
-        editor,
-        setContent,
-        getContent,
-        clearContent,
-    };
-
-    return <EditorContext.Provider value={value}>{children}</EditorContext.Provider>;
+    return <EditorContext.Provider value={{ editor, isLoading, setEditor, setIsLoading }}>{children}</EditorContext.Provider>;
 }
