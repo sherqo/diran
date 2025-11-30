@@ -23,7 +23,7 @@ interface EditorProps {
     editable?: boolean;
     className?: string;
     initialContent?: PartialBlock[];
-    pageId?: string;
+    pageId: string;
 }
 
 export default function Editor({ editable = true, className, initialContent, pageId }: EditorProps) {
