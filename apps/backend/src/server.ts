@@ -96,9 +96,9 @@ async function setupPlugins() {
         timeWindow: '1 minute',
     });
 
-    // Custom request logger (only in development)
+    // request logger (only in development)
     if (isDevelopment) {
-        app.addHook('onRequest', loggerHook);
+        app.addHook('preHandler', loggerHook);
     }
 
     // Register error handlers
