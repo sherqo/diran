@@ -23,9 +23,10 @@ interface EditorProps {
     editable?: boolean;
     className?: string;
     initialContent?: PartialBlock[];
+    pageId?: string;
 }
 
-export default function Editor({ editable = true, className, initialContent }: EditorProps) {
+export default function Editor({ editable = true, className, initialContent, pageId }: EditorProps) {
     const [editor, setEditor] = useState<BlockNoteEditor | null>(null);
     const { resolvedTheme } = useTheme();
     const colorScheme = resolvedTheme === 'dark' ? 'dark' : 'light';
@@ -41,7 +42,6 @@ export default function Editor({ editable = true, className, initialContent }: E
             blockSpecs: { heading },
         });
 
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setEditor(editorInstance);
 
         return () => {
@@ -57,10 +57,11 @@ export default function Editor({ editable = true, className, initialContent }: E
         const unsubscribe = editor.onChange((editor, { getChanges }) => {
             const changes = getChanges();
             const content = editor.document;
-            handleChanges(changes, content);
+            handleChanges(changes, content, pageId);
         });
 
         return unsubscribe;
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [editor]);
 
     if (!editor) {

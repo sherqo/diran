@@ -56,8 +56,8 @@ export const getRoleWithInheritance = async (userId: string, blockId: string): P
         JOIN permissions p
           ON p.entity_id = a.id
          AND p.actor_id = ${userId}::uuid
-         AND p.actor_type = ${ActorType.USER}
-         AND p.entity_type = ${EntityType.BLOCK}
+         AND p.actor_type::text = ${ActorType.USER}
+         AND p.entity_type::text = ${EntityType.BLOCK}
         ORDER BY a.depth ASC
         LIMIT 1
     `;

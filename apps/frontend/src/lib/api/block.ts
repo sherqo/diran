@@ -1,6 +1,6 @@
 import { apiRequest } from './helpers';
 import type { CreateBlockResponseData, GetBlockResponseData, UpdateBlockResponseData, DeleteBlockResponseData } from '@/shared/types/block';
-import type { CreateBlockBodyInput, UpdateBlockParamInput } from '@/shared/validation/block';
+import type { CreateBlockBodyInput, UpdateBlockBodyInput } from '@/shared/validation/block';
 
 /**
  * Create a new block
@@ -19,7 +19,7 @@ export const getBlockApi = (id: string) => apiRequest<GetBlockResponseData>(`/bl
 /**
  * Update a block
  */
-export const updateBlockApi = (id: string, data: Partial<UpdateBlockParamInput>) =>
+export const updateBlockApi = (id: string, data: Partial<UpdateBlockBodyInput>) =>
     apiRequest<UpdateBlockResponseData>(`/block/${id}`, {
         method: 'PUT',
         body: JSON.stringify(data),

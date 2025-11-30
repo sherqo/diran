@@ -8,6 +8,7 @@ import {
     getBlockParamSchema,
     updateBlockParamSchema,
     deleteBlockParamSchema,
+    updateBlockBodySchema,
 } from '@diran/shared/validation/block.js';
 
 /**
@@ -34,7 +35,7 @@ export async function registerBlockRoutes(fastify: FastifyInstance): Promise<voi
 
     // Update block - requires write permission
     fastify.put('/:id', {
-        preHandler: [vr({ paramsSchema: updateBlockParamSchema }), auth, requireWritePermission],
+        preHandler: [vr({ paramsSchema: updateBlockParamSchema, bodySchema: updateBlockBodySchema }), auth, requireWritePermission],
         handler: updateBlock,
     });
 

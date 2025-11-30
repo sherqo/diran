@@ -12,7 +12,7 @@ export const createBlockBodySchema = z
     prevId: z.uuid().optional().nullable(),
     nextId: z.uuid().optional().nullable(),
     // order: z.string().min(1).max(100), // a lot of Qs here... ! NO LONGER REQUIRED (i think ^_^)
-    content: z.record(z.string(), z.any()),
+    content: z.any(),
   })
   .refine(
     data => {
@@ -39,14 +39,16 @@ export const getBlockParamSchema = z.object({
 
 export const updateBlockParamSchema = z.object({
   id: z.uuid(),
+});
 
+export const updateBlockBodySchema = z.object({
   // same block but optional
   type: BlockTypeEnumSchema.optional(),
   parentId: z.uuid().nullable().optional(),
-  prevId: z.string().optional().nullable(),
-  nextId: z.string().optional().nullable(),
+  prevId: z.string().nullable().optional(),
+  nextId: z.string().nullable().optional(),
   // order: z.string().min(1).max(100), // a lot of Qs here...
-  content: z.record(z.string(), z.any()).optional(),
+  content: z.any().optional(),
 });
 
 export const deleteBlockParamSchema = z.object({
@@ -62,4 +64,5 @@ export const deleteBlockParamSchema = z.object({
 export type CreateBlockBodyInput = z.infer<typeof createBlockBodySchema>;
 export type GetBlockParamInput = z.infer<typeof getBlockParamSchema>;
 export type UpdateBlockParamInput = z.infer<typeof updateBlockParamSchema>;
+export type UpdateBlockBodyInput = z.infer<typeof updateBlockBodySchema>;
 export type DeleteBlockParamInput = z.infer<typeof deleteBlockParamSchema>;

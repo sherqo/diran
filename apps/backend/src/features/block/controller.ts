@@ -1,6 +1,6 @@
 import { FastifyReply } from 'fastify';
 import { AuthenticatedRequest } from '#lib/middleware/auth';
-import { CreateBlockBodyInput, GetBlockParamInput, UpdateBlockParamInput, DeleteBlockParamInput } from '@diran/shared/validation/block';
+import { CreateBlockBodyInput, GetBlockParamInput, UpdateBlockBodyInput, DeleteBlockParamInput } from '@diran/shared/validation/block';
 import { db } from '#lib/database/connection';
 import { sendSuccess } from '#lib/utils/response';
 import { ApiError } from '#lib/middleware/errorHandler';
@@ -225,7 +225,7 @@ const getBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Promise
 // UPDATE - update the block data by providing its id and the new data (needs permission)
 const updateBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     const { id } = req.params as { id: string };
-    const payload = req.body as Partial<UpdateBlockParamInput>;
+    const payload = req.body as Partial<UpdateBlockBodyInput>;
 
     const existing = await db.block.findUnique({ where: { id } });
     if (!existing) {
@@ -373,12 +373,12 @@ const getAllPages = async (req: AuthenticatedRequest, reply: FastifyReply): Prom
         FROM blocks b
         INNER JOIN permissions p ON p.entity_id = b.id
         WHERE 
-            b.type = 'PAGE'
+            b.type::text = 'PAGE'
             AND b.parent_id IS NULL
             AND p.actor_id = ${userId}::uuid
-            AND p."actorType" = 'USER'
-            AND p."entityType" = 'BLOCK'
-            AND p.role IN ('OWNER', 'EDITOR', 'VIEWER')
+            AND p.actor_type::text = 'USER'
+            AND p.entity_type::text = 'BLOCK'
+            AND p.role::text IN ('OWNER', 'EDITOR', 'VIEWER')
         ORDER BY b."order" ASC
     `;
 
