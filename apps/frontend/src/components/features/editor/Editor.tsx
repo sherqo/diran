@@ -48,7 +48,8 @@ export default function Editor({ editable = true, className, initialContent }: E
             editorInstance._tiptapEditor.destroy();
             setEditor(null);
         };
-    }, [initialContent]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
     // Listen to changes
     useEffect(() => {
         if (!editor) return;
