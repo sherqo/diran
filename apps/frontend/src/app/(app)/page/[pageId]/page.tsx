@@ -1,21 +1,78 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { usePage } from '@/contexts/PageContext';
 import { PageHeader } from '@/components/page-header';
 import { Loader2 } from 'lucide-react';
 import { Editor } from '@/components/features/editor/DynamicEditor';
-import type { PartialBlock } from '@blocknote/core';
+import type { PartialBlock, BlockNoteEditor } from '@blocknote/core';
+import { getBlockTreeApi } from '@/lib/api/block';
 
 export default function PageView() {
     const params = useParams();
     const pageId = params.pageId as string;
     const { currentPage, pageLoading, loadPage } = usePage();
+    const editorRef = useRef<BlockNoteEditor | null>(null);
+    const isLoadingChildrenRef = useRef(false);
 
     useEffect(() => {
         loadPage(pageId);
     }, [pageId, loadPage]);
+
+    const [initialContent, setInitialContent] = useState<PartialBlock[] | null>(null);
+
+    // Recursively map API response to PartialBlock format
+    const mapTreeToPartialBlocks = useCallback((children: any[]): PartialBlock[] => {
+        return children.map(child => {
+            const block: PartialBlock = {
+                id: child.id,
+                type: child.type.toLowerCase(),
+                content: child.content,
+            };
+
+            // Recursively map nested children
+            if (child.children && child.children.length > 0) {
+                block.children = mapTreeToPartialBlocks(child.children);
+            }
+
+            return block;
+        });
+    }, []);
+
+    useEffect(() => {
+        let mounted = true;
+        const fetchChildren = async () => {
+            if (!mounted) return;
+            setInitialContent(null);
+            isLoadingChildrenRef.current = true;
+
+            try {
+                const res = await getBlockTreeApi(pageId);
+                if (!mounted) return;
+
+                if (res.success && res.data?.children && res.data.children.length > 0) {
+                    const mappedContent = mapTreeToPartialBlocks(res.data.children);
+                    setInitialContent(mappedContent);
+                } else {
+                    setInitialContent([{}] as PartialBlock[]);
+                }
+            } catch (error) {
+                console.error('Error fetching children:', error);
+                if (!mounted) return;
+                setInitialContent([{}] as PartialBlock[]);
+            } finally {
+                if (!mounted) return;
+                isLoadingChildrenRef.current = false;
+            }
+        };
+
+        void fetchChildren();
+
+        return () => {
+            mounted = false;
+        };
+    }, [pageId, mapTreeToPartialBlocks]);
 
     const pageTitle =
         currentPage?.content && typeof currentPage.content === 'object' && 'title' in currentPage.content
@@ -49,24 +106,21 @@ export default function PageView() {
     return (
         <>
             <PageHeader title={pageTitle} />
-            {/* <div className="flex-1 overflow-y-auto"> */}
             <div className="container mx-auto max-w-4xl pt-10 pb-40">
-                <Editor
-                    key={pageId}
-                    pageId={pageId}
-                    initialContent={
-                        [
-                            {
-                                type: 'paragraph',
-                                content: [{ type: 'text', text: `Page ID: ${pageId}`, styles: {} }],
-                            },
-                        ] as unknown as PartialBlock[]
-                    }
-                />
+                {initialContent === null ? (
+                    <div className="flex items-center justify-center p-10">
+                        <Loader2 className="h-8 w-8 animate-spin" />
+                    </div>
+                ) : (
+                    <Editor
+                        key={pageId}
+                        pageId={pageId}
+                        initialContent={initialContent}
+                        editorRef={editorRef}
+                        isLoadingChildrenRef={isLoadingChildrenRef}
+                    />
+                )}
             </div>
-            <h2 className="mb-4 text-xl font-semibold">Page Data (Raw)</h2>
-            <pre className="bg-muted overflow-auto rounded p-4 text-sm">{JSON.stringify(currentPage, null, 2)}</pre>
-            {/* </div> */}
         </>
     );
 }

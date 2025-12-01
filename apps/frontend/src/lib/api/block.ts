@@ -42,9 +42,23 @@ export const getChildBlocksApi = (parentId: string) =>
             id: string;
             type: string;
             content: any;
-        }>;
+        }>,
         length: number;
     }>(`/block/${parentId}/children`);
+
+/**
+ * Get entire nested tree of children for a given parent block (recursive)
+ */
+export const getBlockTreeApi = (parentId: string) =>
+    apiRequest<{
+        children: Array<{
+            id: string;
+            type: string;
+            content: any;
+            children?: any[];
+        }>,
+        length: number;
+    }>(`/block/${parentId}/tree`);
 
 /**
  * Get all pages (blocks with type=PAGE) - TODO: bad types

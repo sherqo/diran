@@ -2,7 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { validateRequest as vr } from '#lib/middleware/validation.js';
 import { authenticate as auth } from '#lib/middleware/auth.js';
 import { requireReadPermission, requireWritePermission, requireParentPermission } from './middlewares.js';
-import { createBlock, getBlock, updateBlock, deleteBlock, getDirectChildrenBlocks, getAllPages } from './controller.js';
+import { createBlock, getBlock, updateBlock, deleteBlock, getDirectChildrenBlocks, getChildrenTree, getAllPages } from './controller.js';
 import {
     createBlockBodySchema,
     getBlockParamSchema,
@@ -10,6 +10,7 @@ import {
     deleteBlockParamSchema,
     updateBlockBodySchema,
     getBlockDirectChildrenParamSchema,
+    getBlockChildrenTreeSchema,
 } from '@diran/shared/validation/block.js';
 
 /**
@@ -50,6 +51,12 @@ export async function registerBlockRoutes(fastify: FastifyInstance): Promise<voi
     fastify.get('/:id/children', {
         preHandler: [vr({ paramsSchema: getBlockDirectChildrenParamSchema }), auth, requireReadPermission],
         handler: getDirectChildrenBlocks,
+    });
+
+    // Get block children tree (all nested children for a block) - requires read permission
+    fastify.get('/:id/tree', {
+        preHandler: [vr({ paramsSchema: getBlockChildrenTreeSchema }), auth, requireReadPermission],
+        handler: getChildrenTree,
     });
 }
 

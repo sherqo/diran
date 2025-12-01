@@ -1,8 +1,8 @@
 type: http_request
 model: http_request
-id: rq_DDRdkvUGKx
-createdAt: 2025-12-01T02:27:01.230866247
-updatedAt: 2025-12-01T14:00:57.261436095
+id: rq_F3WHTJ5CAf
+createdAt: 2025-12-01T13:59:06.856142361
+updatedAt: 2025-12-01T14:00:40.699578999
 workspaceId: wk_xHj4uko5i5
 folderId: fl_ATSPWaW5T7
 authentication: {}
@@ -22,7 +22,7 @@ bodyType: null
 description: ''
 headers: []
 method: GET
-name: direct block children
-sortPriority: -1760017295647.999
-url: ${[ base_url ]}/block/80a5d335-547b-4448-9759-ed6032c4ebfd/children
+name: direct block children tree
+sortPriority: -1760017295647.998
+url: ${[ base_url ]}/block/80a5d335-547b-4448-9759-ed6032c4ebfd/tree
 urlParameters: []

@@ -24,9 +24,20 @@ interface EditorProps {
     className?: string;
     initialContent?: PartialBlock[];
     pageId: string;
+    editorRef?: React.MutableRefObject<BlockNoteEditor | null>;
+    onEditorReady?: () => void;
+    isLoadingChildrenRef?: React.MutableRefObject<boolean>;
 }
 
-export default function Editor({ editable = true, className, initialContent, pageId }: EditorProps) {
+export default function Editor({
+    editable = true,
+    className,
+    initialContent,
+    pageId,
+    editorRef,
+    onEditorReady,
+    isLoadingChildrenRef,
+}: EditorProps) {
     const [editor, setEditor] = useState<BlockNoteEditor | null>(null);
     const { resolvedTheme } = useTheme();
     const colorScheme = resolvedTheme === 'dark' ? 'dark' : 'light';
@@ -44,9 +55,25 @@ export default function Editor({ editable = true, className, initialContent, pag
 
         setEditor(editorInstance);
 
+        // Set the ref if provided
+        if (editorRef) {
+            editorRef.current = editorInstance;
+        }
+
+        // Call onEditorReady callback after editor is set
+        if (onEditorReady) {
+            // Use setTimeout to ensure the editor is fully ready
+            setTimeout(() => {
+                onEditorReady();
+            }, 0);
+        }
+
         return () => {
             editorInstance._tiptapEditor.destroy();
             setEditor(null);
+            if (editorRef) {
+                editorRef.current = null;
+            }
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -55,6 +82,10 @@ export default function Editor({ editable = true, className, initialContent, pag
         if (!editor) return;
 
         const unsubscribe = editor.onChange((editor, { getChanges }) => {
+            // Skip change handling if we're loading children
+            if (isLoadingChildrenRef?.current) {
+                return;
+            }
             handleChanges(getChanges(), editor.document, pageId);
         });
 
