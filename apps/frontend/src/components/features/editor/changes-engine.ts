@@ -55,7 +55,7 @@ class ChangesEngine {
             return newOp;
         }
 
-        console.log(`🔄 [Resolver] Resolving: ${existingOp.type} + ${newOp.type} for block ${blockId}`);
+        console.log(`[Resolver] Resolving: ${existingOp.type} + ${newOp.type} for block ${blockId}`);
 
         // Case 1: create + update → create (with merged data)
         if (existingOp.type === 'create' && newOp.type === 'update') {
@@ -96,7 +96,7 @@ class ChangesEngine {
         }
 
         // Default: return new operation (shouldn't reach here normally)
-        console.warn(`⚠️ [Resolver] Unhandled case: ${existingOp.type} + ${newOp.type}`);
+        console.warn(`[Resolver] Unhandled case: ${existingOp.type} + ${newOp.type}`);
         return newOp;
     }
 
@@ -146,7 +146,7 @@ class ChangesEngine {
         this.isSyncing = true;
 
         const operations = Array.from(this.mapB.entries());
-        const errors: Array<{ blockId: string; error: any }> = [];
+        let hasErrors = false;
 
         // Execute all operations
         for (const [blockId, operation] of operations) {
@@ -166,14 +166,12 @@ class ChangesEngine {
                 this.mapB.delete(blockId);
             } catch (error) {
                 console.error(`❌ [MapB] Failed for block ${blockId}:`, error);
-                errors.push({ blockId, error });
+                hasErrors = true;
             }
         }
 
         // Check if we have errors and should retry
-        if (errors.length > 0) {
-            console.log(`⚠️ [MapB] ${errors.length} operations failed`);
-
+        if (hasErrors) {
             if (retryCount < this.MAX_RETRIES) {
                 console.log(`🔄 [MapB] Retrying in ${this.RETRY_DELAY_MS}ms (attempt ${retryCount + 1}/${this.MAX_RETRIES})`);
 
@@ -185,7 +183,6 @@ class ChangesEngine {
             } else {
                 console.error(`💥 [MapB] Max retries reached. ${this.mapB.size} operations remain in queue`);
                 this.isSyncing = false;
-                // TODO: Maybe notify user or persist failed operations
             }
         } else {
             // All successful
