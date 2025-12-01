@@ -1,6 +1,13 @@
 import { FastifyReply } from 'fastify';
 import { AuthenticatedRequest } from '#lib/middleware/auth';
-import { CreateBlockBodyInput, GetBlockParamInput, UpdateBlockBodyInput, DeleteBlockParamInput } from '@diran/shared/validation/block';
+import {
+    CreateBlockBodyInput,
+    GetBlockParamInput,
+    UpdateBlockBodyInput,
+    DeleteBlockParamInput,
+    UpdateBlockParamInput,
+    GetBlockDirectChildrenParamInput,
+} from '@diran/shared/validation/block';
 import { db } from '#lib/database/connection';
 import { sendSuccess } from '#lib/utils/response';
 import { ApiError } from '#lib/middleware/errorHandler';
@@ -224,7 +231,7 @@ const getBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Promise
 
 // UPDATE - update the block data by providing its id and the new data (needs permission)
 const updateBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
-    const { id } = req.params as { id: string };
+    const { id } = req.params as UpdateBlockParamInput;
     const payload = req.body as Partial<UpdateBlockBodyInput>;
 
     const existing = await db.block.findUnique({ where: { id } });
@@ -348,6 +355,28 @@ const deleteBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Prom
     sendSuccess(reply, {}, 'Block and all children deleted successfully');
 };
 
+// GET DIRECT CHILDREN BLOCKS - gets all direct children blocks of a parent block (needs permission)
+const getDirectChildrenBlocks = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
+    const { id } = req.params as GetBlockDirectChildrenParamInput;
+    const children = await db.block.findMany({
+        where: { parentId: id },
+        orderBy: { order: 'asc' },
+        select: {
+            id: true,
+            type: true,
+            // parentId: true, // no need on the client + wtf bro, it's the same for all
+            // order: true, // no need to send the order to the client (it uses indexes)
+            content: true,
+
+            // the same with these bad guys
+            // createdAt: true,
+            // updatedAt: true,
+        },
+    });
+
+    sendSuccess(reply, { children }, 'Direct children blocks retrieved successfully');
+};
+
 // GET ALL PAGES - returns all top-level pages the user has access to (optimized with single query)
 const getAllPages = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     const userId = req.user!.id;
@@ -400,4 +429,4 @@ const getAllPages = async (req: AuthenticatedRequest, reply: FastifyReply): Prom
     return sendSuccess(reply, { pages: transformedPages }, 'Pages retrieved successfully');
 };
 
-export { createBlock, getBlock, updateBlock, deleteBlock, getAllPages };
+export { createBlock, getBlock, updateBlock, deleteBlock, getDirectChildrenBlocks, getAllPages };

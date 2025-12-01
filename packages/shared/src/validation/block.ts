@@ -55,6 +55,10 @@ export const deleteBlockParamSchema = z.object({
   id: z.uuid(),
 });
 
+export const getBlockDirectChildrenParamSchema = z.object({
+  id: z.uuid(),
+});
+
 /**
  * at this moment 14:17 25-Oct-2025
  * i have no idea why i'm adding these types
@@ -66,3 +70,4 @@ export type GetBlockParamInput = z.infer<typeof getBlockParamSchema>;
 export type UpdateBlockParamInput = z.infer<typeof updateBlockParamSchema>;
 export type UpdateBlockBodyInput = z.infer<typeof updateBlockBodySchema>;
 export type DeleteBlockParamInput = z.infer<typeof deleteBlockParamSchema>;
+export type GetBlockDirectChildrenParamInput = z.infer<typeof getBlockDirectChildrenParamSchema>;
