@@ -45,8 +45,8 @@ export const updateBlockBodySchema = z.object({
   // same block but optional
   type: BlockTypeEnumSchema.optional(),
   parentId: z.uuid().nullable().optional(),
-  prevId: z.string().nullable().optional(),
-  nextId: z.string().nullable().optional(),
+  prevId: z.uuid().nullable().optional(),
+  nextId: z.uuid().nullable().optional(),
   // order: z.string().min(1).max(100), // a lot of Qs here...
   content: z.any().optional(),
 });
