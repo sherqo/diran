@@ -455,17 +455,7 @@ const getChildrenTree = async (req: AuthenticatedRequest, reply: FastifyReply): 
 
     const children = cleanTree(rootChildren);
 
-    const responseData = {
-        success: true,
-        data: { children },
-        message: 'Block tree retrieved successfully',
-    };
-
-    // Send as raw string with explicit headers to avoid streaming issues
-    const serialized = JSON.stringify(responseData);
-    reply.header('Content-Type', 'application/json; charset=utf-8');
-    reply.header('Content-Length', serialized.length);
-    return reply.send(serialized);
+    return sendSuccess(reply, { children }, 'Block tree retrieved successfully');
 };
 
 // GET ALL PAGES - returns all top-level pages the user has access to (optimized with single query)

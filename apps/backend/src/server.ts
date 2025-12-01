@@ -3,7 +3,6 @@ import fastifyCors from '@fastify/cors';
 import fastifyHelmet from '@fastify/helmet';
 import fastifyCookie from '@fastify/cookie';
 import fastifyRateLimit from '@fastify/rate-limit';
-import fastifyCompress from '@fastify/compress';
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
 import fastifyUnderPressure from '@fastify/under-pressure';
@@ -67,13 +66,6 @@ async function setupPlugins() {
         retryAfter: 5, // seconds
         message: 'SERVER_NUKED',
         exposeStatusRoute: false,
-    });
-
-    // Response compression (gzip/brotli)
-    await app.register(fastifyCompress, {
-        global: true,
-        threshold: 1024, // Only compress responses > 1KB
-        encodings: ['br', 'gzip', 'deflate'], // Prefer brotli, fallback to gzip
     });
 
     // Helmet for security headers
