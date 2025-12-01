@@ -42,7 +42,7 @@ export const getChildBlocksApi = (parentId: string) =>
             id: string;
             type: string;
             content: any;
-        }>,
+        }>;
         length: number;
     }>(`/block/${parentId}/children`);
 
@@ -56,7 +56,7 @@ export const getBlockTreeApi = (parentId: string) =>
             type: string;
             content: any;
             children?: any[];
-        }>,
+        }>;
         length: number;
     }>(`/block/${parentId}/tree`);
 

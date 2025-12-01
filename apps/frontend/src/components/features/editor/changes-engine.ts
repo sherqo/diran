@@ -23,14 +23,38 @@ type ChangeOperation =
     | { type: 'update'; blockId: string; data: Parameters<typeof updateBlockApi>[1] }
     | { type: 'delete'; blockId: string };
 
+export type SyncStatus = 'saved' | 'saving' | 'error';
+
+type StatusListener = (status: SyncStatus) => void;
+
 class ChangesEngine {
     private mapA: Map<string, ChangeOperation> = new Map(); // active buffer
     private mapB: Map<string, ChangeOperation> = new Map(); // sync queue
     private isSyncing: boolean = false;
     private debounceTimer: NodeJS.Timeout | null = null;
-    private readonly DEBOUNCE_MS = 5000;
+    private readonly DEBOUNCE_MS = 1000;
     private readonly MAX_RETRIES = 3;
     private readonly RETRY_DELAY_MS = 1000;
+    private currentStatus: SyncStatus = 'saved';
+    private listeners: Set<StatusListener> = new Set();
+
+    // Subscribe to status changes
+    onStatusChange(listener: StatusListener) {
+        this.listeners.add(listener);
+        // Immediately call with current status
+        listener(this.currentStatus);
+        // Return unsubscribe function
+        return () => {
+            this.listeners.delete(listener);
+        };
+    }
+
+    private setStatus(status: SyncStatus) {
+        if (this.currentStatus !== status) {
+            this.currentStatus = status;
+            this.listeners.forEach(listener => listener(status));
+        }
+    }
 
     addChange(blockId: string, operation: ChangeOperation) {
         // Resolve operation with existing one (if any)
@@ -43,6 +67,9 @@ class ChangesEngine {
             // add resolved operation to Map A
             this.mapA.set(blockId, resolved);
         }
+
+        // Update status to saving since we have pending changes
+        this.setStatus('saving');
 
         this.resetDebounce();
     }
@@ -183,6 +210,7 @@ class ChangesEngine {
             } else {
                 console.error(`💥 [MapB] Max retries reached. ${this.mapB.size} operations remain in queue`);
                 this.isSyncing = false;
+                this.setStatus('error');
             }
         } else {
             // All successful
@@ -192,6 +220,9 @@ class ChangesEngine {
             // Check if Map A accumulated changes during sync
             if (this.mapA.size > 0) {
                 console.log(`🔔 [MapB] Map A has ${this.mapA.size} pending changes, will move after debounce`);
+                this.setStatus('saving');
+            } else {
+                this.setStatus('saved');
             }
         }
     }
@@ -208,6 +239,11 @@ class ChangesEngine {
 
 // Singleton instance
 const changesEngine = new ChangesEngine();
+
+// Export function to subscribe to status changes
+export const onSyncStatusChange = (listener: StatusListener) => {
+    return changesEngine.onStatusChange(listener);
+};
 
 // the main function that handles editor changes - called from the editor component
 export const handleChanges = (changes: BlocksChanged, document: Block[], pageId: string) => {

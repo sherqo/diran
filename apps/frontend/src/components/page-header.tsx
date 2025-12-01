@@ -4,6 +4,7 @@ import { NavActions } from '@/components/nav-actions';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from '@/components/ui/breadcrumb';
 import { Separator } from '@/components/ui/separator';
 import { SidebarTrigger } from '@/components/ui/sidebar';
+import SyncStatusIndicator from './features/editor/SyncStatusIndicator';
 
 interface PageHeaderProps {
     title: string;
@@ -22,6 +23,7 @@ export function PageHeader({ title }: PageHeaderProps) {
                         </BreadcrumbItem>
                     </BreadcrumbList>
                 </Breadcrumb>
+                <SyncStatusIndicator />
             </div>
             <div className="ml-auto px-3">
                 <NavActions />
