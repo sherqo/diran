@@ -55,9 +55,7 @@ export default function Editor({ editable = true, className, initialContent, pag
         if (!editor) return;
 
         const unsubscribe = editor.onChange((editor, { getChanges }) => {
-            const changes = getChanges();
-            const content = editor.document;
-            handleChanges(changes, content, pageId);
+            handleChanges(getChanges(), editor.document, pageId);
         });
 
         return unsubscribe;
