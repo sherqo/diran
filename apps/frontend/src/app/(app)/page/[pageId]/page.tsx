@@ -16,63 +16,65 @@ export default function PageView() {
     const editorRef = useRef<BlockNoteEditor | null>(null);
     const isLoadingChildrenRef = useRef(false);
 
+    const [initialContent, setInitialContent] = useState<PartialBlock[] | null>(null);
+
     useEffect(() => {
         loadPage(pageId);
     }, [pageId, loadPage]);
 
-    const [initialContent, setInitialContent] = useState<PartialBlock[] | null>(null);
-
     // Recursively map API response to PartialBlock format
-    const mapTreeToPartialBlocks = useCallback((children: any[]): PartialBlock[] => {
-        return children.map(child => {
-            const block: PartialBlock = {
-                id: child.id,
-                type: child.type.toLowerCase(),
-                content: child.content,
+    const mapToPartialBlocks = useCallback((blocks: any[]): PartialBlock[] => {
+        return blocks.map(block => {
+            const partialBlock: PartialBlock = {
+                id: block.id,
+                type: block.type.toLowerCase(),
+                content: block.content,
             };
 
-            // Recursively map nested children
-            if (child.children && child.children.length > 0) {
-                block.children = mapTreeToPartialBlocks(child.children);
+            if (block.children?.length > 0) {
+                partialBlock.children = mapToPartialBlocks(block.children);
             }
 
-            return block;
+            return partialBlock;
         });
     }, []);
 
+    // Fetch the entire block tree on mount
     useEffect(() => {
         let mounted = true;
-        const fetchChildren = async () => {
-            if (!mounted) return;
+
+        const fetchBlockTree = async () => {
             setInitialContent(null);
             isLoadingChildrenRef.current = true;
 
             try {
                 const res = await getBlockTreeApi(pageId);
+
                 if (!mounted) return;
 
-                if (res.success && res.data?.children && res.data.children.length > 0) {
-                    const mappedContent = mapTreeToPartialBlocks(res.data.children);
-                    setInitialContent(mappedContent);
+                if (res.success && res.data?.children?.length > 0) {
+                    setInitialContent(mapToPartialBlocks(res.data.children));
                 } else {
                     setInitialContent([{}] as PartialBlock[]);
                 }
             } catch (error) {
-                console.error('Error fetching children:', error);
-                if (!mounted) return;
-                setInitialContent([{}] as PartialBlock[]);
+                console.error('Failed to fetch block tree:', error);
+                if (mounted) {
+                    setInitialContent([{}] as PartialBlock[]);
+                }
             } finally {
-                if (!mounted) return;
-                isLoadingChildrenRef.current = false;
+                if (mounted) {
+                    isLoadingChildrenRef.current = false;
+                }
             }
         };
 
-        void fetchChildren();
+        void fetchBlockTree();
 
         return () => {
             mounted = false;
         };
-    }, [pageId, mapTreeToPartialBlocks]);
+    }, [pageId, mapToPartialBlocks]);
 
     const pageTitle =
         currentPage?.content && typeof currentPage.content === 'object' && 'title' in currentPage.content
