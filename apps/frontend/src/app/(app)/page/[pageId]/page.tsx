@@ -85,7 +85,7 @@ export default function PageView() {
         return (
             <>
                 <PageHeader title="Loading..." />
-                <div className="flex flex-1 items-center justify-center overflow-y-auto">
+                <div className="flex flex-1 items-center justify-center">
                     <Loader2 className="h-8 w-8 animate-spin" />
                 </div>
             </>
@@ -96,7 +96,7 @@ export default function PageView() {
         return (
             <>
                 <PageHeader title="Error" />
-                <div className="flex flex-1 items-center justify-center overflow-y-auto">
+                <div className="flex flex-1 items-center justify-center">
                     <div className="text-center">
                         <p className="text-destructive text-lg">Page not found</p>
                     </div>
@@ -108,20 +108,22 @@ export default function PageView() {
     return (
         <>
             <PageHeader title={pageTitle} />
-            <div className="container mx-auto max-w-4xl pt-10 pb-40">
-                {initialContent === null ? (
-                    <div className="flex items-center justify-center p-10">
-                        <Loader2 className="h-8 w-8 animate-spin" />
-                    </div>
-                ) : (
-                    <Editor
-                        key={pageId}
-                        pageId={pageId}
-                        initialContent={initialContent}
-                        editorRef={editorRef}
-                        isLoadingChildrenRef={isLoadingChildrenRef}
-                    />
-                )}
+            <div className="flex-1 overflow-y-auto">
+                <div className="container mx-auto max-w-4xl pt-10 pb-40">
+                    {initialContent === null ? (
+                        <div className="flex items-center justify-center p-10">
+                            <Loader2 className="h-8 w-8 animate-spin" />
+                        </div>
+                    ) : (
+                        <Editor
+                            key={pageId}
+                            pageId={pageId}
+                            initialContent={initialContent}
+                            editorRef={editorRef}
+                            isLoadingChildrenRef={isLoadingChildrenRef}
+                        />
+                    )}
+                </div>
             </div>
         </>
     );
