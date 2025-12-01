@@ -34,7 +34,20 @@ export const deleteBlockApi = (id: string) =>
     });
 
 /**
- * Get all pages (blocks with type=PAGE)
+ * Get all direct child blocks of a given parent block
+ */
+export const getChildBlocksApi = (parentId: string) =>
+    apiRequest<{
+        children: Array<{
+            id: string;
+            type: string;
+            content: any;
+        }>;
+        length: number;
+    }>(`/block/${parentId}/children`);
+
+/**
+ * Get all pages (blocks with type=PAGE) - TODO: bad types
  */
 export const getAllPagesApi = () =>
     apiRequest<{
