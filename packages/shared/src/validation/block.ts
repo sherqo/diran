@@ -7,7 +7,27 @@ import { BlockTypeEnum } from '../types/block.js';
  * Block type enum values as a tuple for Zod validation.
  * Must match BlockTypeEnum exactly.
  */
-const BlockTypeValues = [BlockTypeEnum.PAGE, BlockTypeEnum.PARAGRAPH, BlockTypeEnum.HEADING, BlockTypeEnum.QUOTE] as const;
+const BlockTypeValues = [
+  BlockTypeEnum.PAGE,
+  // Typography
+  BlockTypeEnum.PARAGRAPH,
+  BlockTypeEnum.HEADING,
+  BlockTypeEnum.QUOTE,
+  // Lists
+  BlockTypeEnum.BULLET_LIST_ITEM,
+  BlockTypeEnum.NUMBERED_LIST_ITEM,
+  BlockTypeEnum.CHECK_LIST_ITEM,
+  BlockTypeEnum.TOGGLE_LIST_ITEM,
+  // Table
+  BlockTypeEnum.TABLE,
+  // Code
+  BlockTypeEnum.CODE_BLOCK,
+  // Embeds
+  BlockTypeEnum.FILE,
+  BlockTypeEnum.IMAGE,
+  BlockTypeEnum.VIDEO,
+  BlockTypeEnum.AUDIO,
+] as const;
 
 const BlockTypeEnumSchema = z.enum(BlockTypeValues);
 

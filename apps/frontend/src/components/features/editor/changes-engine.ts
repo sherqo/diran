@@ -297,11 +297,12 @@ export const handleChanges = (changes: BlocksChanged, document: Block[], pageId:
 /**
  * BlockNote stores props (colors, alignment, level, etc.) at the same level as content.
  * Backend only stores content as JSON, so we embed props inside content for storage.
- * Format: { __props: {...}, __content: [...] } - always this structure for consistency
+ * Format: { __props: {...}, __content: ... } - content can be array (text blocks), object (tables), or undefined (embeds)
  */
 const embedPropsInContent = (block: Block): EmbeddedBlockContent => {
-    const content = Array.isArray(block.content) ? block.content : [];
     const props = block.props || {};
+    // Content can be: InlineContent[] for text blocks, TableContent for tables, or undefined for embeds
+    const content = block.content;
 
     return {
         __props: props as EmbeddedBlockContent['__props'],

@@ -71,6 +71,24 @@ enum BlockType {
   paragraph
   heading
   quote
+
+  // List types
+  bulletListItem
+  numberedListItem
+  checkListItem
+  toggleListItem
+
+  // Table
+  table
+
+  // Code
+  codeBlock
+
+  // Embeds
+  file
+  image
+  video
+  audio
 }
 
 enum RoleType {

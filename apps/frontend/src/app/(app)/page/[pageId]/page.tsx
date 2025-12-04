@@ -34,13 +34,16 @@ export default function PageView() {
             if (content && typeof content === 'object' && '__props' in content) {
                 const embedded = content as EmbeddedBlockContent;
                 props = embedded.__props as Record<string, unknown>;
+                // __content can be: array (text blocks), object (tables), or undefined (embeds)
                 content = embedded.__content;
             }
 
+            // Build the partial block - only include content if it exists
+            // Embeds (image, video, audio, file) have undefined content
             const partialBlock = {
                 id: block.id,
-                type: block.type.toLowerCase(),
-                content,
+                type: block.type, // BlockNote types are already in correct format (camelCase)
+                ...(content !== undefined && content !== null && { content }),
                 ...(props && { props }),
             } as PartialBlock;
 
