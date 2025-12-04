@@ -291,7 +291,7 @@ const handleInsert = (currentDocument: Block[], newBlock: Block, pageId: string)
         type: 'create',
         data: {
             id: newBlock.id,
-            type: newBlock.type.toUpperCase() as BlockTypeEnum,
+            type: newBlock.type as BlockTypeEnum, // BlockNote types are already lowercase
             content: newBlock.content,
             parentId: posInfo.parentId,
             prevId: posInfo.beforeBlockId,
@@ -316,7 +316,7 @@ const handleUpdate = (oldBlock: Block, newBlock: Block) => {
         type: BlockTypeEnum;
         content: Block['content'];
     }> = {
-        ...(oldBlock.type !== newBlock.type && { type: newBlock.type.toUpperCase() as BlockTypeEnum }),
+        ...(oldBlock.type !== newBlock.type && { type: newBlock.type as BlockTypeEnum }), // BlockNote types are already lowercase
         content: newBlock.content, // most of the time content will change, so we just send it directly, the check is expensive
     };
 

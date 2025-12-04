@@ -1,18 +1,107 @@
 import { z } from 'zod';
 import { BlockTypeEnum } from '../types/block.js';
 
-const BlockTypeEnumSchema = z.enum(BlockTypeEnum);
+// ================ Enum Values for Zod ================
+
+/**
+ * Block type enum values as a tuple for Zod validation.
+ * Must match BlockTypeEnum exactly.
+ */
+const BlockTypeValues = [BlockTypeEnum.PAGE, BlockTypeEnum.PARAGRAPH, BlockTypeEnum.HEADING, BlockTypeEnum.QUOTE] as const;
+
+const BlockTypeEnumSchema = z.enum(BlockTypeValues);
+
+// ================ Inline Content Schemas ================
+
+/**
+ * Text styles schema matching BlockNote's default styles.
+ */
+const StylesSchema = z.object({
+  bold: z.boolean().optional(),
+  italic: z.boolean().optional(),
+  underline: z.boolean().optional(),
+  strike: z.boolean().optional(),
+  textColor: z.string().optional(),
+  backgroundColor: z.string().optional(),
+});
+
+/**
+ * Styled text inline content schema.
+ */
+const StyledTextSchema = z.object({
+  type: z.literal('text'),
+  text: z.string(),
+  styles: StylesSchema,
+});
+
+/**
+ * Link inline content schema.
+ */
+const LinkSchema = z.object({
+  type: z.literal('link'),
+  content: z.array(StyledTextSchema),
+  href: z.string().url(),
+});
+
+/**
+ * Union of all inline content types.
+ */
+const InlineContentSchema = z.union([StyledTextSchema, LinkSchema]);
+
+// ================ Block Props Schemas ================
+
+/**
+ * Default block props schema.
+ */
+const DefaultPropsSchema = z.object({
+  backgroundColor: z.string().optional(),
+  textColor: z.string().optional(),
+  textAlignment: z.enum(['left', 'center', 'right', 'justify']).optional(),
+});
+
+/**
+ * Heading props schema with level.
+ */
+const HeadingPropsSchema = DefaultPropsSchema.extend({
+  level: z.union([z.literal(1), z.literal(2), z.literal(3)]),
+});
+
+// ================ Block Content Schemas ================
+
+/**
+ * Paragraph content schema.
+ */
+const ParagraphContentSchema = z.object({
+  props: DefaultPropsSchema.optional(),
+  content: z.array(InlineContentSchema),
+});
+
+/**
+ * Heading content schema.
+ */
+const HeadingContentSchema = z.object({
+  props: HeadingPropsSchema,
+  content: z.array(InlineContentSchema),
+});
+
+/**
+ * Quote content schema.
+ */
+const QuoteContentSchema = z.object({
+  props: DefaultPropsSchema.optional(),
+  content: z.array(InlineContentSchema),
+});
+
+// ================ Block Validation Schemas ================
 
 export const createBlockBodySchema = z
   .object({
-    // i need a full block here but without createdAt, updatedAt
     id: z.uuid().optional(),
     type: BlockTypeEnumSchema,
     parentId: z.uuid().optional().nullable(),
     prevId: z.uuid().optional().nullable(),
     nextId: z.uuid().optional().nullable(),
-    // order: z.string().min(1).max(100), // a lot of Qs here... ! NO LONGER REQUIRED (i think ^_^)
-    content: z.any(),
+    content: z.any(), // Using z.any() for flexibility; content structure varies by block type
   })
   .refine(
     data => {
@@ -22,13 +111,10 @@ export const createBlockBodySchema = z
         return !data.id;
       }
 
-      // If type is "PAGE", parentId must be undefined. -> this is wrong! (i keep the wrong for reference and not to make the same mistake again)
-      // If not "PAGE", parentId must exist.
-      // if (data.type === BlockTypeEnum.PAGE) return data.parentId === undefined;
-      return hasParent || data.type === BlockTypeEnum.PAGE; //? where do u check for PAGE then?!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      return hasParent || data.type === BlockTypeEnum.PAGE;
     },
     {
-      message: "parentId is required unless type='PAGE'",
+      message: "parentId is required unless type='page'",
       path: ['parentId'],
     }
   );
@@ -42,13 +128,11 @@ export const updateBlockParamSchema = z.object({
 });
 
 export const updateBlockBodySchema = z.object({
-  // same block but optional
   type: BlockTypeEnumSchema.optional(),
   parentId: z.uuid().nullable().optional(),
   prevId: z.uuid().nullable().optional(),
   nextId: z.uuid().nullable().optional(),
-  // order: z.string().min(1).max(100), // a lot of Qs here...
-  content: z.any().optional(),
+  content: z.any().optional(), // Using z.any() for flexibility; content structure varies by block type
 });
 
 export const deleteBlockParamSchema = z.object({
@@ -63,12 +147,8 @@ export const getBlockChildrenTreeSchema = z.object({
   id: z.uuid(),
 });
 
-/**
- * at this moment 14:17 25-Oct-2025
- * i have no idea why i'm adding these types
- * but i feel like it's a good practice bc all files did the same
- */
-// Types
+// ================ Exported Types ================
+
 export type CreateBlockBodyInput = z.infer<typeof createBlockBodySchema>;
 export type GetBlockParamInput = z.infer<typeof getBlockParamSchema>;
 export type UpdateBlockParamInput = z.infer<typeof updateBlockParamSchema>;
@@ -76,3 +156,18 @@ export type UpdateBlockBodyInput = z.infer<typeof updateBlockBodySchema>;
 export type DeleteBlockParamInput = z.infer<typeof deleteBlockParamSchema>;
 export type GetBlockDirectChildrenParamInput = z.infer<typeof getBlockDirectChildrenParamSchema>;
 export type GetBlockChildrenTreeInput = z.infer<typeof getBlockChildrenTreeSchema>;
+
+// ================ Content Schema Exports ================
+// Export content schemas for use in other validation files if needed
+
+export {
+  StylesSchema,
+  StyledTextSchema,
+  LinkSchema,
+  InlineContentSchema,
+  DefaultPropsSchema,
+  HeadingPropsSchema,
+  ParagraphContentSchema,
+  HeadingContentSchema,
+  QuoteContentSchema,
+};

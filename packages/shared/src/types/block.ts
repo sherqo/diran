@@ -1,27 +1,132 @@
+// ================ Block Types (matching BlockNote editor) ================
+
+/**
+ * Block types matching BlockNote's built-in blocks.
+ * Using lowercase to match BlockNote's type names exactly.
+ * @see https://www.blocknotejs.org/docs/features/blocks
+ */
 export enum BlockTypeEnum {
-  PAGE = 'PAGE',
+  // Special type for pages (not a BlockNote type)
+  PAGE = 'page',
 
-  // Headings
-  HEADING_1 = 'HEADING_1',
-  HEADING_2 = 'HEADING_2',
-  HEADING_3 = 'HEADING_3',
+  // Typography blocks
+  PARAGRAPH = 'paragraph',
+  HEADING = 'heading',
+  QUOTE = 'quote',
 
-  PARAGRAPH = 'PARAGRAPH',
-  CODE = 'CODE',
-  TODO = 'TODO',
+  // TODO: Add more block types as needed
+  // List types: bulletListItem, numberedListItem, checkListItem, toggleListItem
+  // Embeds: image, video, audio, file
+  // Other: table, codeBlock
 }
 
-// we can later extend make this `Block<T>` and have `T` be the content type
+// ================ Text Styles (for inline content) ================
+
+/**
+ * Text styles matching BlockNote's default styles.
+ * @see https://www.blocknotejs.org/docs/features/blocks/inline-content
+ */
+export interface Styles {
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean;
+  strike?: boolean;
+  textColor?: string;
+  backgroundColor?: string;
+}
+
+// ================ Inline Content Types ================
+
+/**
+ * Styled text inline content.
+ */
+export interface StyledText {
+  type: 'text';
+  text: string;
+  styles: Styles;
+}
+
+/**
+ * Link inline content.
+ */
+export interface Link {
+  type: 'link';
+  content: StyledText[];
+  href: string;
+}
+
+/**
+ * Union of all inline content types.
+ */
+export type InlineContent = StyledText | Link;
+
+// ================ Default Block Props ================
+
+/**
+ * Default props that apply to all blocks.
+ * @see https://www.blocknotejs.org/docs/features/blocks
+ */
+export interface DefaultProps {
+  backgroundColor?: string;
+  textColor?: string;
+  textAlignment?: 'left' | 'center' | 'right' | 'justify';
+}
+
+// ================ Typography Block Props ================
+
+/**
+ * Heading block specific props.
+ */
+export interface HeadingProps extends DefaultProps {
+  level: 1 | 2 | 3;
+}
+
+// ================ Block Content Types ================
+
+/**
+ * Content structure for paragraph blocks.
+ */
+export interface ParagraphContent {
+  props?: DefaultProps;
+  content: InlineContent[];
+}
+
+/**
+ * Content structure for heading blocks.
+ */
+export interface HeadingContent {
+  props: HeadingProps;
+  content: InlineContent[];
+}
+
+/**
+ * Content structure for quote blocks.
+ */
+export interface QuoteContent {
+  props?: DefaultProps;
+  content: InlineContent[];
+}
+
+/**
+ * Union of all block content types.
+ */
+export type BlockContent = ParagraphContent | HeadingContent | QuoteContent | Record<string, unknown>;
+
+// ================ Block Interface ================
+
+/**
+ * Block structure matching BlockNote's block format.
+ * @see https://www.blocknotejs.org/docs/features/blocks
+ */
 export interface Block {
-  // All of this should be synced with the database model
   id: string;
   type: BlockTypeEnum;
   parentId: string | null; // null for root blocks like PAGE
   order: number;
-  content: Record<string, any>; // JSON content varies by block type
+  content: BlockContent;
   createdAt: string;
   updatedAt: string;
-  children?: Block[]; // Not all blocks will have children
+  children?: Block[];
 }
 
 export interface CreateBlockResponseData {

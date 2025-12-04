@@ -64,13 +64,13 @@ model waitlist {
 }
 
 enum BlockType {
-  PAGE
-  HEADING_1
-  HEADING_2
-  HEADING_3
-  PARAGRAPH
-  CODE
-  TODO
+  // Special type for pages
+  page
+
+  // Typography blocks (matching BlockNote)
+  paragraph
+  heading
+  quote
 }
 
 enum RoleType {

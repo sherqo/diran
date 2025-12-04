@@ -483,7 +483,7 @@ const getAllPages = async (req: AuthenticatedRequest, reply: FastifyReply): Prom
         FROM blocks b
         INNER JOIN permissions p ON p.entity_id = b.id
         WHERE 
-            b.type::text = 'PAGE'
+            b.type::text = 'page'
             AND b.parent_id IS NULL
             AND p.actor_id = ${userId}::uuid
             AND p.actor_type::text = 'USER'
