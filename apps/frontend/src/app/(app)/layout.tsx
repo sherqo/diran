@@ -1,6 +1,7 @@
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { PageProvider } from '@/contexts/PageContext';
+import { EditorProvider } from '@/contexts/EditorContext';
 import { CommandPalette } from '@/components/command-palette';
 import { ThemeProvider } from 'next-themes';
 import { AppSidebar } from '@/components/app-sidebar';
@@ -17,11 +18,13 @@ export default function AppLayout({
                 <AuthProvider>
                     <ProtectedRoute>
                         <PageProvider>
-                            <SidebarProvider>
-                                <AppSidebar />
-                                <SidebarInset className="flex h-screen flex-col">{children}</SidebarInset>
-                            </SidebarProvider>
-                            <CommandPalette />
+                            <EditorProvider>
+                                <SidebarProvider>
+                                    <AppSidebar />
+                                    <SidebarInset className="flex h-screen flex-col">{children}</SidebarInset>
+                                </SidebarProvider>
+                                <CommandPalette />
+                            </EditorProvider>
                         </PageProvider>
                     </ProtectedRoute>
                 </AuthProvider>

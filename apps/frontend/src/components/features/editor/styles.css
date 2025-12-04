@@ -1,0 +1,47 @@
+/* .bn-shadcn .bn-editor {
+    box-shadow: none !important;
+    background-color: transparent !important;
+}
+
+.bn-shadcn .bn-editor * {
+    color: var(--color-foreground) !important;
+}
+
+.bn-shadcn .bn-side-menu {
+    background-color: transparent !important;
+}
+
+.\[\&_svg\]\:pointer-events-none svg {
+    margin: 0;
+    padding: 0;
+    width: 5px;
+    color: #b4b0ab;
+} */
+/* button {
+    width: 5px;
+} */
+
+/* Force editor background and text color to follow the --bn colors */
+.bn-container[data-theming-css-variables-editor] .bn-editor {
+    background-color: transparent;
+}
+
+/* Ensure editor child text uses the editor text color */
+/* Let BlockNote handle inline text colors and marks; keep default background from `--bn-colors-editor-background`. */
+
+/* Ensure block backgrounds are transparent unless set by highlight */
+
+/* Don't override inline `style`-applied colors. Only set defaults on elements without inline style. */
+/* Do not force transparent backgrounds on blocks or elements so user-applied styles remain visible */
+
+/* Make inline background-color highlights visible (editor sets style attributes on child nodes) */
+.bn-container[data-theming-css-variables-editor] .bn-editor [style*='background-color'] {
+    display: inline-block;
+    border-radius: 2px;
+    /* allow small padding so background looks neat on small spans */
+    padding: 0 0.06rem;
+}
+
+.bn-container[data-theming-css-variables-editor] .bn-editor mark {
+    display: inline-block;
+}

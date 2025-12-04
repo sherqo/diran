@@ -1,0 +1,28 @@
+type: http_request
+model: http_request
+id: rq_F3WHTJ5CAf
+createdAt: 2025-12-01T13:59:06.856142361
+updatedAt: 2025-12-01T14:00:40.699578999
+workspaceId: wk_xHj4uko5i5
+folderId: fl_ATSPWaW5T7
+authentication: {}
+authenticationType: null
+body:
+  text: |-
+    {
+      "type": "HEADING_2",
+      "order":"I AM in the bottom of the second heading",
+      "prevId": "d7373739-09d5-4ed6-9c33-35374876a325",
+      "parentId": "1731f3ba-9b06-475a-818c-1a0db7b5b60c",
+      "content": {
+        "title" : "the good title 3"
+      }
+    }
+bodyType: null
+description: ''
+headers: []
+method: GET
+name: direct block children tree
+sortPriority: -1760017295647.998
+url: ${[ base_url ]}/block/80a5d335-547b-4448-9759-ed6032c4ebfd/tree
+urlParameters: []

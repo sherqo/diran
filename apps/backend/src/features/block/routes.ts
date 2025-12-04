@@ -2,12 +2,15 @@ import { FastifyInstance } from 'fastify';
 import { validateRequest as vr } from '#lib/middleware/validation.js';
 import { authenticate as auth } from '#lib/middleware/auth.js';
 import { requireReadPermission, requireWritePermission, requireParentPermission } from './middlewares.js';
-import { createBlock, getBlock, updateBlock, deleteBlock, getAllPages } from './controller.js';
+import { createBlock, getBlock, updateBlock, deleteBlock, getDirectChildrenBlocks, getChildrenTree, getAllPages } from './controller.js';
 import {
     createBlockBodySchema,
     getBlockParamSchema,
     updateBlockParamSchema,
     deleteBlockParamSchema,
+    updateBlockBodySchema,
+    getBlockDirectChildrenParamSchema,
+    getBlockChildrenTreeSchema,
 } from '@diran/shared/validation/block.js';
 
 /**
@@ -34,7 +37,7 @@ export async function registerBlockRoutes(fastify: FastifyInstance): Promise<voi
 
     // Update block - requires write permission
     fastify.put('/:id', {
-        preHandler: [vr({ paramsSchema: updateBlockParamSchema }), auth, requireWritePermission],
+        preHandler: [vr({ paramsSchema: updateBlockParamSchema, bodySchema: updateBlockBodySchema }), auth, requireWritePermission],
         handler: updateBlock,
     });
 
@@ -42,6 +45,18 @@ export async function registerBlockRoutes(fastify: FastifyInstance): Promise<voi
     fastify.delete('/:id', {
         preHandler: [vr({ paramsSchema: deleteBlockParamSchema }), auth, requireWritePermission],
         handler: deleteBlock,
+    });
+
+    // Get all direct children blocks of a parent block - requires read permission
+    fastify.get('/:id/children', {
+        preHandler: [vr({ paramsSchema: getBlockDirectChildrenParamSchema }), auth, requireReadPermission],
+        handler: getDirectChildrenBlocks,
+    });
+
+    // Get block children tree (all nested children for a block) - requires read permission
+    fastify.get('/:id/tree', {
+        preHandler: [vr({ paramsSchema: getBlockChildrenTreeSchema }), auth, requireReadPermission],
+        handler: getChildrenTree,
     });
 }
 

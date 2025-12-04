@@ -1,11 +1,19 @@
 import { FastifyReply } from 'fastify';
 import { AuthenticatedRequest } from '#lib/middleware/auth';
-import { CreateBlockBodyInput, GetBlockParamInput, UpdateBlockParamInput, DeleteBlockParamInput } from '@diran/shared/validation/block';
+import {
+    CreateBlockBodyInput,
+    GetBlockParamInput,
+    UpdateBlockBodyInput,
+    DeleteBlockParamInput,
+    UpdateBlockParamInput,
+    GetBlockDirectChildrenParamInput,
+    GetBlockChildrenTreeInput,
+} from '@diran/shared/validation/block';
 import { db } from '#lib/database/connection';
 import { sendSuccess } from '#lib/utils/response';
 import { ApiError } from '#lib/middleware/errorHandler';
 import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors';
-import { ActorType, EntityType, RoleType } from '@prisma/client';
+import { ActorType, EntityType, RoleType, BlockType } from '@prisma/client';
 import { generateKeyBetween } from 'fractional-indexing';
 import { canWrite } from './middlewares';
 import { getRoleWithInheritance } from '#lib/services/permission';
@@ -177,6 +185,18 @@ const createBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Prom
             });
         }
 
+        // If creating a PAGE, also create a default empty paragraph block as first child
+        if (type === BlockType.page) {
+            await tx.block.create({
+                data: {
+                    type: BlockType.paragraph,
+                    parentId: created.id,
+                    order: generateKeyBetween(null, null),
+                    content: [],
+                },
+            });
+        }
+
         return { block };
     });
 
@@ -224,8 +244,8 @@ const getBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Promise
 
 // UPDATE - update the block data by providing its id and the new data (needs permission)
 const updateBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
-    const { id } = req.params as { id: string };
-    const payload = req.body as Partial<UpdateBlockParamInput>;
+    const { id } = req.params as UpdateBlockParamInput;
+    const payload = req.body as Partial<UpdateBlockBodyInput>;
 
     const existing = await db.block.findUnique({ where: { id } });
     if (!existing) {
@@ -348,6 +368,108 @@ const deleteBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Prom
     sendSuccess(reply, {}, 'Block and all children deleted successfully');
 };
 
+// GET DIRECT CHILDREN BLOCKS - gets all direct children blocks of a parent block (needs permission)
+const getDirectChildrenBlocks = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
+    const { id } = req.params as GetBlockDirectChildrenParamInput;
+    const children = await db.block.findMany({
+        where: { parentId: id },
+        orderBy: { order: 'asc' },
+        select: {
+            id: true,
+            type: true,
+            // parentId: true, // no need on the client + wtf bro, it's the same for all
+            // order: true, // no need to send the order to the client (it uses indexes)
+            content: true,
+
+            // the same with these bad guys
+            // createdAt: true,
+            // updatedAt: true,
+        },
+    });
+
+    sendSuccess(reply, { children }, 'Direct children blocks retrieved successfully');
+};
+
+// GET CHILDREN TREE - gets all nested children blocks of a parent block (needs permission)
+const getChildrenTree = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
+    const { id } = req.params as GetBlockChildrenTreeInput;
+
+    // Use recursive CTE to fetch entire tree in a single query
+    const allBlocks: Array<{
+        id: string;
+        type: string;
+        parentId: string | null;
+        order: string;
+        content: any;
+    }> = await db.$queryRaw`
+        WITH RECURSIVE block_tree AS (
+            -- Base case: direct children of the parent block
+            SELECT id, type, parent_id, "order", content, 1 as depth
+            FROM blocks
+            WHERE parent_id = ${id}::uuid
+            
+            UNION ALL
+            
+            -- Recursive case: children of blocks we've already found
+            SELECT b.id, b.type, b.parent_id, b."order", b.content, bt.depth + 1
+            FROM blocks b
+            INNER JOIN block_tree bt ON b.parent_id = bt.id
+            WHERE bt.depth < 100
+        )
+        SELECT id, type, parent_id as "parentId", "order", content
+        FROM block_tree
+        ORDER BY "order" ASC
+    `;
+
+    // Create a map for faster lookups
+    const blockMap = new Map<string, any>();
+
+    // Initialize all blocks in the map
+    allBlocks.forEach(block => {
+        blockMap.set(block.id, {
+            id: block.id,
+            type: block.type,
+            content: JSON.parse(JSON.stringify(block.content)), // Ensure content is properly serializable
+            children: [] as any[],
+        });
+    });
+
+    // Build the tree structure
+    const rootChildren: any[] = [];
+    allBlocks.forEach(block => {
+        const node = blockMap.get(block.id)!;
+
+        if (block.parentId === id) {
+            // Direct child of the root
+            rootChildren.push(node);
+        } else if (block.parentId) {
+            // Child of another block
+            const parent = blockMap.get(block.parentId);
+            if (parent) {
+                parent.children.push(node);
+            }
+        }
+    });
+
+    // Remove empty children arrays
+    const cleanTree = (nodes: any[]): any[] => {
+        return nodes.map(node => {
+            if (node.children && node.children.length > 0) {
+                return {
+                    ...node,
+                    children: cleanTree(node.children),
+                };
+            }
+            const { children, ...rest } = node;
+            return rest;
+        });
+    };
+
+    const children = cleanTree(rootChildren);
+
+    return sendSuccess(reply, { children }, 'Block tree retrieved successfully');
+};
+
 // GET ALL PAGES - returns all top-level pages the user has access to (optimized with single query)
 const getAllPages = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     const userId = req.user!.id;
@@ -373,12 +495,12 @@ const getAllPages = async (req: AuthenticatedRequest, reply: FastifyReply): Prom
         FROM blocks b
         INNER JOIN permissions p ON p.entity_id = b.id
         WHERE 
-            b.type = 'PAGE'
+            b.type::text = 'page'
             AND b.parent_id IS NULL
             AND p.actor_id = ${userId}::uuid
-            AND p."actorType" = 'USER'
-            AND p."entityType" = 'BLOCK'
-            AND p.role IN ('OWNER', 'EDITOR', 'VIEWER')
+            AND p.actor_type::text = 'USER'
+            AND p.entity_type::text = 'BLOCK'
+            AND p.role::text IN ('OWNER', 'EDITOR', 'VIEWER')
         ORDER BY b."order" ASC
     `;
 
@@ -400,4 +522,4 @@ const getAllPages = async (req: AuthenticatedRequest, reply: FastifyReply): Prom
     return sendSuccess(reply, { pages: transformedPages }, 'Pages retrieved successfully');
 };
 
-export { createBlock, getBlock, updateBlock, deleteBlock, getAllPages };
+export { createBlock, getBlock, updateBlock, deleteBlock, getDirectChildrenBlocks, getChildrenTree, getAllPages };

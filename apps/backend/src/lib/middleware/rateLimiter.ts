@@ -1,7 +1,7 @@
 import type { RateLimitPluginOptions } from '@fastify/rate-limit';
 
 export const globalRateLimiterConfig: RateLimitPluginOptions = {
-    max: 100,
+    max: 200,
     timeWindow: '1 minute',
 };
 

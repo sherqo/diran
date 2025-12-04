@@ -1,6 +1,13 @@
 import { apiRequest } from './helpers';
-import type { CreateBlockResponseData, GetBlockResponseData, UpdateBlockResponseData, DeleteBlockResponseData } from '@/shared/types/block';
-import type { CreateBlockBodyInput, UpdateBlockParamInput } from '@/shared/validation/block';
+import type {
+    CreateBlockResponseData,
+    GetBlockResponseData,
+    UpdateBlockResponseData,
+    DeleteBlockResponseData,
+    GetBlockTreeResponseData,
+    ApiBlock,
+} from '@/shared/types/block';
+import type { CreateBlockBodyInput, UpdateBlockBodyInput } from '@/shared/validation/block';
 
 /**
  * Create a new block
@@ -19,7 +26,7 @@ export const getBlockApi = (id: string) => apiRequest<GetBlockResponseData>(`/bl
 /**
  * Update a block
  */
-export const updateBlockApi = (id: string, data: Partial<UpdateBlockParamInput>) =>
+export const updateBlockApi = (id: string, data: Partial<UpdateBlockBodyInput>) =>
     apiRequest<UpdateBlockResponseData>(`/block/${id}`, {
         method: 'PUT',
         body: JSON.stringify(data),
@@ -34,7 +41,21 @@ export const deleteBlockApi = (id: string) =>
     });
 
 /**
- * Get all pages (blocks with type=PAGE)
+ * Get all direct child blocks of a given parent block
+ */
+export const getChildBlocksApi = (parentId: string) =>
+    apiRequest<{
+        children: ApiBlock[];
+        length: number;
+    }>(`/block/${parentId}/children`);
+
+/**
+ * Get entire nested tree of children for a given parent block (recursive)
+ */
+export const getBlockTreeApi = (parentId: string) => apiRequest<GetBlockTreeResponseData>(`/block/${parentId}/tree`);
+
+/**
+ * Get all pages (blocks with type=PAGE) - TODO: bad types
  */
 export const getAllPagesApi = () =>
     apiRequest<{

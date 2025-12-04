@@ -21,7 +21,6 @@ export const getRole = async (actorId: string, entityId: string): Promise<RoleTy
 /**
  * Get role with permission inheritance.
  * Checks direct permission first, then traverses up the parent chain.
- * Only checks USER actor type and BLOCK entity type.
  */
 export const getRoleWithInheritance = async (userId: string, blockId: string): Promise<RoleType | undefined> => {
     // first, try the direct permission (fast path)
@@ -41,7 +40,8 @@ export const getRoleWithInheritance = async (userId: string, blockId: string): P
 
     // use a recursive CTE to fetch the block and all its ancestors in one go,
     // ordered by distance from the original block (closest first)
-    const rows = await db.$queryRaw<Array<{ role: RoleType | null }>>`
+    // Request the ancestor id and depth so we can see which ancestor granted the role
+    const rows = await db.$queryRaw<Array<{ block_id: string; depth: number; role: RoleType | null; actor_id: string }>>`
         WITH RECURSIVE ancestors AS (
             SELECT id, parent_id, 0 AS depth
             FROM blocks
@@ -51,17 +51,14 @@ export const getRoleWithInheritance = async (userId: string, blockId: string): P
             FROM blocks b
             INNER JOIN ancestors a ON b.id = a.parent_id
         )
-        SELECT p.role
+        SELECT a.id AS block_id, a.depth, p.role, p.actor_id
         FROM ancestors a
         JOIN permissions p
           ON p.entity_id = a.id
-         AND p.actor_id = ${userId}::uuid
-         AND p.actor_type = ${ActorType.USER}
-         AND p.entity_type = ${EntityType.BLOCK}
+        AND p.actor_id = ${userId}::uuid
         ORDER BY a.depth ASC
         LIMIT 1
     `;
-
     const first = rows[0];
     if (first?.role != null) {
         return first.role as RoleType;

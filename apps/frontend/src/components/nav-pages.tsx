@@ -135,7 +135,7 @@ export function NavPages() {
                             return (
                                 <SidebarMenuItem key={page.id}>
                                     <SidebarMenuButton asChild isActive={currentPage?.id === page.id}>
-                                        <Link href={`/page/${page.id}`}>
+                                        <Link scroll={false} href={`/page/${page.id}`}>
                                             <FileText className="h-4 w-4" />
                                             <span>{pageName}</span>
                                         </Link>
