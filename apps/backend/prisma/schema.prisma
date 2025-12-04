@@ -85,10 +85,8 @@ enum BlockType {
   codeBlock
 
   // Embeds
-  file
   image
   video
-  audio
 }
 
 enum RoleType {

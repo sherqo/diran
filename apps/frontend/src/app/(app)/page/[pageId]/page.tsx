@@ -39,7 +39,7 @@ export default function PageView() {
             }
 
             // Build the partial block - only include content if it exists
-            // Embeds (image, video, audio, file) have undefined content
+            // Embeds (image, video) have undefined content
             const partialBlock = {
                 id: block.id,
                 type: block.type, // BlockNote types are already in correct format (camelCase)
