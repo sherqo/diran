@@ -7,6 +7,7 @@ import { PageHeader } from '@/components/page-header';
 import { Loader2 } from 'lucide-react';
 import { Editor } from '@/components/features/editor/DynamicEditor';
 import type { PartialBlock, BlockNoteEditor } from '@blocknote/core';
+import type { EmbeddedBlockContent, ApiBlock } from '@/shared/types/block';
 import { getBlockTreeApi } from '@/lib/api/block';
 
 export default function PageView() {
@@ -23,15 +24,27 @@ export default function PageView() {
     }, [pageId, loadPage]);
 
     // Recursively map API response to PartialBlock format
-    const mapToPartialBlocks = useCallback((blocks: any[]): PartialBlock[] => {
+    const mapToPartialBlocks = useCallback((blocks: ApiBlock[]): PartialBlock[] => {
         return blocks.map(block => {
-            const partialBlock: PartialBlock = {
+            // Extract props from content if they were embedded
+            let content: unknown = block.content;
+            let props: Record<string, unknown> | undefined = undefined;
+
+            // Check if content uses our embedded format
+            if (content && typeof content === 'object' && '__props' in content) {
+                const embedded = content as EmbeddedBlockContent;
+                props = embedded.__props as Record<string, unknown>;
+                content = embedded.__content;
+            }
+
+            const partialBlock = {
                 id: block.id,
                 type: block.type.toLowerCase(),
-                content: block.content,
-            };
+                content,
+                ...(props && { props }),
+            } as PartialBlock;
 
-            if (block.children?.length > 0) {
+            if (block.children && block.children.length > 0) {
                 partialBlock.children = mapToPartialBlocks(block.children);
             }
 

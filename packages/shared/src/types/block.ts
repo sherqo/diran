@@ -112,6 +112,22 @@ export interface QuoteContent {
  */
 export type BlockContent = ParagraphContent | HeadingContent | QuoteContent | Record<string, unknown>;
 
+// ================ Embedded Content Format ================
+
+/**
+ * When storing blocks to the backend, we embed props inside content.
+ * This structure allows the backend to store props without a dedicated field.
+ */
+export interface EmbeddedBlockContent {
+  __props: DefaultProps | HeadingProps | Record<string, unknown>;
+  __content: InlineContent[];
+}
+
+/**
+ * Content can be either the embedded format (for storage) or raw inline content.
+ */
+export type StorageBlockContent = EmbeddedBlockContent | BlockContent;
+
 // ================ Block Interface ================
 
 /**
@@ -145,4 +161,19 @@ export interface DeleteBlockResponseData {}
 
 export interface GetBlockChildrenResponseData {
   blocks: Block[];
+}
+
+/**
+ * Block structure as returned from API (with embedded content format).
+ */
+export interface ApiBlock {
+  id: string;
+  type: string;
+  content: EmbeddedBlockContent | Record<string, unknown>;
+  children?: ApiBlock[];
+}
+
+export interface GetBlockTreeResponseData {
+  children: ApiBlock[];
+  length: number;
 }

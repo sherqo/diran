@@ -1,5 +1,12 @@
 import { apiRequest } from './helpers';
-import type { CreateBlockResponseData, GetBlockResponseData, UpdateBlockResponseData, DeleteBlockResponseData } from '@/shared/types/block';
+import type {
+    CreateBlockResponseData,
+    GetBlockResponseData,
+    UpdateBlockResponseData,
+    DeleteBlockResponseData,
+    GetBlockTreeResponseData,
+    ApiBlock,
+} from '@/shared/types/block';
 import type { CreateBlockBodyInput, UpdateBlockBodyInput } from '@/shared/validation/block';
 
 /**
@@ -38,27 +45,14 @@ export const deleteBlockApi = (id: string) =>
  */
 export const getChildBlocksApi = (parentId: string) =>
     apiRequest<{
-        children: Array<{
-            id: string;
-            type: string;
-            content: any;
-        }>;
+        children: ApiBlock[];
         length: number;
     }>(`/block/${parentId}/children`);
 
 /**
  * Get entire nested tree of children for a given parent block (recursive)
  */
-export const getBlockTreeApi = (parentId: string) =>
-    apiRequest<{
-        children: Array<{
-            id: string;
-            type: string;
-            content: any;
-            children?: any[];
-        }>;
-        length: number;
-    }>(`/block/${parentId}/tree`);
+export const getBlockTreeApi = (parentId: string) => apiRequest<GetBlockTreeResponseData>(`/block/${parentId}/tree`);
 
 /**
  * Get all pages (blocks with type=PAGE) - TODO: bad types

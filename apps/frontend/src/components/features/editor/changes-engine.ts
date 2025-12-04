@@ -1,7 +1,7 @@
 // this file is responsible for managing the changes and pushing them to the backend
 
 import { createBlockApi, deleteBlockApi, updateBlockApi } from '@/lib/api/block';
-import { BlockTypeEnum } from '@/shared/types/block';
+import { BlockTypeEnum, EmbeddedBlockContent } from '@/shared/types/block';
 import { BlocksChanged, Block } from '@blocknote/core';
 
 // ================ Changes Engine ================
@@ -293,6 +293,22 @@ export const handleChanges = (changes: BlocksChanged, document: Block[], pageId:
     console.log('\n📄 Full document:', document);
 };
 
+// ================ helpers for props handling ================
+/**
+ * BlockNote stores props (colors, alignment, level, etc.) at the same level as content.
+ * Backend only stores content as JSON, so we embed props inside content for storage.
+ * Format: { __props: {...}, __content: [...] } - always this structure for consistency
+ */
+const embedPropsInContent = (block: Block): EmbeddedBlockContent => {
+    const content = Array.isArray(block.content) ? block.content : [];
+    const props = block.props || {};
+
+    return {
+        __props: props as EmbeddedBlockContent['__props'],
+        __content: content as EmbeddedBlockContent['__content'],
+    };
+};
+
 // ================ changes handlers ================
 // insert is kinda ez, just create the block with its data and send to the backend...
 const handleInsert = (currentDocument: Block[], newBlock: Block, pageId: string) => {
@@ -303,7 +319,8 @@ const handleInsert = (currentDocument: Block[], newBlock: Block, pageId: string)
         data: {
             id: newBlock.id,
             type: newBlock.type as BlockTypeEnum, // BlockNote types are already lowercase
-            content: newBlock.content,
+            // Cast to unknown first since we're changing the content structure for storage
+            content: embedPropsInContent(newBlock) as unknown as Block['content'],
             parentId: posInfo.parentId,
             prevId: posInfo.beforeBlockId,
             nextId: posInfo.afterBlockId,
@@ -325,17 +342,17 @@ const handleDelete = (deletedBlockId: string) => {
 const handleUpdate = (oldBlock: Block, newBlock: Block) => {
     const changes: Partial<{
         type: BlockTypeEnum;
-        content: Block['content'];
+        content: EmbeddedBlockContent;
     }> = {
         ...(oldBlock.type !== newBlock.type && { type: newBlock.type as BlockTypeEnum }), // BlockNote types are already lowercase
-        content: newBlock.content, // most of the time content will change, so we just send it directly, the check is expensive
+        content: embedPropsInContent(newBlock), // Embed props in content for backend storage
     };
 
     if (Object.keys(changes).length > 0) {
         changesEngine.addChange(newBlock.id, {
             type: 'update',
             blockId: newBlock.id,
-            data: changes,
+            data: changes as Parameters<typeof updateBlockApi>[1],
         });
     }
 };
