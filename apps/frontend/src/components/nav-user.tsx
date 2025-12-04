@@ -22,7 +22,6 @@ import { User } from '@/shared/types/user';
 import { useState } from 'react';
 
 export function NavUser({ user, loading, logout }: { user: User | null; loading: boolean; logout: () => Promise<void> }) {
-    const { isMobile } = useSidebar();
     const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false);
     const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
