@@ -23,10 +23,8 @@ const BlockTypeValues = [
   // Code
   BlockTypeEnum.CODE_BLOCK,
   // Embeds
-  BlockTypeEnum.FILE,
   BlockTypeEnum.IMAGE,
   BlockTypeEnum.VIDEO,
-  BlockTypeEnum.AUDIO,
 ] as const;
 
 const BlockTypeEnumSchema = z.enum(BlockTypeValues);

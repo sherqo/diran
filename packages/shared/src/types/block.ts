@@ -27,10 +27,8 @@ export enum BlockTypeEnum {
   CODE_BLOCK = 'codeBlock',
 
   // Embeds (store URLs, no storage API needed)
-  FILE = 'file',
   IMAGE = 'image',
   VIDEO = 'video',
-  AUDIO = 'audio',
 }
 
 // ================ Text Styles (for inline content) ================
@@ -123,15 +121,6 @@ export interface CodeBlockProps extends DefaultProps {
 // ================ Embed Block Props ================
 
 /**
- * File block props.
- */
-export interface FileProps extends DefaultProps {
-  name?: string;
-  url?: string;
-  caption?: string;
-}
-
-/**
  * Image block props.
  */
 export interface ImageProps extends DefaultProps {
@@ -150,16 +139,6 @@ export interface VideoProps extends DefaultProps {
   caption?: string;
   showPreview?: boolean;
   previewWidth?: number;
-}
-
-/**
- * Audio block props.
- */
-export interface AudioProps extends DefaultProps {
-  name?: string;
-  url?: string;
-  caption?: string;
-  showPreview?: boolean;
 }
 
 // ================ Table Content Types ================
@@ -233,10 +212,8 @@ export type BlockProps =
   | NumberedListItemProps
   | CheckListItemProps
   | CodeBlockProps
-  | FileProps
   | ImageProps
-  | VideoProps
-  | AudioProps;
+  | VideoProps;
 
 /**
  * Union of all block content types.
