@@ -1,18 +1,3 @@
-// docs: https://pris.ly/d/prisma-schema
-
-// Some notes:
-//  - We use Supabase as our Postgres provider.
-//
-//  - We use `@default(dbgenerated("gen_random_uuid()"))` for UUIDs because its postgres function
-//    and works well with Supabase.
-//
-//  - We use `@map` to customize the names of the fields in the database
-//    to write in camelCase in the Prisma schema but snake_case in the database
-//
-//  - We use `@db.Timestamptz(3)` for timestamps to store the timezone information
-//    and to match the precision of Supabase's `now()` function — it defaults to 3 decimal places. 
-
-// ========== Config ==========
 generator client {
   provider = "prisma-client-js"
 }
@@ -23,122 +8,100 @@ datasource db {
   directUrl = env("DATABASE_DIRECT_URL")
 }
 
-// ========== Types ==========
-// Block kinds (page, heading, paragraph, etc.)
-enum BlockType {
-  PAGE
-  HEADING_1
-  HEADING_2
-  HEADING_3
-  PARAGRAPH
-  CODE
-  TODO
+model User {
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email                String    @unique
+  password             String
+  name                 String
+  photo                String?
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt            DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  refreshToken         String?   @map("refresh_token")
+  refreshTokenExpires  DateTime? @map("refresh_token_expires") @db.Timestamptz(3)
+  resetPasswordToken   String?   @map("reset_password_token")
+  resetPasswordExpires DateTime? @map("reset_password_expires") @db.Timestamptz(3)
+  emailVerified        Boolean   @default(false) @map("email_verified")
+  otpHashed            String?   @map("otp_hashed")
+  otpExpires           DateTime? @map("otp_expires") @db.Timestamptz(3)
+
+  @@map("users")
 }
 
-// Roles Type
+model Block {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  type      BlockType
+  parentId  String?   @map("parent_id") @db.Uuid
+  order     String
+  content   Json
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  parent    Block?    @relation("BlockToChildren", fields: [parentId], references: [id])
+  children  Block[]   @relation("BlockToChildren")
+
+  @@unique([parentId, order])
+  @@index([parentId], map: "idx_blocks_parent_id")
+  @@map("blocks")
+}
+
+model Permission {
+  id         String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  actorId    String     @map("actor_id") @db.Uuid
+  actorType  ActorType  @map("actor_type")
+  entityId   String     @map("entity_id") @db.Uuid
+  entityType EntityType @map("entity_type")
+  role       RoleType
+  createdAt  DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt  DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@unique([actorId, entityId])
+  @@map("permissions")
+}
+
+model waitlist {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email     String    @unique
+  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+}
+
+enum BlockType {
+  // Special type for pages
+  page
+
+  // Typography blocks (matching BlockNote)
+  paragraph
+  heading
+  quote
+
+  // List types
+  bulletListItem
+  numberedListItem
+  checkListItem
+  toggleListItem
+
+  // Table
+  table
+
+  // Code
+  codeBlock
+
+  // Embeds
+  image
+  video
+}
+
 enum RoleType {
   OWNER
   EDITOR
   VIEWER
-  NONE // idk why? but makes sense to have a none role :)
+  NONE
 }
 
 enum ActorType {
   USER
-  TEAM // not used yet, for future
+  TEAM
 }
 
 enum EntityType {
   BLOCK
   TAG
-}
-
-// ==========  Schemas ==========
-// --------- Actors ---------
-// users, the main actor now - Oct, 2025
-model User {
-  id       String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email    String  @unique
-  password String
-  name     String
-  photo    String?
-
-  // Timestamps
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
-
-  // refresh token fields
-  refreshToken        String?   @map("refresh_token")
-  refreshTokenExpires DateTime? @map("refresh_token_expires") @db.Timestamptz(3)
-
-  // Password reset fields
-  resetPasswordToken   String?   @map("reset_password_token")
-  resetPasswordExpires DateTime? @map("reset_password_expires") @db.Timestamptz(3)
-
-  // email verification fields
-  emailVerified Boolean   @default(false) @map("email_verified")
-  otpHashed     String?   @map("otp_hashed")
-  otpExpires    DateTime? @map("otp_expires") @db.Timestamptz(3)
-
-  @@map("users")
-}
-
-// --------- Entities ---------
-// Schema for block
-model Block {
-  // Who are you?
-  id   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  type BlockType
-
-  // Self-referential relationship for hierarchical blocks
-  parentId String? @map("parent_id") @db.Uuid // All has parents, except root blocks (pages)
-  parent   Block?  @relation("BlockToChildren", fields: [parentId], references: [id]) // relationship (not real)
-  children Block[] @relation("BlockToChildren") // relationship (not real)
-  order    String  // order among brothers - to string for fractoinal indexing like "a", "b", "ac"
-
-  content Json @db.JsonB // content varies by block type, stored as JSON, will be checked/validated in the applicatioin 
-
-  // Timestamps
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
-
-  // FUTURE
-  // Tags // many to many, more than one tag per block, more than one block per tag
-
-  /**
-   * quick note: we can have many block with the SAME parent and
-   * SAME order in case of the parentId is null
-   * postgres treats nulls as different unknown values
-   * i love postgres <3
-   */
-  @@unique([parentId, order]) // NO two children under the same parent can have the same order
-  @@index([parentId], name: "idx_blocks_parent_id") // index for querying children by parent
-  @@map("blocks")
-}
-
-// Schema for permissions
-model Permission {
-  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-
-  actorId   String    @map("actor_id") @db.Uuid // can be user, team or whatever for scalability...
-  actorType ActorType
-
-  entityId   String     @map("entity_id") @db.Uuid // can be block, tags or whatever 
-  entityType EntityType
-
-  role RoleType // what role this actor has on this entity
-
-  // Timestamps
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
-
-  @@unique([actorId, entityId]) // one permission per actor per entity
-  @@map("permissions")
-}
-
-// idc about this db and never use it in this project, it's for the waitlist in the landing page
-model waitlist {
-  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email      String    @unique
-  createdAt DateTime?  @map("created_at") @default(now()) @db.Timestamptz(6)
 }

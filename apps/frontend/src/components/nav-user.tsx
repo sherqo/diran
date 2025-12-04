@@ -22,7 +22,6 @@ import { User } from '@/shared/types/user';
 import { useState } from 'react';
 
 export function NavUser({ user, loading, logout }: { user: User | null; loading: boolean; logout: () => Promise<void> }) {
-    const { isMobile } = useSidebar();
     const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false);
     const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -79,7 +78,7 @@ export function NavUser({ user, loading, logout }: { user: User | null; loading:
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
                         className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-                        side={isMobile ? 'bottom' : 'right'}
+                        side={'bottom'}
                         align="start"
                         sideOffset={4}>
                         <DropdownMenuItem

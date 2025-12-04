@@ -54,7 +54,7 @@ export function NavMain({ onSearchClick }: { onSearchClick?: () => void }) {
 
                 <SidebarMenuItem>
                     <SidebarMenuButton asChild isActive={isHomeActive}>
-                        <Link href="/home">
+                        <Link scroll={false} href="/home">
                             <Home />
                             <span>Home</span>
                         </Link>

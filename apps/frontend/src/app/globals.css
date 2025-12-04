@@ -1,6 +1,9 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
-@import '../styles/editor.css';
+/* @import '../styles/editor.css'; */
+
+/* Path to BlockNote ShadCN package for Tailwind to generate necessary CSS */
+@source '../node_modules/@blocknote/shadcn';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -125,44 +128,6 @@
     --sidebar-ring: #cc5200;
 }
 
-/* .dark {
-    --background: #13161b;
-    --foreground: #e8eaed;
-    --card: #0f1115;
-    --card-foreground: #f4f4f6;
-    --popover: #0f1115;
-    --popover-foreground: #f4f4f6;
-    --primary: #ef6306;
-    --primary-foreground: #ffffff;
-    --secondary: #2b2f36;
-    --secondary-foreground: #cccfd7;
-    --muted: #1f2228;
-    --muted-foreground: #979ca5;
-    --accent: #363b45;
-    --accent-foreground: #e8eaed;
-    --destructive: #e42525;
-    --destructive-foreground: #ffffff;
-
-    --border: #414753;
-    --input: #2f333c;
-    --ring: #ef6306;
-
-    --chart-1: #ef6306;
-    --chart-2: #eda71d;
-    --chart-3: #56a92d;
-    --chart-4: #2693c9;
-    --chart-5: #a560c7;
-
-    --sidebar: #080a0c;
-    --sidebar-foreground: #e8eaed;
-    --sidebar-primary: #d65905;
-    --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: #262a31;
-    --sidebar-accent-foreground: #e8eaed;
-    --sidebar-border: #363b45;
-    --sidebar-ring: #d65905;
-} */
-
 .dark {
     --background: #0d0e12;
     --foreground: #e8eaed;
@@ -197,6 +162,8 @@
     --sidebar-border: #1c1e22; /* before: #2c2f36 */
     --sidebar-ring: #ef6306;
 }
+
+/* BlockNote ShadCN variables - dark mode (apply site-level dark theme variables) */
 
 body {
     letter-spacing: var(--tracking-normal);
