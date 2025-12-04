@@ -177,6 +177,17 @@ class ChangesEngine {
 
         // Execute all operations
         for (const [blockId, operation] of operations) {
+            // 🔍 DEBUG: Log what's being sent to server
+            console.log(`\n🚀 [SYNC] Sending to server:`);
+            console.log(`   Block ID: ${blockId}`);
+            console.log(`   Operation: ${operation.type}`);
+            if (operation.type === 'create') {
+                console.log(`   Data:`, JSON.stringify(operation.data, null, 2));
+            } else if (operation.type === 'update') {
+                console.log(`   Update Data:`, JSON.stringify(operation.data, null, 2));
+            }
+            console.log(`\n`);
+
             try {
                 switch (operation.type) {
                     case 'create':

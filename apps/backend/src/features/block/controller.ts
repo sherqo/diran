@@ -13,7 +13,7 @@ import { db } from '#lib/database/connection';
 import { sendSuccess } from '#lib/utils/response';
 import { ApiError } from '#lib/middleware/errorHandler';
 import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors';
-import { ActorType, EntityType, RoleType } from '@prisma/client';
+import { ActorType, EntityType, RoleType, BlockType } from '@prisma/client';
 import { generateKeyBetween } from 'fractional-indexing';
 import { canWrite } from './middlewares';
 import { getRoleWithInheritance } from '#lib/services/permission';
@@ -181,6 +181,18 @@ const createBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Prom
                     entityId: created.id,
                     entityType: EntityType.BLOCK,
                     role: RoleType.OWNER,
+                },
+            });
+        }
+
+        // If creating a PAGE, also create a default empty paragraph block as first child
+        if (type === BlockType.page) {
+            await tx.block.create({
+                data: {
+                    type: BlockType.paragraph,
+                    parentId: created.id,
+                    order: generateKeyBetween(null, null),
+                    content: [],
                 },
             });
         }
