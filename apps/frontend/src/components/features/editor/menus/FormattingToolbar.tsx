@@ -1,13 +1,6 @@
 'use client';
 
-import {
-    BasicTextStyleButton,
-    BlockTypeSelect,
-    ColorStyleButton,
-    CreateLinkButton,
-    FormattingToolbar,
-    TextAlignButton,
-} from '@blocknote/react';
+import { BasicTextStyleButton, ColorStyleButton, CreateLinkButton, FormattingToolbar } from '@blocknote/react';
 
 /**
  * Custom Formatting Toolbar - appears when selecting text.
@@ -16,9 +9,6 @@ import {
 export function CustomFormattingToolbar() {
     return (
         <FormattingToolbar>
-            {/* Block type selector */}
-            <BlockTypeSelect key="blockTypeSelect" />
-
             {/* Text styles */}
             <BasicTextStyleButton basicTextStyle="bold" key="boldStyleButton" />
             <BasicTextStyleButton basicTextStyle="italic" key="italicStyleButton" />
@@ -28,11 +18,6 @@ export function CustomFormattingToolbar() {
 
             {/* Colors */}
             <ColorStyleButton key="colorStyleButton" />
-
-            {/* Alignment */}
-            <TextAlignButton textAlignment="left" key="textAlignLeftButton" />
-            <TextAlignButton textAlignment="center" key="textAlignCenterButton" />
-            <TextAlignButton textAlignment="right" key="textAlignRightButton" />
 
             {/* Links */}
             <CreateLinkButton key="createLinkButton" />
