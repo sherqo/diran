@@ -2,5 +2,6 @@
 // All modules converted to Fastify
 export { registerAuthRoutes } from './auth/routes';
 export { registerUserRoutes } from './user/routes';
-export { registerBlockRoutes, registerPageRoutes } from './block/routes';
+export { registerBlockRoutes } from './block/routes';
+export { registerPageRoutes } from './page/routes';
 export { registerExtrasRoutes, registerHealthRoutes } from './extras/router';

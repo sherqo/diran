@@ -2,7 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { validateRequest as vr } from '#lib/middleware/validation.js';
 import { authenticate as auth } from '#lib/middleware/auth.js';
 import { requireReadPermission, requireWritePermission, requireParentPermission } from './middlewares.js';
-import { createBlock, getBlock, updateBlock, deleteBlock, getDirectChildrenBlocks, getChildrenTree, getAllPages } from './controller.js';
+import { createBlock, getBlock, updateBlock, deleteBlock, getDirectChildrenBlocks, getChildrenTree } from './controller.js';
 import {
     createBlockBodySchema,
     getBlockParamSchema,
@@ -57,15 +57,5 @@ export async function registerBlockRoutes(fastify: FastifyInstance): Promise<voi
     fastify.get('/:id/tree', {
         preHandler: [vr({ paramsSchema: getBlockChildrenTreeSchema }), auth, requireReadPermission],
         handler: getChildrenTree,
-    });
-}
-
-export async function registerPageRoutes(fastify: FastifyInstance): Promise<void> {
-    // creating, updating, deleting pages is ez and can be done via blocks
-    // these routes will be for smth like: getting all pages, getting all blocks in a page, etc.
-
-    fastify.get('/', {
-        preHandler: [auth],
-        handler: getAllPages,
     });
 }
