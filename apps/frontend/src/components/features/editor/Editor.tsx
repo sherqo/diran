@@ -7,7 +7,8 @@ import './styles.css';
 
 import { useTheme } from 'next-themes';
 import { useState, useEffect } from 'react';
-import { BlockNoteEditor, createHeadingBlockSpec, PartialBlock } from '@blocknote/core';
+import { BlockNoteEditor, PartialBlock } from '@blocknote/core';
+import { SuggestionMenuController, FormattingToolbarController, SideMenuController } from '@blocknote/react';
 
 import * as Button from '@/components/ui/button';
 import * as DropdownMenu from '@/components/ui/dropdown-menu';
@@ -18,6 +19,7 @@ import * as Popover from '@/components/ui/popover';
 import * as Tooltip from '@/components/ui/tooltip';
 
 import { handleChanges } from './changes-engine';
+import { SlashMenu, getSlashMenuItems, filterSlashMenuItems, CustomFormattingToolbar, CustomSideMenu } from './menus';
 
 interface EditorProps {
     editable?: boolean;
@@ -44,13 +46,8 @@ export default function Editor({
 
     // Create new editor for each page
     useEffect(() => {
-        const heading = createHeadingBlockSpec({
-            levels: [1, 2, 3],
-        });
-
         const editorInstance = BlockNoteEditor.create({
             initialContent: initialContent,
-            blockSpecs: { heading },
         });
 
         setEditor(editorInstance);
@@ -114,6 +111,22 @@ export default function Editor({
             }}
             theme={colorScheme}
             editable={editable}
-        />
+            // Disable default menus to use custom ones
+            slashMenu={false}
+            formattingToolbar={false}
+            sideMenu={false}>
+            {/* Slash Menu */}
+            <SuggestionMenuController
+                triggerCharacter="/"
+                getItems={async query => filterSlashMenuItems(getSlashMenuItems(editor), query)}
+                suggestionMenuComponent={SlashMenu}
+            />
+
+            {/* Formatting Toolbar */}
+            <FormattingToolbarController formattingToolbar={CustomFormattingToolbar} />
+
+            {/* Side Menu - via drag button*/}
+            <SideMenuController sideMenu={CustomSideMenu} />
+        </BlockNoteView>
     );
 }
