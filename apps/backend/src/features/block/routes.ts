@@ -3,6 +3,7 @@ import { validateRequest as vr } from '#lib/middleware/validation.js';
 import { authenticate as auth } from '#lib/middleware/auth.js';
 import { requireReadPermission, requireWritePermission, requireParentPermission } from './middlewares.js';
 import { createBlock, getBlock, updateBlock, deleteBlock, getDirectChildrenBlocks, getChildrenTree } from './controller.js';
+import { registerPermissionRoutes } from './permission/routes.js';
 import {
     createBlockBodySchema,
     getBlockParamSchema,
@@ -58,4 +59,7 @@ export async function registerBlockRoutes(fastify: FastifyInstance): Promise<voi
         preHandler: [vr({ paramsSchema: getBlockChildrenTreeSchema }), auth, requireReadPermission],
         handler: getChildrenTree,
     });
+
+    // Permission routes - /block/:id/permissions
+    await fastify.register(registerPermissionRoutes, { prefix: '/:id/permissions' });
 }
