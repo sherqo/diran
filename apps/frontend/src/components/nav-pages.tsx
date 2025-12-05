@@ -1,6 +1,6 @@
 'use client';
 
-import { FileText, Loader2, Plus, MoreHorizontal, Trash2, Link as LinkIcon, ArrowUpRight } from 'lucide-react';
+import { FileText, Loader2, Plus, MoreHorizontal, Trash2, Link as LinkIcon, ArrowUpRight, Pencil } from 'lucide-react';
 import * as React from 'react';
 import { usePage, type Page } from '@/contexts/PageContext';
 import {
@@ -45,6 +45,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { CreatePageDialog } from '@/components/features/create-page-dialog';
+import { EditPageDialog } from '@/components/features/edit-page-dialog';
 import { deleteBlockApi, updateBlockApi } from '@/lib/api/block';
 import { showToast } from '@/lib/toast';
 import Link from 'next/link';
@@ -61,10 +62,20 @@ interface SortablePageItemProps {
     isMobile: boolean;
     onCopyLink: (pageId: string) => void;
     onOpenInNewTab: (pageId: string) => void;
+    onEditClick: (page: Page) => void;
     onDeleteClick: (pageId: string, pageName: string) => void;
 }
 
-function SortablePageItem({ page, isActive, isDeleting, isMobile, onCopyLink, onOpenInNewTab, onDeleteClick }: SortablePageItemProps) {
+function SortablePageItem({
+    page,
+    isActive,
+    isDeleting,
+    isMobile,
+    onCopyLink,
+    onOpenInNewTab,
+    onEditClick,
+    onDeleteClick,
+}: SortablePageItemProps) {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: page.id });
     const wasDraggingRef = React.useRef(false);
 
@@ -87,7 +98,9 @@ function SortablePageItem({ page, isActive, isDeleting, isMobile, onCopyLink, on
         opacity: isDragging ? 0.5 : 1,
     };
 
-    const pageName = (page.content as { title?: string }).title || 'Untitled';
+    const content = page.content as { title?: string; icon?: string };
+    const pageName = content.title || 'Untitled';
+    const pageIcon = content.icon;
 
     const handleClick = (e: React.MouseEvent) => {
         // Prevent navigation if we just finished dragging
@@ -100,7 +113,7 @@ function SortablePageItem({ page, isActive, isDeleting, isMobile, onCopyLink, on
         <SidebarMenuItem ref={setNodeRef} style={style} {...attributes} {...listeners}>
             <SidebarMenuButton asChild isActive={isActive}>
                 <Link scroll={false} href={`/page/${page.id}`} onClick={handleClick}>
-                    <FileText className="h-4 w-4" />
+                    {pageIcon ? <span className="text-base">{pageIcon}</span> : <FileText className="h-4 w-4" />}
                     <span>{pageName}</span>
                 </Link>
             </SidebarMenuButton>
@@ -112,10 +125,11 @@ function SortablePageItem({ page, isActive, isDeleting, isMobile, onCopyLink, on
                         <span className="sr-only">More</span>
                     </SidebarMenuAction>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent
-                    className="w-56 rounded-lg"
-                    side={isMobile ? 'bottom' : 'right'}
-                    align={isMobile ? 'end' : 'start'}>
+                <DropdownMenuContent className="w-56 rounded-lg" side={isMobile ? 'bottom' : 'right'} align={isMobile ? 'end' : 'start'}>
+                    <DropdownMenuItem onClick={() => onEditClick(page)}>
+                        <Pencil className="text-muted-foreground" />
+                        <span>Edit</span>
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => onCopyLink(page.id)}>
                         <LinkIcon className="text-muted-foreground" />
                         <span>Copy Link</span>
@@ -149,6 +163,7 @@ export function NavPages() {
     const [createDialogOpen, setCreateDialogOpen] = React.useState(false);
     const [deletingPageId, setDeletingPageId] = React.useState<string | null>(null);
     const [pageToDelete, setPageToDelete] = React.useState<{ id: string; name: string } | null>(null);
+    const [pageToEdit, setPageToEdit] = React.useState<Page | null>(null);
     const [activeId, setActiveId] = React.useState<string | null>(null);
 
     // Memoize page IDs to prevent unnecessary re-renders
@@ -224,6 +239,10 @@ export function NavPages() {
 
     const handleOpenInNewTab = (pageId: string) => {
         window.open(`/page/${pageId}`, '_blank');
+    };
+
+    const handleEditClick = (page: Page) => {
+        setPageToEdit(page);
     };
 
     const handleDeleteClick = (pageId: string, pageName: string) => {
@@ -310,6 +329,7 @@ export function NavPages() {
                                         isMobile={isMobile}
                                         onCopyLink={handleCopyLink}
                                         onOpenInNewTab={handleOpenInNewTab}
+                                        onEditClick={handleEditClick}
                                         onDeleteClick={handleDeleteClick}
                                     />
                                 ))}
@@ -320,7 +340,11 @@ export function NavPages() {
                             {activePage ? (
                                 <div className="bg-sidebar rounded-md border px-2 py-1.5 shadow-lg">
                                     <div className="flex items-center gap-2">
-                                        <FileText className="h-4 w-4" />
+                                        {(activePage.content as { icon?: string }).icon ? (
+                                            <span className="text-base">{(activePage.content as { icon?: string }).icon}</span>
+                                        ) : (
+                                            <FileText className="h-4 w-4" />
+                                        )}
                                         <span>{(activePage.content as { title?: string }).title || 'Untitled'}</span>
                                     </div>
                                 </div>
@@ -330,6 +354,7 @@ export function NavPages() {
                 </SidebarGroupContent>
             </SidebarGroup>
             <CreatePageDialog open={createDialogOpen} onOpenChange={setCreateDialogOpen} />
+            <EditPageDialog open={!!pageToEdit} onOpenChange={open => !open && setPageToEdit(null)} page={pageToEdit} />
 
             <AlertDialog open={!!pageToDelete} onOpenChange={() => setPageToDelete(null)}>
                 <AlertDialogContent>
