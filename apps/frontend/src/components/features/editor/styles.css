@@ -45,3 +45,58 @@
 .bn-container[data-theming-css-variables-editor] .bn-editor mark {
     display: inline-block;
 }
+
+/* ===== Custom Menu Styles ===== */
+
+/* Side menu - cleaner drag handle */
+.bn-container .bn-side-menu {
+    opacity: 0;
+    transition: opacity 150ms ease;
+}
+
+.bn-container .bn-block-outer:hover .bn-side-menu,
+.bn-container .bn-side-menu:hover {
+    opacity: 1;
+}
+
+/* Drag handle menu - tighter spacing */
+.bn-container [data-radix-popper-content-wrapper] {
+    z-index: 50 !important;
+}
+
+/* Menu items - consistent styling */
+.bn-container .bn-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 100ms ease;
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-size: 13px;
+}
+
+.bn-container .bn-menu-item:hover {
+    background-color: hsl(var(--accent));
+}
+
+/* Formatting toolbar - compact */
+.bn-container .bn-formatting-toolbar {
+    gap: 2px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    padding: 4px;
+}
+
+.bn-container .bn-formatting-toolbar button {
+    border-radius: 4px;
+    padding: 6px;
+}
+
+/* Toolbar dividers */
+.bn-container .bn-formatting-toolbar [data-separator] {
+    margin: 0 4px;
+    background: hsl(var(--border));
+    width: 1px;
+    height: 20px;
+}
