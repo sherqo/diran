@@ -2,58 +2,83 @@
 
 import { BlockNoteEditor } from '@blocknote/core';
 import { DefaultReactSuggestionItem, getDefaultReactSlashMenuItems } from '@blocknote/react';
-import { BLOCK_TYPES } from './shared';
+import { ReactElement } from 'react';
+import {
+    Pilcrow,
+    Heading1,
+    Heading2,
+    Heading3,
+    Quote,
+    List,
+    ListOrdered,
+    CheckSquare,
+    ChevronRight,
+    Table,
+    Code,
+    ImageIcon,
+    Video,
+} from 'lucide-react';
 
-// Build maps from shared BLOCK_TYPES config
-const LABEL_TO_ICON = Object.fromEntries(
-    BLOCK_TYPES.map(b => {
-        const Icon = b.icon;
-        // eslint-disable-next-line react/jsx-key
-        return [b.label, <Icon size={18} />];
-    })
-);
-
-const LABEL_TO_GROUP = Object.fromEntries(BLOCK_TYPES.map(b => [b.label, b.group]));
-
-const SUPPORTED_LABELS = new Set(BLOCK_TYPES.map(b => b.label));
-
-// Map BlockNote's default titles to our labels
-const TITLE_TO_LABEL: Record<string, string> = {
-    Paragraph: 'Text',
-    'Heading 1': 'Heading 1',
-    'Heading 2': 'Heading 2',
-    'Heading 3': 'Heading 3',
-    Quote: 'Quote',
-    'Bullet List': 'Bullet List',
-    'Numbered List': 'Numbered List',
-    'Check List': 'Check List',
-    'Toggle List': 'Toggle List',
-    Table: 'Table',
-    'Code Block': 'Code Block',
-    Image: 'Image',
-    Video: 'Video',
+/**
+ * These must match BlockNote's EXACT titles from getDefaultReactSlashMenuItems.
+ */
+const ICONS: Record<string, ReactElement> = {
+    Paragraph: <Pilcrow size={18} />,
+    'Heading 1': <Heading1 size={18} />,
+    'Heading 2': <Heading2 size={18} />,
+    'Heading 3': <Heading3 size={18} />,
+    Quote: <Quote size={18} />,
+    'Bullet List': <List size={18} />,
+    'Numbered List': <ListOrdered size={18} />,
+    'Check List': <CheckSquare size={18} />,
+    'Toggle List': <ChevronRight size={18} />,
+    Table: <Table size={18} />,
+    'Code Block': <Code size={18} />,
+    Image: <ImageIcon size={18} />,
+    Video: <Video size={18} />,
 };
 
 /**
- * Filters to supported types and adds custom icons.
+ * Map BlockNote's default item titles to our custom groups.
+ */
+const GROUPS: Record<string, string> = {
+    Paragraph: 'Basic',
+    'Heading 1': 'Basic',
+    'Heading 2': 'Basic',
+    'Heading 3': 'Basic',
+    Quote: 'Basic',
+    'Bullet List': 'Lists',
+    'Numbered List': 'Lists',
+    'Check List': 'Lists',
+    'Toggle List': 'Lists',
+    Table: 'Advanced',
+    'Code Block': 'Advanced',
+    Image: 'Media',
+    Video: 'Media',
+};
+
+/**
+ * Block types we want to show in the slash menu.
+ * Must match BlockNote's exact titles.
+ */
+const SUPPORTED_TYPES = new Set(Object.keys(ICONS));
+
+/**
+ * Get slash menu items with custom icons and groups.
+ * We keep BlockNote's original items (with their onItemClick handlers) intact,
+ * only customizing the visuals (icon, group).
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getSlashMenuItems = (editor: BlockNoteEditor<any, any, any>): DefaultReactSuggestionItem[] => {
     const defaultItems = getDefaultReactSlashMenuItems(editor);
 
     return defaultItems
-        .filter(item => {
-            const label = TITLE_TO_LABEL[item.title];
-            return label && SUPPORTED_LABELS.has(label);
-        })
-        .map(item => {
-            const label = TITLE_TO_LABEL[item.title] || item.title;
-            return {
-                ...item,
-                icon: LABEL_TO_ICON[label] || item.icon,
-                group: LABEL_TO_GROUP[label] || item.group,
-            };
-        });
+        .filter(item => SUPPORTED_TYPES.has(item.title))
+        .map(item => ({
+            ...item,
+            icon: ICONS[item.title] ?? item.icon,
+            group: GROUPS[item.title] ?? item.group,
+        }));
 };
 
 /**
