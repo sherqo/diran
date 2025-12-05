@@ -1,3 +1,6 @@
+// https://www.blocknotejs.org/docs/ui-components/suggestion-menus#slash-menu
+// https://www.blocknotejs.org/docs/ui-components/suggestion-menus#replacing-the-suggestion-menu-component
+
 'use client';
 
 import { useRef, useMemo, useEffect } from 'react';

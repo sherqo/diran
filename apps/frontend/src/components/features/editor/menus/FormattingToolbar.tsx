@@ -1,10 +1,11 @@
+// https://www.blocknotejs.org/docs/ui-components/formatting-toolbar
+
 'use client';
 
 import { BasicTextStyleButton, ColorStyleButton, CreateLinkButton, FormattingToolbar } from '@blocknote/react';
 
 /**
  * Custom Formatting Toolbar - appears when selecting text.
- * Clean, essential buttons only. Fast and keyboard-friendly.
  */
 export function CustomFormattingToolbar() {
     return (

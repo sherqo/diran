@@ -1,3 +1,5 @@
+// https://www.blocknotejs.org/docs/ui-components/suggestion-menus#changing-slash-menu-items
+
 'use client';
 
 import { BlockNoteEditor } from '@blocknote/core';

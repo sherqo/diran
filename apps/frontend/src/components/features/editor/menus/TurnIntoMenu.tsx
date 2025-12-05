@@ -1,3 +1,5 @@
+// https://www.blocknotejs.org/docs/editor-api/manipulating-blocks#updating-blocks
+
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
