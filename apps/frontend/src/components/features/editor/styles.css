@@ -100,3 +100,29 @@
     width: 1px;
     height: 20px;
 }
+
+/* Side menu buttons (drag handle + add block) - smaller and dimmed */
+.bn-container .bn-side-menu button {
+    z-index: 1;
+    transition:
+        color 150ms ease,
+        background-color 150ms ease;
+    padding: 2px;
+    width: 20px;
+    min-width: 20px;
+    height: 20px;
+    min-height: 20px;
+    color: hsl(var(--muted-foreground) / 0.4);
+}
+
+.bn-container .bn-side-menu button:hover {
+    z-index: 1;
+    background-color: hsl(var(--accent) / 0.5);
+    color: hsl(var(--muted-foreground) / 0.7);
+}
+
+.bn-container .bn-side-menu button svg {
+    z-index: 1;
+    width: 18px;
+    height: 18px;
+}
