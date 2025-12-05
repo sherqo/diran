@@ -2,7 +2,20 @@
 
 import { FileText, Loader2, Plus, MoreHorizontal, Trash2, Link as LinkIcon, ArrowUpRight } from 'lucide-react';
 import * as React from 'react';
-import { usePage } from '@/contexts/PageContext';
+import { usePage, type Page } from '@/contexts/PageContext';
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    type DragEndEvent,
+    DragOverlay,
+    type DragStartEvent,
+} from '@dnd-kit/core';
+import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import {
     SidebarGroup,
     SidebarGroupContent,
@@ -32,10 +45,102 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { CreatePageDialog } from '@/components/features/create-page-dialog';
-import { deleteBlockApi } from '@/lib/api/block';
+import { deleteBlockApi, updateBlockApi } from '@/lib/api/block';
 import { showToast } from '@/lib/toast';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Sortable Page Item Component
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface SortablePageItemProps {
+    page: Page;
+    isActive: boolean;
+    isDeleting: boolean;
+    isMobile: boolean;
+    onCopyLink: (pageId: string) => void;
+    onOpenInNewTab: (pageId: string) => void;
+    onDeleteClick: (pageId: string, pageName: string) => void;
+}
+
+function SortablePageItem({ page, isActive, isDeleting, isMobile, onCopyLink, onOpenInNewTab, onDeleteClick }: SortablePageItemProps) {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: page.id });
+    const wasDraggingRef = React.useRef(false);
+
+    // Track if we were dragging to prevent click navigation after drag
+    React.useEffect(() => {
+        if (isDragging) {
+            wasDraggingRef.current = true;
+        } else if (wasDraggingRef.current) {
+            // Reset after a short delay to allow drag end to complete
+            const timeout = setTimeout(() => {
+                wasDraggingRef.current = false;
+            }, 100);
+            return () => clearTimeout(timeout);
+        }
+    }, [isDragging]);
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+    };
+
+    const pageName = (page.content as { title?: string }).title || 'Untitled';
+
+    const handleClick = (e: React.MouseEvent) => {
+        // Prevent navigation if we just finished dragging
+        if (wasDraggingRef.current) {
+            e.preventDefault();
+        }
+    };
+
+    return (
+        <SidebarMenuItem ref={setNodeRef} style={style} {...attributes} {...listeners}>
+            <SidebarMenuButton asChild isActive={isActive}>
+                <Link scroll={false} href={`/page/${page.id}`} onClick={handleClick}>
+                    <FileText className="h-4 w-4" />
+                    <span>{pageName}</span>
+                </Link>
+            </SidebarMenuButton>
+
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <SidebarMenuAction showOnHover>
+                        {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <MoreHorizontal />}
+                        <span className="sr-only">More</span>
+                    </SidebarMenuAction>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                    className="w-56 rounded-lg"
+                    side={isMobile ? 'bottom' : 'right'}
+                    align={isMobile ? 'end' : 'start'}>
+                    <DropdownMenuItem onClick={() => onCopyLink(page.id)}>
+                        <LinkIcon className="text-muted-foreground" />
+                        <span>Copy Link</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onOpenInNewTab(page.id)}>
+                        <ArrowUpRight className="text-muted-foreground" />
+                        <span>Open in New Tab</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                        onClick={() => onDeleteClick(page.id, pageName)}
+                        disabled={isDeleting}
+                        className="text-destructive focus:text-destructive">
+                        <Trash2 className="text-muted-foreground" />
+                        <span>Delete</span>
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+        </SidebarMenuItem>
+    );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// NavPages Component
+// ─────────────────────────────────────────────────────────────────────────────
 
 export function NavPages() {
     const { pages, loading, currentPage, setPages } = usePage();
@@ -44,6 +149,66 @@ export function NavPages() {
     const [createDialogOpen, setCreateDialogOpen] = React.useState(false);
     const [deletingPageId, setDeletingPageId] = React.useState<string | null>(null);
     const [pageToDelete, setPageToDelete] = React.useState<{ id: string; name: string } | null>(null);
+    const [activeId, setActiveId] = React.useState<string | null>(null);
+
+    // Memoize page IDs to prevent unnecessary re-renders
+    const pageIds = React.useMemo(() => pages.map(p => p.id), [pages]);
+    const activePage = React.useMemo(() => pages.find(p => p.id === activeId), [pages, activeId]);
+
+    // DnD sensors for pointer and keyboard
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8, // Require 8px movement before starting drag
+            },
+        }),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
+    const handleDragStart = (event: DragStartEvent) => {
+        setActiveId(event.active.id as string);
+    };
+
+    const handleDragCancel = () => {
+        setActiveId(null);
+    };
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+        setActiveId(null);
+
+        if (!over || active.id === over.id) return;
+
+        const oldIndex = pages.findIndex(p => p.id === active.id);
+        const newIndex = pages.findIndex(p => p.id === over.id);
+
+        if (oldIndex === -1 || newIndex === -1) return;
+
+        // Optimistic update: reorder locally first using arrayMove
+        const previousPages = [...pages];
+        const reorderedPages = arrayMove(pages, oldIndex, newIndex);
+        setPages(reorderedPages);
+
+        // Fire API call in background (non-blocking)
+        const prevId = newIndex === 0 ? null : (reorderedPages[newIndex - 1]?.id ?? null);
+        const nextId = newIndex === reorderedPages.length - 1 ? null : (reorderedPages[newIndex + 1]?.id ?? null);
+
+        updateBlockApi(active.id as string, { prevId, nextId })
+            .then(result => {
+                if (!result.success) {
+                    console.error('Failed to reorder page:', result.error);
+                    setPages(previousPages);
+                    showToast('Failed to reorder page', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error reordering page:', error);
+                setPages(previousPages);
+                showToast('An error occurred while reordering', 'error');
+            });
+    };
 
     const handleCopyLink = (pageId: string) => {
         const url = `${window.location.origin}/page/${pageId}`;
@@ -128,52 +293,40 @@ export function NavPages() {
                     </div>
                 </SidebarGroupLabel>
                 <SidebarGroupContent>
-                    <SidebarMenu>
-                        {pages.map(page => {
-                            const pageName = (page.content as { title?: string }).title || 'Untitled';
-                            const isDeleting = deletingPageId === page.id;
-                            return (
-                                <SidebarMenuItem key={page.id}>
-                                    <SidebarMenuButton asChild isActive={currentPage?.id === page.id}>
-                                        <Link scroll={false} href={`/page/${page.id}`}>
-                                            <FileText className="h-4 w-4" />
-                                            <span>{pageName}</span>
-                                        </Link>
-                                    </SidebarMenuButton>
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <SidebarMenuAction showOnHover>
-                                                {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <MoreHorizontal />}
-                                                <span className="sr-only">More</span>
-                                            </SidebarMenuAction>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent
-                                            className="w-56 rounded-lg"
-                                            side={isMobile ? 'bottom' : 'right'}
-                                            align={isMobile ? 'end' : 'start'}>
-                                            <DropdownMenuItem onClick={() => handleCopyLink(page.id)}>
-                                                <LinkIcon className="text-muted-foreground" />
-                                                <span>Copy Link</span>
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem onClick={() => handleOpenInNewTab(page.id)}>
-                                                <ArrowUpRight className="text-muted-foreground" />
-                                                <span>Open in New Tab</span>
-                                            </DropdownMenuItem>
-                                            <DropdownMenuSeparator />
-                                            <DropdownMenuItem
-                                                onClick={() => handleDeleteClick(page.id, pageName)}
-                                                disabled={isDeleting}
-                                                className="text-destructive focus:text-destructive">
-                                                <Trash2 className="text-muted-foreground" />
-                                                <span>Delete</span>
-                                            </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                </SidebarMenuItem>
-                            );
-                        })}
-                        {pages.length === 0 && <div className="text-muted-foreground px-2 py-4 text-sm">No pages yet</div>}
-                    </SidebarMenu>
+                    <DndContext
+                        sensors={sensors}
+                        collisionDetection={closestCenter}
+                        onDragStart={handleDragStart}
+                        onDragEnd={handleDragEnd}
+                        onDragCancel={handleDragCancel}>
+                        <SortableContext items={pageIds} strategy={verticalListSortingStrategy}>
+                            <SidebarMenu>
+                                {pages.map(page => (
+                                    <SortablePageItem
+                                        key={page.id}
+                                        page={page}
+                                        isActive={currentPage?.id === page.id}
+                                        isDeleting={deletingPageId === page.id}
+                                        isMobile={isMobile}
+                                        onCopyLink={handleCopyLink}
+                                        onOpenInNewTab={handleOpenInNewTab}
+                                        onDeleteClick={handleDeleteClick}
+                                    />
+                                ))}
+                                {pages.length === 0 && <div className="text-muted-foreground px-2 py-4 text-sm">No pages yet</div>}
+                            </SidebarMenu>
+                        </SortableContext>
+                        <DragOverlay>
+                            {activePage ? (
+                                <div className="bg-sidebar rounded-md border px-2 py-1.5 shadow-lg">
+                                    <div className="flex items-center gap-2">
+                                        <FileText className="h-4 w-4" />
+                                        <span>{(activePage.content as { title?: string }).title || 'Untitled'}</span>
+                                    </div>
+                                </div>
+                            ) : null}
+                        </DragOverlay>
+                    </DndContext>
                 </SidebarGroupContent>
             </SidebarGroup>
             <CreatePageDialog open={createDialogOpen} onOpenChange={setCreateDialogOpen} />
