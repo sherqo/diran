@@ -9,34 +9,36 @@ datasource db {
 }
 
 model User {
-  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email                String    @unique
+  id                   String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email                String       @unique
   password             String
   name                 String
   photo                String?
-  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt            DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
-  refreshToken         String?   @map("refresh_token")
-  refreshTokenExpires  DateTime? @map("refresh_token_expires") @db.Timestamptz(3)
-  resetPasswordToken   String?   @map("reset_password_token")
-  resetPasswordExpires DateTime? @map("reset_password_expires") @db.Timestamptz(3)
-  emailVerified        Boolean   @default(false) @map("email_verified")
-  otpHashed            String?   @map("otp_hashed")
-  otpExpires           DateTime? @map("otp_expires") @db.Timestamptz(3)
+  createdAt            DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt            DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
+  refreshToken         String?      @map("refresh_token")
+  refreshTokenExpires  DateTime?    @map("refresh_token_expires") @db.Timestamptz(3)
+  resetPasswordToken   String?      @map("reset_password_token")
+  resetPasswordExpires DateTime?    @map("reset_password_expires") @db.Timestamptz(3)
+  emailVerified        Boolean      @default(false) @map("email_verified")
+  otpHashed            String?      @map("otp_hashed")
+  otpExpires           DateTime?    @map("otp_expires") @db.Timestamptz(3)
+  permissions          Permission[]
 
   @@map("users")
 }
 
 model Block {
-  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  type      BlockType
-  parentId  String?   @map("parent_id") @db.Uuid
-  order     String
-  content   Json
-  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
-  parent    Block?    @relation("BlockToChildren", fields: [parentId], references: [id])
-  children  Block[]   @relation("BlockToChildren")
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  type        BlockType
+  parentId    String?      @map("parent_id") @db.Uuid
+  order       String
+  content     Json
+  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
+  parent      Block?       @relation("BlockToChildren", fields: [parentId], references: [id], onDelete: Cascade)
+  children    Block[]      @relation("BlockToChildren")
+  permissions Permission[]
 
   @@unique([parentId, order])
   @@index([parentId], map: "idx_blocks_parent_id")
@@ -44,16 +46,18 @@ model Block {
 }
 
 model Permission {
-  id         String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  actorId    String     @map("actor_id") @db.Uuid
-  actorType  ActorType  @map("actor_type")
-  entityId   String     @map("entity_id") @db.Uuid
-  entityType EntityType @map("entity_type")
-  role       RoleType
-  createdAt  DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt  DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  blockId   String   @map("block_id") @db.Uuid
+  role      RoleType
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  block     Block    @relation(fields: [blockId], references: [id], onDelete: Cascade)
 
-  @@unique([actorId, entityId])
+  @@unique([userId, blockId])
+  @@index([userId], map: "idx_permissions_user_id")
+  @@index([blockId], map: "idx_permissions_block_id")
   @@map("permissions")
 }
 
@@ -94,14 +98,4 @@ enum RoleType {
   EDITOR
   VIEWER
   NONE
-}
-
-enum ActorType {
-  USER
-  TEAM
-}
-
-enum EntityType {
-  BLOCK
-  TAG
 }

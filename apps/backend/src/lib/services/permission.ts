@@ -1,17 +1,16 @@
 import { db } from '#lib/database/connection';
-import { RoleType, ActorType, EntityType } from '@prisma/client';
+import { RoleType } from '@prisma/client';
 
-export const getRole = async (actorId: string, entityId: string): Promise<RoleType | undefined> => {
+export const getRole = async (userId: string, blockId: string): Promise<RoleType | undefined> => {
     const perm = await db.permission.findUnique({
         where: {
-            actorId_entityId: {
-                actorId,
-                entityId,
+            userId_blockId: {
+                userId,
+                blockId,
             },
         },
         select: {
             role: true,
-            // can select more like: id, createdAt, updatedAt, types of a actors and so on...
         },
     });
 
@@ -26,9 +25,9 @@ export const getRoleWithInheritance = async (userId: string, blockId: string): P
     // first, try the direct permission (fast path)
     const directPermission = await db.permission.findUnique({
         where: {
-            actorId_entityId: {
-                actorId: userId,
-                entityId: blockId,
+            userId_blockId: {
+                userId,
+                blockId,
             },
         },
         select: { role: true },
@@ -41,7 +40,7 @@ export const getRoleWithInheritance = async (userId: string, blockId: string): P
     // use a recursive CTE to fetch the block and all its ancestors in one go,
     // ordered by distance from the original block (closest first)
     // Request the ancestor id and depth so we can see which ancestor granted the role
-    const rows = await db.$queryRaw<Array<{ block_id: string; depth: number; role: RoleType | null; actor_id: string }>>`
+    const rows = await db.$queryRaw<Array<{ block_id: string; depth: number; role: RoleType | null; user_id: string }>>`
         WITH RECURSIVE ancestors AS (
             SELECT id, parent_id, 0 AS depth
             FROM blocks
@@ -51,11 +50,11 @@ export const getRoleWithInheritance = async (userId: string, blockId: string): P
             FROM blocks b
             INNER JOIN ancestors a ON b.id = a.parent_id
         )
-        SELECT a.id AS block_id, a.depth, p.role, p.actor_id
+        SELECT a.id AS block_id, a.depth, p.role, p.user_id
         FROM ancestors a
         JOIN permissions p
-          ON p.entity_id = a.id
-        AND p.actor_id = ${userId}::uuid
+          ON p.block_id = a.id
+        AND p.user_id = ${userId}::uuid
         ORDER BY a.depth ASC
         LIMIT 1
     `;

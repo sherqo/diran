@@ -13,7 +13,7 @@ import { db } from '#lib/database/connection';
 import { sendSuccess } from '#lib/utils/response';
 import { ApiError } from '#lib/middleware/errorHandler';
 import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors';
-import { ActorType, EntityType, RoleType, BlockType } from '@prisma/client';
+import { RoleType, BlockType } from '@prisma/client';
 import { generateKeyBetween } from 'fractional-indexing';
 import { canWrite } from './middlewares';
 import { getRoleWithInheritance } from '#lib/services/permission';
@@ -146,7 +146,7 @@ const createBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Prom
         const created = await tx.block.create({
             data: {
                 ...(id && { id }), // Only include id if it exists
-                type,
+                type: type as BlockType,
                 parentId: parentId ?? null,
                 order,
                 content,
@@ -176,10 +176,8 @@ const createBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Prom
         if (!parentId) {
             await tx.permission.create({
                 data: {
-                    actorId: req.user!.id,
-                    actorType: ActorType.USER,
-                    entityId: created.id,
-                    entityType: EntityType.BLOCK,
+                    userId: req.user!.id,
+                    blockId: created.id,
                     role: RoleType.OWNER,
                 },
             });
@@ -351,18 +349,10 @@ const deleteBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Prom
 
         const blockIds = allBlockIds.map((row: any) => row.id);
 
-        // Delete in batch - much more efficient
-        await Promise.all([
-            tx.permission.deleteMany({
-                where: {
-                    entityId: { in: blockIds },
-                    entityType: EntityType.BLOCK,
-                },
-            }),
-            tx.block.deleteMany({
-                where: { id: { in: blockIds } },
-            }),
-        ]);
+        // Delete blocks - permissions will cascade delete automatically
+        await tx.block.deleteMany({
+            where: { id: { in: blockIds } },
+        });
     });
 
     sendSuccess(reply, {}, 'Block and all children deleted successfully');
@@ -493,13 +483,11 @@ const getAllPages = async (req: AuthenticatedRequest, reply: FastifyReply): Prom
             b.updated_at as "updatedAt",
             p.role
         FROM blocks b
-        INNER JOIN permissions p ON p.entity_id = b.id
+        INNER JOIN permissions p ON p.block_id = b.id
         WHERE 
             b.type::text = 'page'
             AND b.parent_id IS NULL
-            AND p.actor_id = ${userId}::uuid
-            AND p.actor_type::text = 'USER'
-            AND p.entity_type::text = 'BLOCK'
+            AND p.user_id = ${userId}::uuid
             AND p.role::text IN ('OWNER', 'EDITOR', 'VIEWER')
         ORDER BY b."order" ASC
     `;
