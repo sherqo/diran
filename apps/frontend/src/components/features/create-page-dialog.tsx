@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { createBlockApi } from '@/lib/api/block';
 import { usePage } from '@/contexts/PageContext';
 import { BlockTypeEnum } from '@/shared/types/block';
@@ -17,6 +17,7 @@ export function CreatePageDialog({ open, onOpenChange }: { open: boolean; onOpen
     const router = useRouter();
     const { fetchPages, pages } = usePage();
     const [pageName, setPageName] = React.useState('');
+    const [pageIcon, setPageIcon] = React.useState<string | undefined>(undefined);
     const [isCreating, setIsCreating] = React.useState(false);
     const [error, setError] = React.useState('');
 
@@ -24,6 +25,7 @@ export function CreatePageDialog({ open, onOpenChange }: { open: boolean; onOpen
     React.useEffect(() => {
         if (!open) {
             setPageName('');
+            setPageIcon(undefined);
             setError('');
         }
     }, [open]);
@@ -49,7 +51,8 @@ export function CreatePageDialog({ open, onOpenChange }: { open: boolean; onOpen
                 prevId: null,
                 nextId: firstPageId,
                 content: {
-                    title: pageName.trim(), // TODO: zod schema and validation needed here and for backend as well
+                    title: pageName.trim(),
+                    ...(pageIcon && { icon: pageIcon }),
                 },
             });
 
@@ -83,15 +86,18 @@ export function CreatePageDialog({ open, onOpenChange }: { open: boolean; onOpen
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
-                        <Label htmlFor="pageName">Page Name</Label>
-                        <Input
-                            id="pageName"
-                            value={pageName}
-                            onChange={e => setPageName(e.target.value)}
-                            placeholder="Enter page name"
-                            autoFocus
-                            disabled={isCreating}
-                        />
+                        <div className="flex items-center gap-2">
+                            <EmojiPicker value={pageIcon} onChange={setPageIcon} disabled={isCreating} />
+                            <Input
+                                id="pageName"
+                                value={pageName}
+                                onChange={e => setPageName(e.target.value)}
+                                placeholder="Enter page name"
+                                autoFocus
+                                disabled={isCreating}
+                                className="flex-1"
+                            />
+                        </div>
                         {error && <p className="text-destructive text-sm">{error}</p>}
                     </div>
 

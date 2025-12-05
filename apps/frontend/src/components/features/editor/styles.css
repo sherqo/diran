@@ -45,3 +45,93 @@
 .bn-container[data-theming-css-variables-editor] .bn-editor mark {
     display: inline-block;
 }
+
+/* ===== Custom Menu Styles ===== */
+
+/* Side menu - cleaner drag handle */
+.bn-container .bn-side-menu {
+    opacity: 0;
+    transition: opacity 150ms ease;
+}
+
+.bn-container .bn-block-outer:hover .bn-side-menu,
+.bn-container .bn-side-menu:hover {
+    opacity: 1;
+}
+
+/* Drag handle menu - tighter spacing */
+.bn-container [data-radix-popper-content-wrapper] {
+    z-index: 50 !important;
+}
+
+/* Menu items - consistent styling */
+.bn-container .bn-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 100ms ease;
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-size: 13px;
+}
+
+.bn-container .bn-menu-item:hover {
+    background-color: var(--color-accent);
+}
+
+/* Formatting toolbar - compact */
+.bn-container .bn-formatting-toolbar {
+    gap: 2px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    padding: 4px;
+}
+
+.bn-container .bn-formatting-toolbar button {
+    transition: background-color 100ms ease;
+    border-radius: 4px;
+    padding: 6px;
+}
+
+/* Active state for formatting toolbar buttons (bold, italic, etc. when applied) */
+.bn-container .bn-formatting-toolbar button[data-active='true'],
+.bn-container .bn-formatting-toolbar button[aria-pressed='true'],
+.bn-container .bn-formatting-toolbar button.bn-is-active {
+    background-color: var(--color-accent);
+    color: var(--color-accent-foreground);
+    /* color */
+}
+
+/* Toolbar dividers */
+.bn-container .bn-formatting-toolbar [data-separator] {
+    margin: 0 4px;
+    background: var(--color-border);
+    width: 1px;
+    height: 20px;
+}
+
+/* Side menu buttons (drag handle + add block) - smaller and dimmed */
+.bn-container .bn-side-menu button {
+    z-index: 1;
+    transition:
+        color 150ms ease,
+        background-color 150ms ease;
+    padding: 2px;
+    width: 20px;
+    min-width: 20px;
+    height: 20px;
+    min-height: 20px;
+    color: var(--muted-foreground);
+}
+
+.bn-container .bn-side-menu button:hover {
+    z-index: 1;
+    background-color: var(--color-sidebar-accent);
+}
+
+.bn-container .bn-side-menu button svg {
+    z-index: 1;
+    width: 18px;
+    height: 18px;
+}

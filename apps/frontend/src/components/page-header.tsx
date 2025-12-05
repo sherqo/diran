@@ -8,9 +8,10 @@ import SyncStatusIndicator from './features/editor/SyncStatusIndicator';
 
 interface PageHeaderProps {
     title: string;
+    icon?: string;
 }
 
-export function PageHeader({ title }: PageHeaderProps) {
+export function PageHeader({ title, icon }: PageHeaderProps) {
     return (
         <header className="bg-sidebar sticky top-0 z-40 flex h-12 w-full shrink-0 items-center gap-2 border-b backdrop-blur-sm">
             <div className="flex flex-1 items-center gap-2 px-3">
@@ -19,7 +20,10 @@ export function PageHeader({ title }: PageHeaderProps) {
                 <Breadcrumb>
                     <BreadcrumbList>
                         <BreadcrumbItem>
-                            <BreadcrumbPage className="line-clamp-1">{title}</BreadcrumbPage>
+                            <BreadcrumbPage className="line-clamp-1 flex items-center gap-1.5">
+                                {icon && <span>{icon}</span>}
+                                {title}
+                            </BreadcrumbPage>
                         </BreadcrumbItem>
                     </BreadcrumbList>
                 </Breadcrumb>
