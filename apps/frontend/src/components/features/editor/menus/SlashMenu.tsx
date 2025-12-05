@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { DefaultReactSuggestionItem, SuggestionMenuProps } from '@blocknote/react';
-import { cn } from '@/lib/utils';
+import { MenuItem, MenuGroupHeader, MenuContainer, MenuEmptyState, groupItems } from './shared';
 
 /**
- * slash menu component.
+ * Custom slash menu component.
  */
 export function SlashMenu({ items, onItemClick }: SuggestionMenuProps<DefaultReactSuggestionItem>) {
     const [selectedIndex, setSelectedIndex] = useState(0);
@@ -20,7 +20,7 @@ export function SlashMenu({ items, onItemClick }: SuggestionMenuProps<DefaultRea
     useEffect(() => {
         const selectedItem = itemRefs.current[selectedIndex];
         if (selectedItem) {
-            selectedItem.scrollIntoView({ block: 'center', behavior: 'smooth' });
+            selectedItem.scrollIntoView({ block: 'nearest', behavior: 'instant' });
         }
     }, [selectedIndex]);
 
@@ -52,60 +52,45 @@ export function SlashMenu({ items, onItemClick }: SuggestionMenuProps<DefaultRea
     }, [items, selectedIndex, onItemClick]);
 
     if (items.length === 0) {
-        return <div className="bg-popover text-popover-foreground w-60 rounded-lg border p-3 text-sm shadow-lg">No results</div>;
+        return (
+            <MenuContainer>
+                <MenuEmptyState />
+            </MenuContainer>
+        );
     }
 
-    // Group items by category
-    const groupedItems = items.reduce(
-        (acc, item) => {
-            const group = item.group || 'Other';
-            if (!acc[group]) {
-                acc[group] = [];
-            }
-            acc[group].push(item);
-            return acc;
-        },
-        {} as Record<string, DefaultReactSuggestionItem[]>
-    );
+    // Add group property for grouping
+    const itemsWithGroup = items.map(item => ({ ...item, group: item.group || 'Other' }));
+    const groupedItems = groupItems(itemsWithGroup);
 
     let globalIndex = 0;
 
     return (
-        <div
-            className="bg-popover text-popover-foreground max-h-80 w-60 overflow-hidden overflow-y-auto rounded-lg border shadow-lg"
-            role="listbox">
+        <MenuContainer className="overflow-y-auto">
             {Object.entries(groupedItems).map(([group, groupItems]) => (
                 <div key={group}>
-                    <div className="text-muted-foreground bg-muted/30 px-3 py-1.5 text-xs font-medium tracking-wider uppercase">
-                        {group}
-                    </div>
+                    <MenuGroupHeader label={group} />
                     {groupItems.map(item => {
                         const currentIndex = globalIndex++;
                         const isSelected = currentIndex === selectedIndex;
 
                         return (
-                            <button
+                            <MenuItem
                                 key={item.title}
                                 ref={el => {
                                     itemRefs.current[currentIndex] = el;
                                 }}
-                                role="option"
-                                aria-selected={isSelected}
-                                className={cn(
-                                    'flex w-full items-center gap-3 px-3 py-2 text-left text-sm transition-colors',
-                                    'hover:bg-accent focus:bg-accent focus:outline-none',
-                                    isSelected && 'bg-accent'
-                                )}
+                                icon={item.icon}
+                                label={item.title}
+                                badge={item.badge}
+                                isSelected={isSelected}
                                 onClick={() => onItemClick?.(item)}
-                                onMouseEnter={() => setSelectedIndex(currentIndex)}>
-                                <span className="text-muted-foreground shrink-0">{item.icon}</span>
-                                <span className="flex-1 font-medium">{item.title}</span>
-                                {item.badge && <span className="text-muted-foreground font-mono text-xs">{item.badge}</span>}
-                            </button>
+                                onMouseEnter={() => setSelectedIndex(currentIndex)}
+                            />
                         );
                     })}
                 </div>
             ))}
-        </div>
+        </MenuContainer>
     );
 }

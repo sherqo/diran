@@ -3,29 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useBlockNoteEditor } from '@blocknote/react';
 import { Block } from '@blocknote/core';
-import { cn } from '@/lib/utils';
-import { Pilcrow, Heading1, Heading2, Heading3, Quote, List, ListOrdered, CheckSquare, ChevronRight, Code } from 'lucide-react';
-
-interface BlockTypeItem {
-    type: string;
-    label: string;
-    group: string;
-    icon: React.ReactNode;
-    props?: Record<string, unknown>;
-}
-
-const BLOCK_TYPES: BlockTypeItem[] = [
-    { type: 'paragraph', label: 'Text', group: 'Basic', icon: <Pilcrow size={18} /> },
-    { type: 'heading', label: 'Heading 1', group: 'Basic', icon: <Heading1 size={18} />, props: { level: 1 } },
-    { type: 'heading', label: 'Heading 2', group: 'Basic', icon: <Heading2 size={18} />, props: { level: 2 } },
-    { type: 'heading', label: 'Heading 3', group: 'Basic', icon: <Heading3 size={18} />, props: { level: 3 } },
-    { type: 'quote', label: 'Quote', group: 'Basic', icon: <Quote size={18} /> },
-    { type: 'bulletListItem', label: 'Bullet List', group: 'Lists', icon: <List size={18} /> },
-    { type: 'numberedListItem', label: 'Numbered List', group: 'Lists', icon: <ListOrdered size={18} /> },
-    { type: 'checkListItem', label: 'Check List', group: 'Lists', icon: <CheckSquare size={18} /> },
-    { type: 'toggleListItem', label: 'Toggle', group: 'Lists', icon: <ChevronRight size={18} /> },
-    { type: 'codeBlock', label: 'Code', group: 'Advanced', icon: <Code size={18} /> },
-];
+import { TURN_INTO_BLOCK_TYPES, BlockTypeConfig, MenuItem, MenuGroupHeader, MenuContainer, MenuEmptyState, groupItems } from './shared';
 
 interface TurnIntoMenuProps {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -45,7 +23,7 @@ export function TurnIntoMenu({ block, onClose }: TurnIntoMenuProps) {
     const inputRef = useRef<HTMLInputElement>(null);
 
     // Filter items based on search
-    const filteredItems = BLOCK_TYPES.filter(item => item.label.toLowerCase().includes(searchQuery.toLowerCase()));
+    const filteredItems = TURN_INTO_BLOCK_TYPES.filter(item => item.label.toLowerCase().includes(searchQuery.toLowerCase()));
 
     // Reset selection when items change
     useEffect(() => {
@@ -61,12 +39,12 @@ export function TurnIntoMenu({ block, onClose }: TurnIntoMenuProps) {
     useEffect(() => {
         const selectedItem = itemRefs.current[selectedIndex];
         if (selectedItem) {
-            selectedItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+            selectedItem.scrollIntoView({ block: 'nearest', behavior: 'instant' });
         }
     }, [selectedIndex]);
 
     const handleBlockTypeChange = useCallback(
-        (item: BlockTypeItem) => {
+        (item: BlockTypeConfig) => {
             editor.updateBlock(block, {
                 type: item.type as 'paragraph',
                 props: item.props as Record<string, never>,
@@ -107,22 +85,12 @@ export function TurnIntoMenu({ block, onClose }: TurnIntoMenuProps) {
         return () => document.removeEventListener('keydown', handleKeyDown);
     }, [filteredItems, selectedIndex, handleBlockTypeChange, onClose]);
 
-    // Group items by category
-    const groupedItems = filteredItems.reduce(
-        (acc, item) => {
-            if (!acc[item.group]) {
-                acc[item.group] = [];
-            }
-            acc[item.group].push(item);
-            return acc;
-        },
-        {} as Record<string, BlockTypeItem[]>
-    );
+    const groupedItems = groupItems(filteredItems as BlockTypeConfig[]);
 
     let globalIndex = 0;
 
     return (
-        <div className="bg-popover text-popover-foreground max-h-80 w-60 overflow-hidden rounded-lg border shadow-lg">
+        <MenuContainer>
             {/* Search input */}
             <div className="border-b p-2">
                 <input
@@ -138,41 +106,34 @@ export function TurnIntoMenu({ block, onClose }: TurnIntoMenuProps) {
             {/* Items */}
             <div className="max-h-64 overflow-y-auto" role="listbox">
                 {filteredItems.length === 0 ? (
-                    <div className="text-muted-foreground p-3 text-sm">No results</div>
+                    <MenuEmptyState />
                 ) : (
                     Object.entries(groupedItems).map(([group, items]) => (
                         <div key={group}>
-                            <div className="text-muted-foreground bg-muted/30 px-3 py-1.5 text-xs font-medium tracking-wider uppercase">
-                                {group}
-                            </div>
+                            <MenuGroupHeader label={group} />
                             {items.map(item => {
                                 const currentIndex = globalIndex++;
                                 const isSelected = currentIndex === selectedIndex;
+                                const Icon = item.icon;
 
                                 return (
-                                    <button
+                                    <MenuItem
                                         key={item.label}
                                         ref={el => {
                                             itemRefs.current[currentIndex] = el;
                                         }}
-                                        role="option"
-                                        aria-selected={isSelected}
-                                        className={cn(
-                                            'flex w-full items-center gap-3 px-3 py-2 text-left text-sm transition-colors',
-                                            'hover:bg-accent focus:bg-accent focus:outline-none',
-                                            isSelected && 'bg-accent'
-                                        )}
+                                        icon={<Icon size={18} />}
+                                        label={item.label}
+                                        isSelected={isSelected}
                                         onClick={() => handleBlockTypeChange(item)}
-                                        onMouseEnter={() => setSelectedIndex(currentIndex)}>
-                                        <span className="text-muted-foreground shrink-0">{item.icon}</span>
-                                        <span className="flex-1 font-medium">{item.label}</span>
-                                    </button>
+                                        onMouseEnter={() => setSelectedIndex(currentIndex)}
+                                    />
                                 );
                             })}
                         </div>
                     ))
                 )}
             </div>
-        </div>
+        </MenuContainer>
     );
 }

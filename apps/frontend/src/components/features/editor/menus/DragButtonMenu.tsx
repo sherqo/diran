@@ -12,46 +12,17 @@ import { useCallback } from 'react';
 import { Block, DefaultBlockSchema } from '@blocknote/core';
 import { SideMenu, DragHandleMenu, RemoveBlockItem, BlockColorsItem, useBlockNoteEditor, useComponentsContext } from '@blocknote/react';
 import { SideMenuProps } from '@blocknote/react';
-import {
-    AlignLeft,
-    AlignCenter,
-    AlignRight,
-    Pilcrow,
-    Copy,
-    Trash2,
-    Palette,
-    Heading1,
-    Heading2,
-    Heading3,
-    Quote,
-    List,
-    ListOrdered,
-    CheckSquare,
-    ChevronRight,
-    Code,
-} from 'lucide-react';
+import { AlignLeft, AlignCenter, AlignRight, Pilcrow, Copy, Trash2, Palette } from 'lucide-react';
+import { TURN_INTO_BLOCK_TYPES } from './shared';
 
 type BlockType = keyof DefaultBlockSchema;
 type TextAlignment = 'left' | 'center' | 'right';
 
 const ALIGNMENTS = [
-    { align: 'left', icon: AlignLeft },
-    { align: 'center', icon: AlignCenter },
-    { align: 'right', icon: AlignRight },
-] as const;
-
-const BLOCK_TYPES = [
-    { type: 'paragraph', label: 'Text', icon: Pilcrow, props: {} },
-    { type: 'heading', label: 'Heading 1', icon: Heading1, props: { level: 1 } },
-    { type: 'heading', label: 'Heading 2', icon: Heading2, props: { level: 2 } },
-    { type: 'heading', label: 'Heading 3', icon: Heading3, props: { level: 3 } },
-    { type: 'quote', label: 'Quote', icon: Quote, props: {} },
-    { type: 'bulletListItem', label: 'Bullet List', icon: List, props: {} },
-    { type: 'numberedListItem', label: 'Numbered List', icon: ListOrdered, props: {} },
-    { type: 'checkListItem', label: 'Check List', icon: CheckSquare, props: {} },
-    { type: 'toggleListItem', label: 'Toggle', icon: ChevronRight, props: {} },
-    { type: 'codeBlock', label: 'Code', icon: Code, props: {} },
-] as const;
+    { align: 'left' as const, icon: AlignLeft, label: 'Left' },
+    { align: 'center' as const, icon: AlignCenter, label: 'Center' },
+    { align: 'right' as const, icon: AlignRight, label: 'Right' },
+];
 
 /**
  *  turn into, alignment, colors, duplicate, delete.
@@ -100,11 +71,11 @@ function CustomDragHandleMenu({ block }: { block: Block<any, any, any> }) {
                     </Components.Generic.Menu.Item>
                 </Components.Generic.Menu.Trigger>
                 <Components.Generic.Menu.Dropdown sub={true}>
-                    {BLOCK_TYPES.map(({ type, label, icon: Icon, props }) => (
+                    {TURN_INTO_BLOCK_TYPES.map(({ type, label, icon: Icon, props }) => (
                         <Components.Generic.Menu.Item
                             key={label}
                             className="bn-menu-item"
-                            onClick={() => handleBlockTypeChange(type, props)}>
+                            onClick={() => handleBlockTypeChange(type as BlockType, props)}>
                             <Icon size={16} />
                             {label}
                         </Components.Generic.Menu.Item>
@@ -121,10 +92,10 @@ function CustomDragHandleMenu({ block }: { block: Block<any, any, any> }) {
                     </Components.Generic.Menu.Item>
                 </Components.Generic.Menu.Trigger>
                 <Components.Generic.Menu.Dropdown sub={true}>
-                    {ALIGNMENTS.map(({ align, icon: Icon }) => (
+                    {ALIGNMENTS.map(({ align, icon: Icon, label }) => (
                         <Components.Generic.Menu.Item key={align} className="bn-menu-item" onClick={() => handleAlignChange(align)}>
                             <Icon size={16} />
-                            {align.charAt(0).toUpperCase() + align.slice(1)}
+                            {label}
                         </Components.Generic.Menu.Item>
                     ))}
                 </Components.Generic.Menu.Dropdown>
