@@ -74,9 +74,9 @@ export default function Editor({
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-    // Listen to changes
+    // Listen to changes (only when editable)
     useEffect(() => {
-        if (!editor) return;
+        if (!editor || !editable) return;
 
         const unsubscribe = editor.onChange((editor, { getChanges }) => {
             // Skip change handling if we're loading children
@@ -88,7 +88,7 @@ export default function Editor({
 
         return unsubscribe;
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [editor]);
+    }, [editor, editable]);
 
     if (!editor) {
         return null;
@@ -111,22 +111,27 @@ export default function Editor({
             }}
             theme={colorScheme}
             editable={editable}
-            // Disable default menus to use custom ones
+            // Disable default menus to use custom ones (or hide when read-only)
             slashMenu={false}
             formattingToolbar={false}
             sideMenu={false}>
-            {/* Slash Menu */}
-            <SuggestionMenuController
-                triggerCharacter="/"
-                getItems={async query => filterSlashMenuItems(getSlashMenuItems(editor), query)}
-                suggestionMenuComponent={SlashMenu}
-            />
+            {/* Only show editing menus when editable */}
+            {editable && (
+                <>
+                    {/* Slash Menu */}
+                    <SuggestionMenuController
+                        triggerCharacter="/"
+                        getItems={async query => filterSlashMenuItems(getSlashMenuItems(editor), query)}
+                        suggestionMenuComponent={SlashMenu}
+                    />
 
-            {/* Formatting Toolbar */}
-            <FormattingToolbarController formattingToolbar={CustomFormattingToolbar} />
+                    {/* Formatting Toolbar */}
+                    <FormattingToolbarController formattingToolbar={CustomFormattingToolbar} />
 
-            {/* Side Menu - via drag button*/}
-            <SideMenuController sideMenu={CustomSideMenu} />
+                    {/* Side Menu - via drag button*/}
+                    <SideMenuController sideMenu={CustomSideMenu} />
+                </>
+            )}
         </BlockNoteView>
     );
 }

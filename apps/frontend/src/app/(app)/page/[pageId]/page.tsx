@@ -142,6 +142,7 @@ export default function PageView() {
                             initialContent={initialContent}
                             editorRef={editorRef}
                             isLoadingChildrenRef={isLoadingChildrenRef}
+                            editable={currentPage.role !== 'VIEWER'}
                         />
                     )}
                 </div>
