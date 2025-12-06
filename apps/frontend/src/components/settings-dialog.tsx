@@ -120,7 +120,7 @@ export function SettingsDialog({ open, onOpenChange }: { open: boolean; onOpenCh
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-h-full overflow-hidden p-0 sm:!max-w-xl md:!max-w-2xl">
+            <DialogContent className="max-h-full overflow-hidden p-0 sm:max-w-xl! md:max-w-2xl!">
                 <DialogHeader className="border-b px-6 py-4">
                     <DialogTitle>Settings</DialogTitle>
                 </DialogHeader>
