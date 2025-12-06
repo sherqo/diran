@@ -205,7 +205,7 @@ const createBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Prom
 
 // ====== Just placeholder(s) for now ======
 
-// READ - gets a single block data by providing its id - not implemented yet
+// READ - gets a single block data by providing its id
 const getBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     const { id } = req.params as GetBlockParamInput;
 
@@ -232,6 +232,7 @@ const getBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Promise
         parentId: found.parentId,
         order: found.order,
         content: found.content,
+        role: req.permissions?.role || null, // Role from middleware
         createdAt: found.createdAt.toISOString(),
         updatedAt: found.updatedAt.toISOString(),
     };

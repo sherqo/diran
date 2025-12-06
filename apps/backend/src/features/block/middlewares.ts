@@ -34,8 +34,9 @@ export const requireReadPermission: preHandlerHookHandler = async (req: Authenti
         throw new ApiError('Access denied: No read permission for this block', HttpStatus.FORBIDDEN, ErrorCode.PERMISSION_DENIED);
     }
 
-    // Attach
+    // Attach role and permissions to request
     req.permissions = {
+        role,
         canRead: true,
         canWrite: canWrite(role),
     };
@@ -56,8 +57,9 @@ export const requireWritePermission: preHandlerHookHandler = async (req: Authent
         throw new ApiError('Access denied: No write permission for this block', HttpStatus.FORBIDDEN, ErrorCode.PERMISSION_DENIED);
     }
 
-    // Attach
+    // Attach role and permissions to request
     req.permissions = {
+        role,
         canRead: true,
         canWrite: true,
     };
