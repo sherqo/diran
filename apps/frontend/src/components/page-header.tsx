@@ -1,13 +1,14 @@
 'use client';
 
 import * as React from 'react';
-import { Share2 } from 'lucide-react';
+import { Users } from 'lucide-react';
 
 import { NavActions } from '@/components/nav-actions';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from '@/components/ui/breadcrumb';
 import { Separator } from '@/components/ui/separator';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ShareDialog } from '@/components/features/share-dialog';
 import SyncStatusIndicator from './features/editor/SyncStatusIndicator';
 
@@ -15,11 +16,13 @@ interface PageHeaderProps {
     title: string;
     icon?: string;
     pageId?: string;
-    isOwner?: boolean;
+    role?: string | null;
 }
 
-export function PageHeader({ title, icon, pageId, isOwner }: PageHeaderProps) {
+export function PageHeader({ title, icon, pageId, role }: PageHeaderProps) {
     const [shareOpen, setShareOpen] = React.useState(false);
+    const isOwner = role === 'OWNER';
+    const canShare = isOwner && pageId;
 
     return (
         <header className="bg-sidebar sticky top-0 z-40 flex h-12 w-full shrink-0 items-center gap-2 border-b backdrop-blur-sm">
@@ -38,14 +41,33 @@ export function PageHeader({ title, icon, pageId, isOwner }: PageHeaderProps) {
                 </Breadcrumb>
                 <SyncStatusIndicator />
             </div>
-            <div className="ml-auto flex items-center gap-2 px-3">
-                {isOwner && pageId && (
+            <div className="ml-auto flex items-center gap-1 px-3">
+                {pageId && (
                     <>
-                        <Button variant="outline" size="sm" onClick={() => setShareOpen(true)}>
-                            <Share2 className="mr-1.5 size-4" />
-                            Share
-                        </Button>
-                        <ShareDialog open={shareOpen} onOpenChange={setShareOpen} pageId={pageId} pageName={title} />
+                        {canShare ? (
+                            <>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button variant="ghost" size="sm" onClick={() => setShareOpen(true)} className="gap-1.5">
+                                            <Users className="size-4" />
+                                            <span className="hidden sm:inline">Share</span>
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>Share this page</TooltipContent>
+                                </Tooltip>
+                                <ShareDialog open={shareOpen} onOpenChange={setShareOpen} pageId={pageId} />
+                            </>
+                        ) : role ? (
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <div className="text-muted-foreground flex items-center gap-1.5 rounded-md px-2 py-1 text-xs">
+                                        <Users className="size-3.5" />
+                                        <span>{role === 'EDITOR' ? 'Editor' : 'Viewer'}</span>
+                                    </div>
+                                </TooltipTrigger>
+                                <TooltipContent>You have {role === 'EDITOR' ? 'edit' : 'view'} access</TooltipContent>
+                            </Tooltip>
+                        ) : null}
                     </>
                 )}
                 <NavActions />

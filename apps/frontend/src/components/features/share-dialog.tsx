@@ -17,7 +17,6 @@ interface ShareDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     pageId: string;
-    pageName: string;
 }
 
 const ROLE_LABELS: Record<string, string> = {
@@ -26,7 +25,7 @@ const ROLE_LABELS: Record<string, string> = {
     VIEWER: 'Can view',
 };
 
-export function ShareDialog({ open, onOpenChange, pageId, pageName }: ShareDialogProps) {
+export function ShareDialog({ open, onOpenChange, pageId }: ShareDialogProps) {
     const [permissions, setPermissions] = React.useState<PermissionResponse[]>([]);
     const [isLoading, setIsLoading] = React.useState(false);
     const [email, setEmail] = React.useState('');
@@ -115,8 +114,8 @@ export function ShareDialog({ open, onOpenChange, pageId, pageName }: ShareDialo
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                    <DialogTitle>Share &ldquo;{pageName}&rdquo;</DialogTitle>
+                <DialogHeader className="mb-6">
+                    <DialogTitle className="sr-only">Share</DialogTitle>
                 </DialogHeader>
 
                 {/* Add person form */}
