@@ -13,7 +13,7 @@ import { db } from '#lib/database/connection';
 import { sendSuccess } from '#lib/utils/response';
 import { ApiError } from '#lib/middleware/errorHandler';
 import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors';
-import { ActorType, EntityType, RoleType, BlockType } from '@prisma/client';
+import { RoleType, BlockType } from '@prisma/client';
 import { generateKeyBetween } from 'fractional-indexing';
 import { canWrite } from './middlewares';
 import { getRoleWithInheritance } from '#lib/services/permission';
@@ -102,6 +102,7 @@ import { getRoleWithInheritance } from '#lib/services/permission';
 //         if (needsPermissionAssignment) {
 //             await tx.permission.create({
 //                 data: {
+
 //                     actorId: req.user!.id,
 //                     actorType: ActorType.USER,
 //                     entityId: created.id,
@@ -146,7 +147,7 @@ const createBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Prom
         const created = await tx.block.create({
             data: {
                 ...(id && { id }), // Only include id if it exists
-                type,
+                type: type as BlockType,
                 parentId: parentId ?? null,
                 order,
                 content,
@@ -176,10 +177,8 @@ const createBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Prom
         if (!parentId) {
             await tx.permission.create({
                 data: {
-                    actorId: req.user!.id,
-                    actorType: ActorType.USER,
-                    entityId: created.id,
-                    entityType: EntityType.BLOCK,
+                    userId: req.user!.id,
+                    blockId: created.id,
                     role: RoleType.OWNER,
                 },
             });
@@ -207,7 +206,7 @@ const createBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Prom
 
 // ====== Just placeholder(s) for now ======
 
-// READ - gets a single block data by providing its id - not implemented yet
+// READ - gets a single block data by providing its id
 const getBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     const { id } = req.params as GetBlockParamInput;
 
@@ -234,6 +233,7 @@ const getBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Promise
         parentId: found.parentId,
         order: found.order,
         content: found.content,
+        role: req.permissions?.role || null, // Role from middleware
         createdAt: found.createdAt.toISOString(),
         updatedAt: found.updatedAt.toISOString(),
     };
@@ -351,18 +351,10 @@ const deleteBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Prom
 
         const blockIds = allBlockIds.map((row: any) => row.id);
 
-        // Delete in batch - much more efficient
-        await Promise.all([
-            tx.permission.deleteMany({
-                where: {
-                    entityId: { in: blockIds },
-                    entityType: EntityType.BLOCK,
-                },
-            }),
-            tx.block.deleteMany({
-                where: { id: { in: blockIds } },
-            }),
-        ]);
+        // Delete blocks - permissions will cascade delete automatically
+        await tx.block.deleteMany({
+            where: { id: { in: blockIds } },
+        });
     });
 
     sendSuccess(reply, {}, 'Block and all children deleted successfully');
@@ -470,56 +462,4 @@ const getChildrenTree = async (req: AuthenticatedRequest, reply: FastifyReply): 
     return sendSuccess(reply, { children }, 'Block tree retrieved successfully');
 };
 
-// GET ALL PAGES - returns all top-level pages the user has access to (optimized with single query)
-const getAllPages = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
-    const userId = req.user!.id;
-
-    // Single optimized query with JOIN instead of two separate queries
-    const pagesWithRoles: Array<{
-        id: string;
-        type: string;
-        content: any;
-        order: string;
-        createdAt: Date;
-        updatedAt: Date;
-        role: string;
-    }> = await db.$queryRaw`
-        SELECT 
-            b.id,
-            b.type,
-            b.content,
-            b."order",
-            b.created_at as "createdAt",
-            b.updated_at as "updatedAt",
-            p.role
-        FROM blocks b
-        INNER JOIN permissions p ON p.entity_id = b.id
-        WHERE 
-            b.type::text = 'page'
-            AND b.parent_id IS NULL
-            AND p.actor_id = ${userId}::uuid
-            AND p.actor_type::text = 'USER'
-            AND p.entity_type::text = 'BLOCK'
-            AND p.role::text IN ('OWNER', 'EDITOR', 'VIEWER')
-        ORDER BY b."order" ASC
-    `;
-
-    if (pagesWithRoles.length === 0) {
-        return sendSuccess(reply, { pages: [] }, 'No pages found');
-    }
-
-    // Transform the response
-    const transformedPages = pagesWithRoles.map(page => ({
-        id: page.id,
-        type: page.type,
-        content: page.content,
-        order: page.order,
-        role: page.role,
-        createdAt: new Date(page.createdAt).toISOString(),
-        updatedAt: new Date(page.updatedAt).toISOString(),
-    }));
-
-    return sendSuccess(reply, { pages: transformedPages }, 'Pages retrieved successfully');
-};
-
-export { createBlock, getBlock, updateBlock, deleteBlock, getDirectChildrenBlocks, getChildrenTree, getAllPages };
+export { createBlock, getBlock, updateBlock, deleteBlock, getDirectChildrenBlocks, getChildrenTree };

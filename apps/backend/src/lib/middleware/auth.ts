@@ -3,12 +3,14 @@ import { FastifyRequest, FastifyReply, preHandlerHookHandler } from 'fastify';
 import { ApiError } from './errorHandler';
 import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors';
 import { AuthUser } from '@diran/shared/types/auth';
+import { RoleType } from '@prisma/client';
 
 export interface AuthenticatedRequest extends FastifyRequest {
     user?: AuthUser;
 
     // permissions added by permission middleware(s)
     permissions?: {
+        role: RoleType;
         canRead: boolean;
         canWrite: boolean;
     };

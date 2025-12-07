@@ -1,4 +1,7 @@
 import { Metadata } from 'next';
+import Link from 'next/link';
+import { CenteredLayout } from '@/components/ui/centered-layout';
+import { Button } from '@/components/ui/button';
 
 export const metadata: Metadata = {
     title: 'Page Not Found',
@@ -7,13 +10,19 @@ export const metadata: Metadata = {
 
 export default function NotFound() {
     return (
-        <body>
-            <div className="flex min-h-screen items-center justify-center p-8">
+        <body className="bg-background">
+            <CenteredLayout maxWidth="sm">
                 <div className="text-center">
-                    <h1 className="text-3xl font-bold">404</h1>
-                    <p className="text-muted-foreground mt-2 text-sm">Page not found.</p>
+                    <h1 className="text-2xl font-semibold">Page not found</h1>
+                    <p className="text-muted-foreground mt-2">The page you&apos;re looking for doesn&apos;t exist or has been moved.</p>
+
+                    <Link href="/">
+                        <Button variant="outline" className="m-4">
+                            Go home
+                        </Button>
+                    </Link>
                 </div>
-            </div>
+            </CenteredLayout>
         </body>
     );
 }
