@@ -102,6 +102,7 @@ import { getRoleWithInheritance } from '#lib/services/permission';
 //         if (needsPermissionAssignment) {
 //             await tx.permission.create({
 //                 data: {
+
 //                     actorId: req.user!.id,
 //                     actorType: ActorType.USER,
 //                     entityId: created.id,
