@@ -9,7 +9,6 @@ import { BlockNoteEditor } from '@blocknote/core';
 import { useTheme } from 'next-themes';
 import { useState, useEffect } from 'react';
 import type { PartialBlock } from '@blocknote/core';
-import Link from 'next/link';
 
 import * as Button from '@/components/ui/button';
 import * as DropdownMenu from '@/components/ui/dropdown-menu';
@@ -18,6 +17,8 @@ import * as Input from '@/components/ui/input';
 import * as Label from '@/components/ui/label';
 import * as Popover from '@/components/ui/popover';
 import * as Tooltip from '@/components/ui/tooltip';
+import { LogoButton } from '@/components/ui/logo-button';
+import Link from 'next/link';
 
 interface ApiBlock {
     id: string;
@@ -97,26 +98,23 @@ export function PublishedPageContent({ page }: PublishedPageContentProps) {
     }
 
     return (
-        <div className="bg-background min-h-screen">
+        <div className="bg-background flex min-h-screen flex-col">
             {/* Header */}
             <header className="border-b">
-                <div className="container mx-auto flex h-14 max-w-4xl items-center justify-between px-4">
-                    <Link href="/" className="text-lg font-semibold">
-                        Diran
-                    </Link>
-                    <div className="text-muted-foreground text-sm">Published page</div>
+                <div className="container mx-auto flex h-14 max-w-4xl items-center px-4">
+                    <LogoButton className="-ml-4" />
                 </div>
             </header>
 
             {/* Content */}
-            <main className="container mx-auto max-w-4xl px-4 py-8">
-                {/* Title */}
-                <div className="mb-8">
-                    {page.icon && <span className="mb-2 block text-5xl">{page.icon}</span>}
-                    <h1 className="text-4xl font-bold">{page.title}</h1>
+            <main className="container mx-auto max-w-4xl flex-1 px-4 py-8">
+                {/* Page Title */}
+                <div className="mb-6">
+                    {page.icon && <span className="mb-2 block text-4xl">{page.icon}</span>}
+                    <h1 className="text-3xl font-bold">{page.title}</h1>
                 </div>
 
-                {/* Editor (read-only) */}
+                {/* Editor Content */}
                 <BlockNoteView
                     editor={editor}
                     className="bn-container bn-shadcn"
@@ -140,14 +138,21 @@ export function PublishedPageContent({ page }: PublishedPageContentProps) {
             </main>
 
             {/* Footer */}
-            <footer className="border-t py-6">
-                <div className="container mx-auto max-w-4xl px-4 text-center">
+            <footer className="border-t">
+                <div className="container mx-auto flex max-w-4xl items-center justify-between px-4 py-4">
                     <p className="text-muted-foreground text-sm">
-                        Published with{' '}
-                        <Link href="/" className="hover:text-foreground underline">
-                            Diran
-                        </Link>
+                        © 2025 <span className="font-clash">Diran</span>
                     </p>
+                    <div className="flex items-center gap-4">
+                        <a
+                            href="mailto:sharqawy@diran.app"
+                            className="text-muted-foreground hover:text-foreground text-sm transition-colors">
+                            Contact
+                        </a>
+                        <Link href="/privacy" className="text-muted-foreground hover:text-foreground text-sm transition-colors">
+                            Privacy
+                        </Link>
+                    </div>
                 </div>
             </footer>
         </div>
