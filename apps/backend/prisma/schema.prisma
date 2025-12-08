@@ -24,6 +24,8 @@ model User {
   otpHashed            String?      @map("otp_hashed")
   otpExpires           DateTime?    @map("otp_expires") @db.Timestamptz(3)
   permissions          Permission[]
+  ownedTeams           Team[]       @relation("TeamOwner")
+  teamMemberships      TeamMember[]
 
   @@map("users")
 }
@@ -64,18 +66,55 @@ model Publish {
 
 model Permission {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId    String   @map("user_id") @db.Uuid
+  userId    String?  @map("user_id") @db.Uuid
+  teamId    String?  @map("team_id") @db.Uuid
   blockId   String   @map("block_id") @db.Uuid
   role      RoleType
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team      Team?    @relation(fields: [teamId], references: [id], onDelete: Cascade)
   block     Block    @relation(fields: [blockId], references: [id], onDelete: Cascade)
 
   @@unique([userId, blockId])
+  @@unique([teamId, blockId])
   @@index([userId], map: "idx_permissions_user_id")
+  @@index([teamId], map: "idx_permissions_team_id")
   @@index([blockId], map: "idx_permissions_block_id")
   @@map("permissions")
+}
+
+model Team {
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String
+  ownerId     String       @map("owner_id") @db.Uuid
+  owner       User         @relation("TeamOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members     TeamMember[]
+  permissions Permission[]
+  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@map("teams")
+}
+
+model TeamMember {
+  id       String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  teamId   String   @map("team_id") @db.Uuid
+  team     Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  userId   String   @map("user_id") @db.Uuid
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role     TeamRole @default(MEMBER)
+  joinedAt DateTime @default(now()) @map("joined_at") @db.Timestamptz(3)
+
+  @@unique([teamId, userId])
+  @@index([teamId], map: "idx_team_members_team_id")
+  @@index([userId], map: "idx_team_members_user_id")
+  @@map("team_members")
+}
+
+enum TeamRole {
+  ADMIN
+  MEMBER
 }
 
 model waitlist {
