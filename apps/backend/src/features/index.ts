@@ -4,4 +4,5 @@ export { registerAuthRoutes } from './auth/routes';
 export { registerUserRoutes } from './user/routes';
 export { registerBlockRoutes } from './block/routes';
 export { registerPageRoutes } from './page/routes';
+export { registerTeamRoutes } from './team/routes';
 export { registerExtrasRoutes, registerHealthRoutes } from './extras/router';
