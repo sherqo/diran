@@ -1,5 +1,5 @@
 import { db } from '#lib/database/connection';
-import { Prisma, RoleType } from '@prisma/client';
+import { RoleType } from '@prisma/client';
 
 /**
  * Role priority for resolving conflicts (higher = more access).
@@ -124,7 +124,7 @@ export const getRoleWithInheritance = async (userId: string, blockId: string): P
     }
 
     // Get the highest role at the closest depth
-    const minDepth = rows[0].depth;
+    const minDepth = rows[0]?.depth || 0;
     let result: RoleType | undefined;
 
     for (const perm of rows) {
@@ -133,5 +133,4 @@ export const getRoleWithInheritance = async (userId: string, blockId: string): P
     }
 
     return result;
-};
 };
