@@ -37,10 +37,8 @@ export function EditablePageTitle({ pageId, initialTitle, initialIcon, editable 
         // Debounce: save after 500ms
         timeoutRef.current = setTimeout(() => {
             // Update sidebar pages list optimistically
-            setPages((prevPages) =>
-                prevPages.map((page) =>
-                    page.id === pageId ? { ...page, content: { ...page.content, title: newTitle } } : page
-                )
+            setPages(prevPages =>
+                prevPages.map(page => (page.id === pageId ? { ...page, content: { ...page.content, title: newTitle } } : page))
             );
 
             // Update current page if it's the same page
