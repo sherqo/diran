@@ -325,7 +325,7 @@ export function ShareDialog({ open, onOpenChange, pageId }: ShareDialogProps) {
                                     <Label htmlFor="slug">Public URL</Label>
                                     <div className="flex gap-2">
                                         <div className="bg-muted flex flex-1 items-center rounded-md border px-3">
-                                            <span className="text-muted-foreground text-sm">/s/</span>
+                                            <span className="text-muted-foreground text-sm">s/</span>
                                             <Input
                                                 id="slug"
                                                 value={slug}
@@ -371,7 +371,8 @@ export function ShareDialog({ open, onOpenChange, pageId }: ShareDialogProps) {
                                     <Label htmlFor="new-slug">Choose a URL slug</Label>
                                     <div className="flex gap-2">
                                         <div className="bg-muted flex flex-1 items-center rounded-md border px-3">
-                                            <span className="text-muted-foreground text-sm">/s/</span>
+                                            <span className="text-muted-foreground text-sm">s/</span>
+
                                             <Input
                                                 id="new-slug"
                                                 placeholder="my-page"
