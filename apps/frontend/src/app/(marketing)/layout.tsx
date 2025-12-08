@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { ThemeProvider } from 'next-themes';
 
 import './marketing.css';
 import Footer from '@/components/features/footer/Footer';
@@ -76,11 +77,11 @@ export default function RootLayout({
                 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
                 <meta name="apple-mobile-web-app-title" content="Diran AI" />
             </head>
-            <body className="light flex min-h-screen flex-col">
-                <div className="light">
+            <body className="flex min-h-screen flex-col">
+                <ThemeProvider attribute="class" defaultTheme="light" forcedTheme="light" enableSystem={false}>
                     {children}
                     <Footer />
-                </div>
+                </ThemeProvider>
             </body>
         </>
     );
