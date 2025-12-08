@@ -1,9 +1,9 @@
 import { FastifyInstance } from 'fastify';
 import { authenticate as auth } from '#lib/middleware/auth.js';
 import { validateRequest as vr } from '#lib/middleware/validation.js';
-import { listTeams, getTeam, createTeam, updateTeam, deleteTeam } from './controller.js';
+import { listTeams, getTeam, createTeam, updateTeam, deleteTeam, getTeamPages, createTeamPage } from './controller.js';
 import { registerMemberRoutes } from './member/routes.js';
-import { teamIdParamSchema, createTeamBodySchema, updateTeamBodySchema } from '@diran/shared/validation/team.js';
+import { teamIdParamSchema, createTeamBodySchema, updateTeamBodySchema, createTeamPageBodySchema } from '@diran/shared/validation/team.js';
 
 /**
  * Team routes
@@ -13,6 +13,8 @@ import { teamIdParamSchema, createTeamBodySchema, updateTeamBodySchema } from '@
  * GET    /team/:teamId             - Get team details with members
  * PUT    /team/:teamId             - Update team info (owner only)
  * DELETE /team/:teamId             - Delete team (owner only)
+ * GET    /team/:teamId/pages       - Get pages owned by team
+ * POST   /team/:teamId/pages       - Create a new page owned by team (owner/admin)
  *
  * Member routes (nested under /:teamId):
  * POST   /team/:teamId/member      - Add member (owner/admin)
@@ -45,6 +47,18 @@ export async function registerTeamRoutes(fastify: FastifyInstance): Promise<void
     fastify.delete('/:teamId', {
         preHandler: [vr({ paramsSchema: teamIdParamSchema }), auth],
         handler: deleteTeam,
+    });
+
+    // Get pages owned by team
+    fastify.get('/:teamId/pages', {
+        preHandler: [vr({ paramsSchema: teamIdParamSchema }), auth],
+        handler: getTeamPages,
+    });
+
+    // Create a new page owned by team
+    fastify.post('/:teamId/pages', {
+        preHandler: [vr({ paramsSchema: teamIdParamSchema, bodySchema: createTeamPageBodySchema }), auth],
+        handler: createTeamPage,
     });
 
     // Register member routes under /:teamId

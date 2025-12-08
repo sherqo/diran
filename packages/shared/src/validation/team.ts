@@ -39,6 +39,11 @@ export const updateMemberBodySchema = z.object({
   role: TeamRoleEnumSchema,
 });
 
+export const createTeamPageBodySchema = z.object({
+  title: z.string().max(500).trim().optional(),
+  icon: z.string().max(50).optional(),
+});
+
 // ================ Exported Types ================
 
 export type TeamRole = z.infer<typeof TeamRoleEnumSchema>;
@@ -48,3 +53,4 @@ export type CreateTeamBodyInput = z.infer<typeof createTeamBodySchema>;
 export type UpdateTeamBodyInput = z.infer<typeof updateTeamBodySchema>;
 export type AddMemberBodyInput = z.infer<typeof addMemberBodySchema>;
 export type UpdateMemberBodyInput = z.infer<typeof updateMemberBodySchema>;
+export type CreateTeamPageBodyInput = z.infer<typeof createTeamPageBodySchema>;

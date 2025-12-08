@@ -7,6 +7,7 @@ import { NavMain } from '@/components/nav-main';
 // import { NavSecondary } from '@/components/nav-secondary';
 import { NavWorkspaces } from '@/components/nav-workspaces';
 import { NavPages } from '@/components/nav-pages';
+import { NavTeams } from '@/components/nav-teams';
 
 import { Sidebar, SidebarContent, SidebarHeader } from '@/components/ui/sidebar';
 import { NavUser } from './nav-user';
@@ -158,6 +159,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </SidebarHeader>
                 <SidebarContent>
                     <NavPages />
+                    <NavTeams />
                     {/* this workspace thing can be for tags later... */}
                     <NavWorkspaces workspaces={data.workspaces} />
                     {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
