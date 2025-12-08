@@ -4,11 +4,7 @@ import { AuthenticatedRequest } from '#lib/middleware/auth.js';
 import { sendSuccess } from '#lib/utils/response.js';
 import { ApiError } from '#lib/middleware/errorHandler.js';
 import { HttpStatus, ErrorCode } from '@diran/shared/constants/errors.js';
-import {
-    TeamIdParamInput,
-    CreateTeamBodyInput,
-    UpdateTeamBodyInput,
-} from '@diran/shared/validation/team.js';
+import { TeamIdParamInput, CreateTeamBodyInput, UpdateTeamBodyInput } from '@diran/shared/validation/team.js';
 import { TeamResponse, TeamDetailResponse } from '@diran/shared/types/team.js';
 
 /**
@@ -54,10 +50,7 @@ export const listTeams = async (req: AuthenticatedRequest, reply: FastifyReply):
 
     const teams = await db.team.findMany({
         where: {
-            OR: [
-                { ownerId: userId },
-                { members: { some: { userId } } },
-            ],
+            OR: [{ ownerId: userId }, { members: { some: { userId } } }],
         },
         include: {
             owner: {

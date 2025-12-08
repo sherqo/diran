@@ -5,12 +5,7 @@ import { sendSuccess } from '#lib/utils/response.js';
 import { ApiError } from '#lib/middleware/errorHandler.js';
 import { HttpStatus, ErrorCode } from '@diran/shared/constants/errors.js';
 import { TeamRole } from '@prisma/client';
-import {
-    TeamIdParamInput,
-    TeamMemberIdParamInput,
-    AddMemberBodyInput,
-    UpdateMemberBodyInput,
-} from '@diran/shared/validation/team.js';
+import { TeamIdParamInput, TeamMemberIdParamInput, AddMemberBodyInput, UpdateMemberBodyInput } from '@diran/shared/validation/team.js';
 import { TeamMemberResponse } from '@diran/shared/types/team.js';
 
 /**
@@ -222,7 +217,11 @@ export const leaveTeam = async (req: AuthenticatedRequest, reply: FastifyReply):
     }
 
     if (team.ownerId === userId) {
-        throw new ApiError('Owner cannot leave the team. Delete it or transfer ownership.', HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR);
+        throw new ApiError(
+            'Owner cannot leave the team. Delete it or transfer ownership.',
+            HttpStatus.BAD_REQUEST,
+            ErrorCode.VALIDATION_ERROR
+        );
     }
 
     const membership = await db.teamMember.findUnique({
