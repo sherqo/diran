@@ -1,12 +1,21 @@
 'use client';
 
 import * as React from 'react';
-import { FileText, Loader2, Plus, Users } from 'lucide-react';
+import { FileText, Plus, Users } from 'lucide-react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragOverlay } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
 import { usePage } from '@/contexts/PageContext';
-import { useSidebar, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu } from '@/components/ui/sidebar';
+import {
+    useSidebar,
+    SidebarGroup,
+    SidebarGroupContent,
+    SidebarGroupLabel,
+    SidebarMenu,
+    SidebarMenuItem,
+    SidebarMenuButton,
+} from '@/components/ui/sidebar';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -68,9 +77,16 @@ export function NavPages() {
             <SidebarGroup>
                 <SidebarGroupLabel>Pages</SidebarGroupLabel>
                 <SidebarGroupContent>
-                    <div className="flex items-center justify-center py-4">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                    </div>
+                    <SidebarMenu>
+                        {[1, 2, 3, 4].map(i => (
+                            <SidebarMenuItem key={i}>
+                                <SidebarMenuButton>
+                                    <Skeleton className="h-4 w-4 rounded" />
+                                    <Skeleton className="h-4 w-28" />
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                        ))}
+                    </SidebarMenu>
                 </SidebarGroupContent>
             </SidebarGroup>
         );

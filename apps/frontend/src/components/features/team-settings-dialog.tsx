@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Loader2, LogOut, MoreHorizontal, Shield, Trash2, User, UserPlus } from 'lucide-react';
+import { LogOut, MoreHorizontal, Shield, Trash2, User, UserPlus } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,6 +27,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { showToast } from '@/lib/toast';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -215,8 +216,37 @@ export function TeamSettingsDialog({ open, onOpenChange, teamId, onTeamUpdated, 
                     </DialogHeader>
 
                     {loading ? (
-                        <div className="flex items-center justify-center py-12">
-                            <Loader2 className="text-muted-foreground h-5 w-5 animate-spin" />
+                        <div className="space-y-6 py-2">
+                            {/* Team name skeleton */}
+                            <div className="space-y-2">
+                                <Skeleton className="h-3 w-16" />
+                                <div className="flex gap-2">
+                                    <Skeleton className="h-9 flex-1" />
+                                    <Skeleton className="h-9 w-16" />
+                                </div>
+                            </div>
+                            {/* Members skeleton */}
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <Skeleton className="h-3 w-20" />
+                                    <Skeleton className="h-8 w-16" />
+                                </div>
+                                <div className="space-y-1">
+                                    {[1, 2, 3].map(i => (
+                                        <div key={i} className="flex items-center gap-2.5 px-2 py-2">
+                                            <Skeleton className="h-8 w-8 rounded-full" />
+                                            <div className="flex-1 space-y-1.5">
+                                                <Skeleton className="h-4 w-32" />
+                                                <Skeleton className="h-3 w-40" />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            {/* Danger zone skeleton */}
+                            <div className="border-t pt-4">
+                                <Skeleton className="h-8 w-28" />
+                            </div>
                         </div>
                     ) : team ? (
                         <div className="space-y-6">
@@ -240,7 +270,7 @@ export function TeamSettingsDialog({ open, onOpenChange, teamId, onTeamUpdated, 
                                             disabled={saving || !teamName.trim() || teamName === team.name}
                                             size="sm"
                                             className="h-9">
-                                            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
+                                            {saving ? 'Saving...' : 'Save'}
                                         </Button>
                                     </div>
                                 ) : (
@@ -429,8 +459,7 @@ export function TeamSettingsDialog({ open, onOpenChange, teamId, onTeamUpdated, 
                                 Cancel
                             </Button>
                             <Button type="submit" disabled={addingMember || !newMemberEmail.trim()} size="sm">
-                                {addingMember ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                                Add
+                                {addingMember ? 'Adding...' : 'Add'}
                             </Button>
                         </DialogFooter>
                     </form>

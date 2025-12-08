@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { ChevronRight, FileText, Loader2, MoreHorizontal, Plus, Settings, Users } from 'lucide-react';
+import { ChevronRight, FileText, MoreHorizontal, Plus, Settings, Users } from 'lucide-react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragOverlay } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
@@ -41,6 +41,7 @@ import { EditPageDialog } from '@/components/features/edit-page-dialog';
 import { listTeamsApi, createTeamApi, getTeamPagesApi, getTeamApi, TeamPage } from '@/lib/api/team';
 import type { TeamResponse } from '@/shared/types/team';
 import { useAuth } from '@/contexts/AuthContext';
+import { Skeleton } from '@/components/ui/skeleton';
 import { SortableTeamPageItem } from './nav-teams/team-page-item';
 import { useTeamPageActions } from './nav-teams/use-team-page-actions';
 import { usePathname } from 'next/navigation';
@@ -162,9 +163,16 @@ export function NavTeams() {
             <SidebarGroup>
                 <SidebarGroupLabel>Teams</SidebarGroupLabel>
                 <SidebarGroupContent>
-                    <div className="flex items-center justify-center py-4">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                    </div>
+                    <SidebarMenu>
+                        {[1, 2].map(i => (
+                            <SidebarMenuItem key={i}>
+                                <SidebarMenuButton>
+                                    <Skeleton className="h-4 w-4 rounded" />
+                                    <Skeleton className="h-4 w-24" />
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                        ))}
+                    </SidebarMenu>
                 </SidebarGroupContent>
             </SidebarGroup>
         );
@@ -245,9 +253,14 @@ export function NavTeams() {
                                     <CollapsibleContent>
                                         {loadingTeamId === team.id ? (
                                             <SidebarMenuSub>
-                                                <div className="flex items-center justify-center py-2">
-                                                    <Loader2 className="h-3 w-3 animate-spin" />
-                                                </div>
+                                                {[1, 2, 3].map(i => (
+                                                    <SidebarMenuSubItem key={i}>
+                                                        <div className="flex items-center gap-2 px-2 py-1.5">
+                                                            <Skeleton className="h-4 w-4" />
+                                                            <Skeleton className="h-3.5 w-20" />
+                                                        </div>
+                                                    </SidebarMenuSubItem>
+                                                ))}
                                             </SidebarMenuSub>
                                         ) : teamPages[team.id] ? (
                                             <TeamPagesList
@@ -294,8 +307,7 @@ export function NavTeams() {
                             Cancel
                         </Button>
                         <Button onClick={handleCreateTeam} disabled={submitting || !newTeamName.trim()}>
-                            {submitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                            Create
+                            {submitting ? 'Creating...' : 'Create'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

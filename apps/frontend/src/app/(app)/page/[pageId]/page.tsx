@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { usePage } from '@/contexts/PageContext';
 import { PageHeader } from '@/components/page-header';
-import { Loader2 } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Editor } from '@/components/features/editor/DynamicEditor';
 import { EditablePageTitle } from '@/components/features/editable-page-title';
 import type { PartialBlock, BlockNoteEditor } from '@blocknote/core';
@@ -107,9 +107,24 @@ export default function PageView() {
     if (pageLoading) {
         return (
             <>
-                <PageHeader title="Loading..." />
-                <div className="flex flex-1 items-center justify-center">
-                    <Loader2 className="h-8 w-8 animate-spin" />
+                <PageHeader title="" />
+                <div className="flex-1 overflow-y-auto">
+                    <div className="container mx-auto max-w-4xl px-4 pt-10 pb-40">
+                        {/* Title skeleton */}
+                        <div className="mb-8 flex items-center gap-3">
+                            <Skeleton className="h-10 w-10 rounded-lg" />
+                            <Skeleton className="h-9 w-64" />
+                        </div>
+                        {/* Content skeleton */}
+                        <div className="space-y-4">
+                            <Skeleton className="h-5 w-full" />
+                            <Skeleton className="h-5 w-4/5" />
+                            <Skeleton className="h-5 w-3/4" />
+                            <div className="py-2" />
+                            <Skeleton className="h-5 w-full" />
+                            <Skeleton className="h-5 w-2/3" />
+                        </div>
+                    </div>
                 </div>
             </>
         );
@@ -132,8 +147,13 @@ export default function PageView() {
                     />
 
                     {initialContent === null ? (
-                        <div className="flex items-center justify-center p-10">
-                            <Loader2 className="h-8 w-8 animate-spin" />
+                        <div className="space-y-4 pt-4">
+                            <Skeleton className="h-5 w-full" />
+                            <Skeleton className="h-5 w-4/5" />
+                            <Skeleton className="h-5 w-3/4" />
+                            <div className="py-2" />
+                            <Skeleton className="h-5 w-full" />
+                            <Skeleton className="h-5 w-2/3" />
                         </div>
                     ) : (
                         <Editor

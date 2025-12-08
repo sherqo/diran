@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Loader2, Trash2, UserPlus, Globe, Link as LinkIcon, Check, Copy } from 'lucide-react';
+import { Trash2, UserPlus, Globe, Link as LinkIcon, Check, Copy } from 'lucide-react';
 
 import { Dialog, DialogContent, DialogTitle, DialogHeader } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -17,6 +17,7 @@ import { showToast } from '@/lib/toast';
 import type { PermissionResponse } from '@/shared/types/permission';
 import type { PublishResponse } from '@/shared/types/publish';
 import type { ShareableRole } from '@/shared/validation/permission';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface ShareDialogProps {
     open: boolean;
@@ -245,14 +246,23 @@ export function ShareDialog({ open, onOpenChange, pageId }: ShareDialogProps) {
                                 </DropdownMenuContent>
                             </DropdownMenu>
                             <Button type="submit" disabled={isAdding || !email.trim()}>
-                                {isAdding ? <Loader2 className="size-4 animate-spin" /> : <UserPlus className="size-4" />}
+                                <UserPlus className="size-4" />
                             </Button>
                         </form>
 
                         <div className="max-h-[300px] space-y-2 overflow-y-auto">
                             {isLoadingPermissions ? (
-                                <div className="flex justify-center py-8">
-                                    <Loader2 className="text-muted-foreground size-5 animate-spin" />
+                                <div className="space-y-2">
+                                    {[1, 2].map(i => (
+                                        <div key={i} className="flex items-center gap-3 rounded-lg border p-3">
+                                            <Skeleton className="size-8 rounded-full" />
+                                            <div className="flex-1 space-y-1.5">
+                                                <Skeleton className="h-4 w-32" />
+                                                <Skeleton className="h-3 w-40" />
+                                            </div>
+                                            <Skeleton className="h-8 w-20" />
+                                        </div>
+                                    ))}
                                 </div>
                             ) : permissions.length === 0 ? (
                                 <p className="text-muted-foreground py-8 text-center text-sm">No one has access yet</p>
@@ -279,11 +289,7 @@ export function ShareDialog({ open, onOpenChange, pageId }: ShareDialogProps) {
                                                     <DropdownMenu>
                                                         <DropdownMenuTrigger asChild>
                                                             <Button variant="ghost" size="sm" disabled={updatingId === permission.id}>
-                                                                {updatingId === permission.id ? (
-                                                                    <Loader2 className="size-3 animate-spin" />
-                                                                ) : (
-                                                                    ROLE_LABELS[permission.role]
-                                                                )}
+                                                                {ROLE_LABELS[permission.role]}
                                                             </Button>
                                                         </DropdownMenuTrigger>
                                                         <DropdownMenuContent align="end">
@@ -314,8 +320,24 @@ export function ShareDialog({ open, onOpenChange, pageId }: ShareDialogProps) {
                     {/* Publish Tab */}
                     <TabsContent value="publish" className="mt-6 space-y-4">
                         {isLoadingPublish ? (
-                            <div className="flex justify-center py-8">
-                                <Loader2 className="text-muted-foreground size-5 animate-spin" />
+                            <div className="space-y-5">
+                                <div className="rounded-lg border p-4">
+                                    <div className="flex items-start gap-3">
+                                        <Skeleton className="size-5 rounded" />
+                                        <div className="flex-1 space-y-1.5">
+                                            <Skeleton className="h-4 w-24" />
+                                            <Skeleton className="h-3 w-40" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="space-y-3">
+                                    <Skeleton className="h-4 w-20" />
+                                    <Skeleton className="h-10 w-full" />
+                                </div>
+                                <div className="flex gap-2">
+                                    <Skeleton className="h-10 flex-1" />
+                                    <Skeleton className="h-10 flex-1" />
+                                </div>
                             </div>
                         ) : publish && publish.isActive ? (
                             <div className="space-y-5">
@@ -347,7 +369,7 @@ export function ShareDialog({ open, onOpenChange, pageId }: ShareDialogProps) {
                                                 onClick={handleUpdateSlug}
                                                 disabled={isUpdating || !slug.trim()}
                                                 className="w-full sm:w-auto">
-                                                {isUpdating ? <Loader2 className="size-4 animate-spin" /> : 'Update'}
+                                                {isUpdating ? 'Updating...' : 'Update'}
                                             </Button>
                                         )}
                                     </div>
@@ -367,8 +389,7 @@ export function ShareDialog({ open, onOpenChange, pageId }: ShareDialogProps) {
                                 </div>
 
                                 <Button variant="destructive" size="sm" className="w-full" onClick={handleUnpublish} disabled={isUpdating}>
-                                    {isUpdating ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
-                                    Unpublish
+                                    {isUpdating ? 'Unpublishing...' : 'Unpublish'}
                                 </Button>
                             </div>
                         ) : (
@@ -402,8 +423,8 @@ export function ShareDialog({ open, onOpenChange, pageId }: ShareDialogProps) {
                                 </div>
 
                                 <Button type="submit" className="w-full" disabled={isPublishing || !slug.trim()}>
-                                    {isPublishing ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Globe className="mr-2 size-4" />}
-                                    Publish
+                                    <Globe className="mr-2 size-4" />
+                                    {isPublishing ? 'Publishing...' : 'Publish'}
                                 </Button>
                             </form>
                         )}

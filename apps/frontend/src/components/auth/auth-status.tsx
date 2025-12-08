@@ -2,6 +2,7 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
 
 export function AuthStatus() {
@@ -9,9 +10,10 @@ export function AuthStatus() {
 
     if (loading) {
         return (
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-                <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-gray-400"></div>
-                Loading...
+            <div className="flex items-center gap-4">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-8 w-16 rounded-md" />
+                <Skeleton className="h-8 w-16 rounded-md" />
             </div>
         );
     }

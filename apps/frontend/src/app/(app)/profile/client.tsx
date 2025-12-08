@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ProfileClientPage() {
     const { user, loading, logout, checkAuth } = useAuth();
@@ -15,8 +16,27 @@ export default function ProfileClientPage() {
 
     if (loading) {
         return (
-            <div className="bg-background flex min-h-screen items-center justify-center">
-                <div className="text-primary h-8 w-8 animate-spin rounded-full border-b-2 border-current" />
+            <div className="bg-background min-h-screen py-16">
+                <div className="mx-auto max-w-2xl px-6">
+                    <div className="border-border bg-card overflow-hidden rounded-lg border p-8 shadow-sm">
+                        <div className="mb-8 text-center">
+                            <Skeleton className="mx-auto mb-4 h-20 w-20 rounded-full" />
+                            <Skeleton className="mx-auto mb-2 h-8 w-48" />
+                            <Skeleton className="mx-auto h-4 w-32" />
+                        </div>
+                        <div className="space-y-6">
+                            {[1, 2, 3, 4].map(i => (
+                                <div key={i}>
+                                    <Skeleton className="mb-2 h-4 w-16" />
+                                    <Skeleton className="h-12 w-full rounded-md" />
+                                </div>
+                            ))}
+                            <div className="border-t pt-6">
+                                <Skeleton className="h-10 w-full" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         );
     }
