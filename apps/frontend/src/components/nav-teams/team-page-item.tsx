@@ -76,7 +76,7 @@ export function SortableTeamPageItem({
 
     return (
         <SidebarMenuItem ref={setNodeRef} className={className} style={style} {...attributes} {...listeners}>
-            <SidebarMenuButton asChild isActive={isActive} size="sm">
+            <SidebarMenuButton asChild isActive={isActive} size="sm" className="text-sm">
                 <Link scroll={false} href={`/page/${page.id}`} onClick={handleClick}>
                     {pageIcon ? <span className="text-base">{pageIcon}</span> : <FileText className="h-4 w-4" />}
                     <span>{pageName}</span>
