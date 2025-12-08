@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogFooter } from '@/components/ui/dialog';
@@ -136,7 +137,8 @@ export function CreatePageDialog({ open, onOpenChange, teamId, teamName, onPageC
                             Cancel
                         </Button>
                         <Button type="submit" disabled={isCreating || !pageName.trim()} className="flex-1 sm:flex-initial">
-                            {isCreating ? 'Creating...' : 'Create'}
+                            {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Create
                         </Button>
                     </DialogFooter>
                 </form>

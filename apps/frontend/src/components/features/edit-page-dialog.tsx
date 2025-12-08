@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { Loader2 } from 'lucide-react';
 
 import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -121,7 +122,8 @@ export function EditPageDialog({ open, onOpenChange, page }: EditPageDialogProps
                             Cancel
                         </Button>
                         <Button type="submit" disabled={isSaving || !pageName.trim()} className="flex-1 sm:flex-initial">
-                            {isSaving ? 'Saving...' : 'Save Changes'}
+                            {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Save Changes
                         </Button>
                     </DialogFooter>
                 </form>

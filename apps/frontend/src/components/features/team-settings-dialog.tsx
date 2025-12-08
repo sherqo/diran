@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { LogOut, MoreHorizontal, Shield, Trash2, User, UserPlus } from 'lucide-react';
+import { Loader2, LogOut, MoreHorizontal, Shield, Trash2, User, UserPlus } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -270,7 +270,8 @@ export function TeamSettingsDialog({ open, onOpenChange, teamId, onTeamUpdated, 
                                             disabled={saving || !teamName.trim() || teamName === team.name}
                                             size="sm"
                                             className="h-9">
-                                            {saving ? 'Saving...' : 'Save'}
+                                            {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                            Save
                                         </Button>
                                     </div>
                                 ) : (
@@ -459,7 +460,8 @@ export function TeamSettingsDialog({ open, onOpenChange, teamId, onTeamUpdated, 
                                 Cancel
                             </Button>
                             <Button type="submit" disabled={addingMember || !newMemberEmail.trim()} size="sm">
-                                {addingMember ? 'Adding...' : 'Add'}
+                                {addingMember && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Add
                             </Button>
                         </DialogFooter>
                     </form>

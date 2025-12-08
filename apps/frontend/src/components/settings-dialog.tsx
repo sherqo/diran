@@ -1,6 +1,6 @@
 'use client';
 
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import * as React from 'react';
 import { useTheme } from 'next-themes';
 
@@ -174,7 +174,8 @@ export function SettingsDialog({ open, onOpenChange }: { open: boolean; onOpenCh
                             {profileValidation.hasErrors && <p className="text-destructive text-sm">{profileValidation.errorMessage}</p>}
 
                             <Button type="submit" disabled={isUpdatingProfile} size="sm">
-                                {isUpdatingProfile ? 'Saving...' : 'Save Changes'}
+                                {isUpdatingProfile && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Save Changes
                             </Button>
                         </form>
                     </div>
@@ -261,7 +262,8 @@ export function SettingsDialog({ open, onOpenChange }: { open: boolean; onOpenCh
                                 type="submit"
                                 size="sm"
                                 disabled={isChangingPassword || passwordForm.newPassword !== passwordForm.confirmPassword}>
-                                {isChangingPassword ? 'Saving...' : 'Change Password'}
+                                {isChangingPassword && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Change Password
                             </Button>
                         </form>
                     </div>

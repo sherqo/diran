@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Trash2, UserPlus, Globe, Link as LinkIcon, Check, Copy } from 'lucide-react';
+import { Loader2, Trash2, UserPlus, Globe, Link as LinkIcon, Check, Copy } from 'lucide-react';
 
 import { Dialog, DialogContent, DialogTitle, DialogHeader } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -369,7 +369,8 @@ export function ShareDialog({ open, onOpenChange, pageId }: ShareDialogProps) {
                                                 onClick={handleUpdateSlug}
                                                 disabled={isUpdating || !slug.trim()}
                                                 className="w-full sm:w-auto">
-                                                {isUpdating ? 'Updating...' : 'Update'}
+                                                {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                                Update
                                             </Button>
                                         )}
                                     </div>
@@ -389,7 +390,8 @@ export function ShareDialog({ open, onOpenChange, pageId }: ShareDialogProps) {
                                 </div>
 
                                 <Button variant="destructive" size="sm" className="w-full" onClick={handleUnpublish} disabled={isUpdating}>
-                                    {isUpdating ? 'Unpublishing...' : 'Unpublish'}
+                                    {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    Unpublish
                                 </Button>
                             </div>
                         ) : (
@@ -423,8 +425,8 @@ export function ShareDialog({ open, onOpenChange, pageId }: ShareDialogProps) {
                                 </div>
 
                                 <Button type="submit" className="w-full" disabled={isPublishing || !slug.trim()}>
-                                    <Globe className="mr-2 size-4" />
-                                    {isPublishing ? 'Publishing...' : 'Publish'}
+                                    {isPublishing ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Globe className="mr-2 size-4" />}
+                                    Publish
                                 </Button>
                             </form>
                         )}

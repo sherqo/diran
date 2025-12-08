@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { ChevronRight, FileText, MoreHorizontal, Plus, Settings, Users } from 'lucide-react';
+import { ChevronRight, FileText, Loader2, MoreHorizontal, Plus, Settings, Users } from 'lucide-react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragOverlay } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
@@ -307,7 +307,8 @@ export function NavTeams() {
                             Cancel
                         </Button>
                         <Button onClick={handleCreateTeam} disabled={submitting || !newTeamName.trim()}>
-                            {submitting ? 'Creating...' : 'Create'}
+                            {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Create
                         </Button>
                     </DialogFooter>
                 </DialogContent>
