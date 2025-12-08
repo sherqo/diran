@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { ChevronRight, FileText, Loader2, MoreHorizontal, Plus, Settings, Trash2, Users, LogOut } from 'lucide-react';
+import { ChevronRight, FileText, Loader2, MoreHorizontal, Plus, Settings, Users } from 'lucide-react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragOverlay } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
@@ -19,13 +19,7 @@ import {
     useSidebar,
 } from '@/components/ui/sidebar';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -162,10 +156,6 @@ export function NavTeams() {
         setSettingsTeam(team);
         setTeamSettingsOpen(true);
     };
-
-    // Leave and delete handled in team settings modal
-
-    const isTeamOwner = (team: TeamResponse) => team.owner.id === user?.id;
 
     if (loading) {
         return (
