@@ -2,7 +2,8 @@
 
 import * as React from 'react';
 import { ChevronRight, FileText, Loader2, MoreHorizontal, Plus, Settings, Trash2, Users, LogOut } from 'lucide-react';
-import Link from 'next/link';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragOverlay } from '@dnd-kit/core';
+import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
@@ -14,7 +15,6 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
     SidebarMenuSub,
-    SidebarMenuSubButton,
     SidebarMenuSubItem,
     useSidebar,
 } from '@/components/ui/sidebar';
@@ -26,16 +26,30 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { showToast } from '@/lib/toast';
 import { CreatePageDialog } from '@/components/features/create-page-dialog';
 import { TeamSettingsDialog } from '@/components/features/team-settings-dialog';
+import { EditPageDialog } from '@/components/features/edit-page-dialog';
 
-import { listTeamsApi, createTeamApi, getTeamPagesApi, TeamPage } from '@/lib/api/team';
+import { listTeamsApi, createTeamApi, getTeamPagesApi, getTeamApi, TeamPage } from '@/lib/api/team';
 import type { TeamResponse } from '@/shared/types/team';
 import { useAuth } from '@/contexts/AuthContext';
+import { SortableTeamPageItem } from './nav-teams/team-page-item';
+import { useTeamPageActions } from './nav-teams/use-team-page-actions';
+import { usePathname } from 'next/navigation';
 
 export function NavTeams() {
     const { user } = useAuth();
@@ -43,6 +57,7 @@ export function NavTeams() {
     const [teams, setTeams] = React.useState<TeamResponse[]>([]);
     const [loading, setLoading] = React.useState(true);
     const [teamPages, setTeamPages] = React.useState<Record<string, TeamPage[]>>({});
+    const [teamDetails, setTeamDetails] = React.useState<Record<string, { isOwner: boolean; isAdmin: boolean }>>({});
     const [loadingTeamId, setLoadingTeamId] = React.useState<string | null>(null);
     const [expandedTeams, setExpandedTeams] = React.useState<Set<string>>(new Set());
 
@@ -58,6 +73,18 @@ export function NavTeams() {
     // Create page dialog (reusable)
     const [createPageDialogOpen, setCreatePageDialogOpen] = React.useState(false);
     const [selectedTeam, setSelectedTeam] = React.useState<TeamResponse | null>(null);
+
+    // DnD sensors
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8,
+            },
+        }),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
 
     const fetchTeams = React.useCallback(async () => {
         setLoading(true);
@@ -78,12 +105,25 @@ export function NavTeams() {
         if (teamPages[teamId]) return; // Already loaded
 
         setLoadingTeamId(teamId);
-        const result = await getTeamPagesApi(teamId);
-        if (result.success) {
-            setTeamPages(prev => ({ ...prev, [teamId]: result.data.pages }));
+        const [pagesResult, teamResult] = await Promise.all([getTeamPagesApi(teamId), getTeamApi(teamId)]);
+
+        if (pagesResult.success) {
+            setTeamPages(prev => ({ ...prev, [teamId]: pagesResult.data.pages }));
         } else {
-            showToast(result.error.message, 'error');
+            showToast(pagesResult.error.message, 'error');
         }
+
+        if (teamResult.success) {
+            const team = teamResult.data.team;
+            const isOwner = team.owner.id === user?.id;
+            const currentMember = team.members.find(m => m.user.id === user?.id);
+            const isAdmin = currentMember?.role === 'ADMIN';
+            setTeamDetails(prev => ({
+                ...prev,
+                [teamId]: { isOwner, isAdmin },
+            }));
+        }
+
         setLoadingTeamId(null);
     };
 
@@ -229,38 +269,23 @@ export function NavTeams() {
                                     </DropdownMenu>
 
                                     <CollapsibleContent>
-                                        <SidebarMenuSub>
-                                            {loadingTeamId === team.id ? (
+                                        {loadingTeamId === team.id ? (
+                                            <SidebarMenuSub>
                                                 <div className="flex items-center justify-center py-2">
                                                     <Loader2 className="h-3 w-3 animate-spin" />
                                                 </div>
-                                            ) : teamPages[team.id] ? (
-                                                <>
-                                                    {teamPages[team.id].map(page => (
-                                                        <SidebarMenuSubItem key={page.id}>
-                                                            <SidebarMenuSubButton asChild>
-                                                                <Link scroll={false} href={`/page/${page.id}`}>
-                                                                    {page.content.icon ? (
-                                                                        <span className="text-base">{page.content.icon}</span>
-                                                                    ) : (
-                                                                        <FileText className="h-4 w-4" />
-                                                                    )}
-                                                                    <span>{page.content.title || 'Untitled'}</span>
-                                                                </Link>
-                                                            </SidebarMenuSubButton>
-                                                        </SidebarMenuSubItem>
-                                                    ))}
-                                                    <SidebarMenuSubItem>
-                                                        <button
-                                                            className="text-muted-foreground hover:text-foreground flex w-full items-center gap-2 px-2 py-1.5 text-sm"
-                                                            onClick={() => handleOpenCreatePageDialog(team)}>
-                                                            <Plus className="h-4 w-4" />
-                                                            <span>Add page</span>
-                                                        </button>
-                                                    </SidebarMenuSubItem>
-                                                </>
-                                            ) : null}
-                                        </SidebarMenuSub>
+                                            </SidebarMenuSub>
+                                        ) : teamPages[team.id] ? (
+                                            <TeamPagesList
+                                                teamId={team.id}
+                                                pages={teamPages[team.id]}
+                                                setPages={pages => setTeamPages(prev => ({ ...prev, [team.id]: pages }))}
+                                                canEdit={teamDetails[team.id]?.isOwner || teamDetails[team.id]?.isAdmin || false}
+                                                isMobile={isMobile}
+                                                sensors={sensors}
+                                                onCreatePage={() => handleOpenCreatePageDialog(team)}
+                                            />
+                                        ) : null}
                                     </CollapsibleContent>
                                 </SidebarMenuItem>
                             </Collapsible>
@@ -322,6 +347,125 @@ export function NavTeams() {
                 teamName={selectedTeam?.name}
                 onPageCreated={handlePageCreated}
             />
+        </>
+    );
+}
+
+interface TeamPagesListProps {
+    teamId: string;
+    pages: TeamPage[];
+    setPages: (pages: TeamPage[]) => void;
+    canEdit: boolean;
+    isMobile: boolean;
+    sensors: ReturnType<typeof useSensors>;
+    onCreatePage: () => void;
+}
+
+function TeamPagesList({ teamId, pages, setPages, canEdit, isMobile, sensors, onCreatePage }: TeamPagesListProps) {
+    const pathname = usePathname();
+    const currentPageId = pathname?.replace('/page/', '');
+
+    const {
+        pageIds,
+        activePage,
+        deletingPageId,
+        pageToDelete,
+        pageToEdit,
+        handleDragStart,
+        handleDragEnd,
+        handleDragCancel,
+        handleCopyLink,
+        handleOpenInNewTab,
+        handleEditClick,
+        handleDeleteClick,
+        handleDeleteConfirm,
+        handleCloseDeleteDialog,
+        handleCloseEditDialog,
+    } = useTeamPageActions({ teamId, teamPages: pages, setTeamPages: setPages, canEdit });
+
+    return (
+        <>
+            <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
+                onDragCancel={handleDragCancel}>
+                <SortableContext items={pageIds} strategy={verticalListSortingStrategy}>
+                    <SidebarMenuSub>
+                        {pages.map(page => (
+                            <SortableTeamPageItem
+                                key={page.id}
+                                page={page}
+                                isActive={currentPageId === page.id}
+                                isDeleting={deletingPageId === page.id}
+                                isMobile={isMobile}
+                                canEdit={canEdit}
+                                onCopyLink={handleCopyLink}
+                                onOpenInNewTab={handleOpenInNewTab}
+                                onEditClick={handleEditClick}
+                                onDeleteClick={handleDeleteClick}
+                            />
+                        ))}
+                        {canEdit && (
+                            <SidebarMenuSubItem>
+                                <button
+                                    className="text-muted-foreground hover:text-foreground flex w-full items-center gap-2 px-2 py-1.5 text-sm"
+                                    onClick={onCreatePage}>
+                                    <Plus className="h-4 w-4" />
+                                    <span>Add page</span>
+                                </button>
+                            </SidebarMenuSubItem>
+                        )}
+                    </SidebarMenuSub>
+                </SortableContext>
+                <DragOverlay>
+                    {activePage ? (
+                        <div className="bg-sidebar rounded-md border px-2 py-1.5 shadow-lg">
+                            <div className="flex items-center gap-2">
+                                {activePage.content.icon ? (
+                                    <span className="text-base">{activePage.content.icon}</span>
+                                ) : (
+                                    <FileText className="h-4 w-4" />
+                                )}
+                                <span>{activePage.content.title || 'Untitled'}</span>
+                            </div>
+                        </div>
+                    ) : null}
+                </DragOverlay>
+            </DndContext>
+
+            {/* Edit Page Dialog - need to convert TeamPage to Page format */}
+            {pageToEdit && (
+                <EditPageDialog
+                    open={!!pageToEdit}
+                    onOpenChange={handleCloseEditDialog}
+                    page={{
+                        id: pageToEdit.id,
+                        type: pageToEdit.type,
+                        content: pageToEdit.content,
+                        role: 'OWNER', // Team pages are always owned by team
+                    }}
+                />
+            )}
+
+            {/* Delete Confirmation */}
+            <AlertDialog open={!!pageToDelete} onOpenChange={handleCloseDeleteDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Page</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Are you sure you want to delete &quot;{pageToDelete?.name}&quot;? This action cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction destructive onClick={handleDeleteConfirm}>
+                            Delete
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </>
     );
 }
