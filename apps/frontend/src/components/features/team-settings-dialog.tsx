@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Loader2, LogOut, MoreHorizontal, Shield, Trash2, User, UserPlus } from 'lucide-react';
+import { LogOut, MoreHorizontal, Shield, Trash2, User, UserPlus } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -80,7 +80,7 @@ export function TeamSettingsDialog({ open, onOpenChange, teamId, onTeamUpdated, 
             setTeam(result.data.team);
             setTeamName(result.data.team.name);
         } else {
-            showToast('Failed to update team', 'error');
+            showToast(result.error.message, 'error');
             onOpenChange(false);
         }
         setLoading(false);
@@ -102,7 +102,7 @@ export function TeamSettingsDialog({ open, onOpenChange, teamId, onTeamUpdated, 
             showToast('Team name updated', 'success');
             onTeamUpdated?.();
         } else {
-            showToast('Failed to update team', 'error');
+            showToast(result.error.message, 'error');
         }
         setSaving(false);
     };
@@ -117,7 +117,7 @@ export function TeamSettingsDialog({ open, onOpenChange, teamId, onTeamUpdated, 
             onOpenChange(false);
             setDeleteTeamOpen(false);
         } else {
-            showToast('Failed to delete team', 'error');
+            showToast(result.error.message, 'error');
         }
     };
 
@@ -131,7 +131,7 @@ export function TeamSettingsDialog({ open, onOpenChange, teamId, onTeamUpdated, 
             setLeaveTeamOpen(false);
             onOpenChange(false);
         } else {
-            showToast('Failed to leave team', 'error');
+            showToast(result.error.message, 'error');
         }
     };
 
@@ -147,7 +147,7 @@ export function TeamSettingsDialog({ open, onOpenChange, teamId, onTeamUpdated, 
             setNewMemberRole('MEMBER');
             showToast('Member added', 'success');
         } else {
-            showToast('Failed to add member', 'error');
+            showToast(result.error.message, 'error');
         }
         setAddingMember(false);
     };
@@ -166,7 +166,7 @@ export function TeamSettingsDialog({ open, onOpenChange, teamId, onTeamUpdated, 
             });
             showToast('Member role updated', 'success');
         } else {
-            showToast('Failed to update member role', 'error');
+            showToast(result.error.message, 'error');
         }
     };
 
@@ -187,7 +187,7 @@ export function TeamSettingsDialog({ open, onOpenChange, teamId, onTeamUpdated, 
             setRemoveMemberOpen(false);
             setMemberToRemove(null);
         } else {
-            showToast('Failed to remove member', 'error');
+            showToast(result.error.message, 'error');
         }
     };
 
@@ -270,8 +270,7 @@ export function TeamSettingsDialog({ open, onOpenChange, teamId, onTeamUpdated, 
                                             disabled={saving || !teamName.trim() || teamName === team.name}
                                             size="sm"
                                             className="h-9">
-                                            {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                            Save
+                                            {saving ? 'Saving...' : 'Save'}
                                         </Button>
                                     </div>
                                 ) : (
@@ -301,12 +300,12 @@ export function TeamSettingsDialog({ open, onOpenChange, teamId, onTeamUpdated, 
                                                     {team.owner.name.charAt(0).toUpperCase()}
                                                 </AvatarFallback>
                                             </Avatar>
-                                            <div className="min-w-0 flex-1">
+                                            <div className="min-w-0 w-0 flex-1 overflow-hidden">
                                                 <div className="flex items-center gap-1.5">
                                                     <span className="truncate text-sm">{team.owner.name}</span>
                                                     {getRoleBadge('OWNER', true)}
                                                 </div>
-                                                <span className="text-muted-foreground truncate text-xs">{team.owner.email}</span>
+                                                <span className="text-muted-foreground truncate text-xs wrap-break-word">{team.owner.email}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -329,12 +328,12 @@ export function TeamSettingsDialog({ open, onOpenChange, teamId, onTeamUpdated, 
                                                                 {member.user.name.charAt(0).toUpperCase()}
                                                             </AvatarFallback>
                                                         </Avatar>
-                                                        <div className="min-w-0 flex-1">
+                                                        <div className="min-w-0 w-0 flex-1 overflow-hidden">
                                                             <div className="flex items-center gap-1.5">
                                                                 <span className="truncate text-sm">{member.user.name}</span>
                                                                 {getRoleBadge(member.role, false)}
                                                             </div>
-                                                            <span className="text-muted-foreground truncate text-xs">
+                                                            <span className="text-muted-foreground truncate text-xs wrap-break-word">
                                                                 {member.user.email}
                                                             </span>
                                                         </div>
@@ -460,8 +459,7 @@ export function TeamSettingsDialog({ open, onOpenChange, teamId, onTeamUpdated, 
                                 Cancel
                             </Button>
                             <Button type="submit" disabled={addingMember || !newMemberEmail.trim()} size="sm">
-                                {addingMember && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                Add
+                                {addingMember ? 'Adding...' : 'Add'}
                             </Button>
                         </DialogFooter>
                     </form>

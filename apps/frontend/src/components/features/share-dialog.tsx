@@ -218,7 +218,7 @@ export function ShareDialog({ open, onOpenChange, pageId, isTeamPage = false }: 
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="w-[calc(100%-2rem)] max-w-lg">
+            <DialogContent className="w-[min(92vw,40rem)] max-w-lg">
                 <DialogHeader>
                     <DialogTitle>{isTeamPage ? 'Publish' : 'Share & Publish'}</DialogTitle>
                 </DialogHeader>
@@ -263,13 +263,13 @@ export function ShareDialog({ open, onOpenChange, pageId, isTeamPage = false }: 
                                 {isLoadingPermissions ? (
                                     <div className="space-y-2">
                                         {[1, 2].map(i => (
-                                            <div key={i} className="flex items-center gap-3 rounded-lg border p-3">
+                                            <div key={i} className="mx-auto flex w-full max-w-md items-center gap-3 rounded-lg border p-3">
                                                 <Skeleton className="size-8 rounded-full" />
-                                                <div className="flex-1 space-y-1.5">
-                                                    <Skeleton className="h-4 w-32" />
-                                                    <Skeleton className="h-3 w-40" />
+                                                <div className="w-0 min-w-0 flex-1 space-y-1.5 overflow-hidden">
+                                                    <Skeleton className="h-4 w-28" />
+                                                    <Skeleton className="h-3 w-32" />
                                                 </div>
-                                                <Skeleton className="h-8 w-20" />
+                                                <Skeleton className="h-8 w-14" />
                                             </div>
                                         ))}
                                     </div>
@@ -280,14 +280,16 @@ export function ShareDialog({ open, onOpenChange, pageId, isTeamPage = false }: 
                                         <div
                                             key={permission.id}
                                             className="hover:bg-accent/50 flex items-center justify-between gap-3 rounded-lg border p-3 transition-colors">
-                                            <div className="flex min-w-0 items-center gap-3">
+                                            <div className="flex min-w-0 flex-1 items-center gap-3">
                                                 <Avatar className="size-8">
                                                     <AvatarImage src={permission.user.photo || undefined} />
                                                     <AvatarFallback className="text-xs">{getInitials(permission.user.name)}</AvatarFallback>
                                                 </Avatar>
-                                                <div className="min-w-0">
+                                                <div className="w-0 min-w-0 flex-1 overflow-hidden">
                                                     <p className="truncate text-sm font-medium">{permission.user.name}</p>
-                                                    <p className="text-muted-foreground truncate text-xs">{permission.user.email}</p>
+                                                    <p className="text-muted-foreground truncate text-xs wrap-break-word">
+                                                        {permission.user.email}
+                                                    </p>
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-1">
@@ -330,23 +332,23 @@ export function ShareDialog({ open, onOpenChange, pageId, isTeamPage = false }: 
                     {/* Publish Tab */}
                     <TabsContent value="publish" className="mt-6 space-y-4">
                         {isLoadingPublish ? (
-                            <div className="space-y-5">
+                            <div className="mx-auto w-full max-w-md space-y-5">
                                 <div className="rounded-lg border p-4">
                                     <div className="flex items-start gap-3">
                                         <Skeleton className="size-5 rounded" />
-                                        <div className="flex-1 space-y-1.5">
-                                            <Skeleton className="h-4 w-24" />
-                                            <Skeleton className="h-3 w-40" />
+                                        <div className="w-0 min-w-0 flex-1 space-y-1.5 overflow-hidden">
+                                            <Skeleton className="h-4 w-28" />
+                                            <Skeleton className="h-3 w-32" />
                                         </div>
                                     </div>
                                 </div>
                                 <div className="space-y-3">
                                     <Skeleton className="h-4 w-20" />
-                                    <Skeleton className="h-10 w-full" />
+                                    <Skeleton className="mx-auto h-10 w-full max-w-md" />
                                 </div>
                                 <div className="flex gap-2">
-                                    <Skeleton className="h-10 flex-1" />
-                                    <Skeleton className="h-10 flex-1" />
+                                    <Skeleton className="h-10 max-w-44 flex-1" />
+                                    <Skeleton className="h-10 max-w-44 flex-1" />
                                 </div>
                             </div>
                         ) : publish && publish.isActive ? (

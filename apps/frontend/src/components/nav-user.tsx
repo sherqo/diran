@@ -115,10 +115,10 @@ export function NavUser({ user, loading, logout }: { user: User | null; loading:
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
+                            <AlertDialogCancel disabled={isLoggingOut}>Cancel</AlertDialogCancel>
                             <AlertDialogAction destructive onClick={handleConfirmLogout} disabled={isLoggingOut}>
                                 {isLoggingOut ? 'Logging out...' : 'Log out'}
                             </AlertDialogAction>
-                            <AlertDialogCancel disabled={isLoggingOut}>Cancel</AlertDialogCancel>
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialog>
