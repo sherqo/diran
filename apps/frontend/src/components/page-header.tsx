@@ -41,9 +41,11 @@ export function PageHeader({ title, icon, pageId, role, loading, isTeamPage = fa
                     <Breadcrumb>
                         <BreadcrumbList>
                             <BreadcrumbItem>
-                                <BreadcrumbPage className="line-clamp-1 flex items-center gap-1.5">
-                                    {icon && <span>{icon}</span>}
-                                    {title}
+                                <BreadcrumbPage className="line-clamp-1 flex min-w-0 items-center gap-1.5">
+                                    {icon && <span className="shrink-0">{icon}</span>}
+                                    <span className="max-w-[40vw] truncate sm:max-w-[40ch]" title={title}>
+                                        {title}
+                                    </span>
                                 </BreadcrumbPage>
                             </BreadcrumbItem>
                         </BreadcrumbList>

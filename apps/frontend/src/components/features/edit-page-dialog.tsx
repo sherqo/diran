@@ -90,7 +90,7 @@ export function EditPageDialog({ open, onOpenChange, page }: EditPageDialogProps
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="w-[calc(100%-2rem)] max-w-md">
+            <DialogContent className="w-[min(92vw,32rem)] max-w-md">
                 <DialogHeader>
                     <DialogTitle>Edit Page</DialogTitle>
                 </DialogHeader>
