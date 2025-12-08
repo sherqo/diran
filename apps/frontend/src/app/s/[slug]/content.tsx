@@ -91,8 +91,12 @@ export function PublishedPageContent({ page }: PublishedPageContentProps) {
 
     if (!editor) {
         return (
-            <div className="bg-background flex min-h-screen items-center justify-center">
-                <div className="text-muted-foreground">Loading...</div>
+            <div className="bg-background flex min-h-screen flex-col">
+                <footer className="border-t">
+                    <div className="container mx-auto flex max-w-4xl items-center justify-between px-4 py-4">
+                        <div className="bg-muted/70 h-4 w-28 animate-pulse rounded-md" />
+                    </div>
+                </footer>
             </div>
         );
     }
