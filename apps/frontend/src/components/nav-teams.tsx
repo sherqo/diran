@@ -250,7 +250,7 @@ export function NavTeams() {
 
                                     <CollapsibleContent>
                                         {loadingTeamId === team.id ? (
-                                            <SidebarMenu className="ml-4 border-l pl-2">
+                                            <SidebarMenu className="ml-2 border-l pl-1.5">
                                                 {[1, 2, 3].map(i => (
                                                     <SidebarMenuItem key={i}>
                                                         <SidebarMenuButton size="sm">
@@ -377,9 +377,10 @@ function TeamPagesList({ teamId, pages, setPages, canEdit, isMobile, sensors, on
                 onDragEnd={handleDragEnd}
                 onDragCancel={handleDragCancel}>
                 <SortableContext items={pageIds} strategy={verticalListSortingStrategy}>
-                    <SidebarMenu className="ml-4 border-l pl-2">
+                    <SidebarMenu className="ml-3.5 border-l pl-2">
                         {pages.map(page => (
                             <SortableTeamPageItem
+                                className="w-54"
                                 key={page.id}
                                 page={page}
                                 isActive={currentPageId === page.id}

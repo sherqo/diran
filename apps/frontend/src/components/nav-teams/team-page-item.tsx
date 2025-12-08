@@ -17,6 +17,7 @@ import {
 import type { TeamPage } from '@/lib/api/team';
 
 interface TeamPageItemProps {
+    className?: string;
     page: TeamPage;
     isActive: boolean;
     isDeleting: boolean;
@@ -29,6 +30,7 @@ interface TeamPageItemProps {
 }
 
 export function SortableTeamPageItem({
+    className,
     page,
     isActive,
     isDeleting,
@@ -73,7 +75,7 @@ export function SortableTeamPageItem({
     };
 
     return (
-        <SidebarMenuItem ref={setNodeRef} style={style} {...attributes} {...listeners}>
+        <SidebarMenuItem ref={setNodeRef} className={className} style={style} {...attributes} {...listeners}>
             <SidebarMenuButton asChild isActive={isActive} size="sm">
                 <Link scroll={false} href={`/page/${page.id}`} onClick={handleClick}>
                     {pageIcon ? <span className="text-base">{pageIcon}</span> : <FileText className="h-4 w-4" />}
