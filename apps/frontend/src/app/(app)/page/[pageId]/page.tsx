@@ -10,6 +10,7 @@ import { EditablePageTitle } from '@/components/features/editable-page-title';
 import type { PartialBlock, BlockNoteEditor } from '@blocknote/core';
 import type { EmbeddedBlockContent, ApiBlock } from '@/shared/types/block';
 import { getBlockTreeApi } from '@/lib/api/block';
+import NotFoundInline from '@/components/not-found-inline';
 
 export default function PageView() {
     const params = useParams();
@@ -115,16 +116,7 @@ export default function PageView() {
     }
 
     if (!currentPage) {
-        return (
-            <>
-                <PageHeader title="Error" />
-                <div className="flex flex-1 items-center justify-center">
-                    <div className="text-center">
-                        <p className="text-destructive text-lg">Page not found</p>
-                    </div>
-                </div>
-            </>
-        );
+        return <NotFoundInline />;
     }
 
     return (
