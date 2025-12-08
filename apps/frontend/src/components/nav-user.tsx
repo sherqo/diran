@@ -71,7 +71,9 @@ export function NavUser({ user, loading, logout }: { user: User | null; loading:
                             </Avatar>
                             <div className="grid flex-1 text-left text-sm leading-tight">
                                 <span className="truncate font-medium">{user.name}</span>
-                                <span className="text-muted-foreground truncate text-xs">{user.email}</span>
+                                <span className="text-muted-foreground truncate text-xs" title={user.email}>
+                                    {user.email}
+                                </span>
                             </div>
                             <Ellipsis className="ml-auto size-4" />
                         </SidebarMenuButton>

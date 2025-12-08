@@ -300,12 +300,16 @@ export function TeamSettingsDialog({ open, onOpenChange, teamId, onTeamUpdated, 
                                                     {team.owner.name.charAt(0).toUpperCase()}
                                                 </AvatarFallback>
                                             </Avatar>
-                                            <div className="min-w-0 w-0 flex-1 overflow-hidden">
+                                            <div className="w-0 min-w-0 flex-1 overflow-hidden">
                                                 <div className="flex items-center gap-1.5">
-                                                    <span className="truncate text-sm">{team.owner.name}</span>
+                                                    <span className="truncate text-sm" title={team.owner.name}>
+                                                        {team.owner.name}
+                                                    </span>
                                                     {getRoleBadge('OWNER', true)}
                                                 </div>
-                                                <span className="text-muted-foreground truncate text-xs wrap-break-word">{team.owner.email}</span>
+                                                <span className="text-muted-foreground truncate text-xs" title={team.owner.email}>
+                                                    {team.owner.email}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -328,12 +332,16 @@ export function TeamSettingsDialog({ open, onOpenChange, teamId, onTeamUpdated, 
                                                                 {member.user.name.charAt(0).toUpperCase()}
                                                             </AvatarFallback>
                                                         </Avatar>
-                                                        <div className="min-w-0 w-0 flex-1 overflow-hidden">
+                                                        <div className="w-0 min-w-0 flex-1 overflow-hidden">
                                                             <div className="flex items-center gap-1.5">
-                                                                <span className="truncate text-sm">{member.user.name}</span>
+                                                                <span className="truncate text-sm" title={member.user.name}>
+                                                                    {member.user.name}
+                                                                </span>
                                                                 {getRoleBadge(member.role, false)}
                                                             </div>
-                                                            <span className="text-muted-foreground truncate text-xs wrap-break-word">
+                                                            <span
+                                                                className="text-muted-foreground truncate text-xs"
+                                                                title={member.user.email}>
                                                                 {member.user.email}
                                                             </span>
                                                         </div>
@@ -477,9 +485,7 @@ export function TeamSettingsDialog({ open, onOpenChange, teamId, onTeamUpdated, 
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={handleDeleteTeam}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                        <AlertDialogAction destructive onClick={handleDeleteTeam}>
                             Delete Team
                         </AlertDialogAction>
                     </AlertDialogFooter>
@@ -497,9 +503,7 @@ export function TeamSettingsDialog({ open, onOpenChange, teamId, onTeamUpdated, 
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={handleLeaveTeam}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                        <AlertDialogAction destructive onClick={handleLeaveTeam}>
                             Leave Team
                         </AlertDialogAction>
                     </AlertDialogFooter>
@@ -518,9 +522,7 @@ export function TeamSettingsDialog({ open, onOpenChange, teamId, onTeamUpdated, 
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel onClick={() => setMemberToRemove(null)}>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={handleRemoveMember}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                        <AlertDialogAction destructive onClick={handleRemoveMember}>
                             Remove Member
                         </AlertDialogAction>
                     </AlertDialogFooter>

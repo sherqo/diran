@@ -286,8 +286,10 @@ export function ShareDialog({ open, onOpenChange, pageId, isTeamPage = false }: 
                                                     <AvatarFallback className="text-xs">{getInitials(permission.user.name)}</AvatarFallback>
                                                 </Avatar>
                                                 <div className="w-0 min-w-0 flex-1 overflow-hidden">
-                                                    <p className="truncate text-sm font-medium">{permission.user.name}</p>
-                                                    <p className="text-muted-foreground truncate text-xs wrap-break-word">
+                                                    <p className="truncate text-sm font-medium" title={permission.user.name}>
+                                                        {permission.user.name}
+                                                    </p>
+                                                    <p className="text-muted-foreground truncate text-xs" title={permission.user.email}>
                                                         {permission.user.email}
                                                     </p>
                                                 </div>
