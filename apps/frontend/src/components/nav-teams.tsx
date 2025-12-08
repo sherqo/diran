@@ -23,7 +23,7 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuSeparator,
+    
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
@@ -249,22 +249,6 @@ export function NavTeams() {
                                                 <Settings className="text-muted-foreground" />
                                                 <span>Team settings</span>
                                             </DropdownMenuItem>
-                                            <DropdownMenuSeparator />
-                                            {isTeamOwner(team) ? (
-                                                <DropdownMenuItem
-                                                    onClick={() => handleOpenTeamSettings(team)}
-                                                    className="text-destructive focus:text-destructive">
-                                                    <Trash2 className="text-muted-foreground" />
-                                                    <span>Delete team</span>
-                                                </DropdownMenuItem>
-                                            ) : (
-                                                <DropdownMenuItem
-                                                    onClick={() => handleOpenTeamSettings(team)}
-                                                    className="text-destructive focus:text-destructive">
-                                                    <LogOut className="text-muted-foreground" />
-                                                    <span>Leave team</span>
-                                                </DropdownMenuItem>
-                                            )}
                                         </DropdownMenuContent>
                                     </DropdownMenu>
 
