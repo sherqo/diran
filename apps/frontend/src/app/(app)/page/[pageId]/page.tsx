@@ -107,16 +107,16 @@ export default function PageView() {
     if (pageLoading) {
         return (
             <>
-                <PageHeader title="" />
+                <PageHeader title="" loading />
                 <div className="flex-1 overflow-y-auto">
                     <div className="container mx-auto max-w-4xl px-4 pt-10 pb-40">
-                        {/* Title skeleton */}
-                        <div className="mb-8 flex items-center gap-3">
-                            <Skeleton className="h-10 w-10 rounded-lg" />
-                            <Skeleton className="h-9 w-64" />
+                        {/* Title skeleton - icon above title */}
+                        <div className="mb-4">
+                            <Skeleton className="mb-2 h-12 w-12 rounded-lg" />
+                            <Skeleton className="h-10 w-72" />
                         </div>
                         {/* Content skeleton */}
-                        <div className="space-y-4">
+                        <div className="space-y-4 pt-4">
                             <Skeleton className="h-5 w-full" />
                             <Skeleton className="h-5 w-4/5" />
                             <Skeleton className="h-5 w-3/4" />
