@@ -80,7 +80,7 @@ export function TeamSettingsDialog({ open, onOpenChange, teamId, onTeamUpdated, 
             setTeam(result.data.team);
             setTeamName(result.data.team.name);
         } else {
-            showToast(result.error.message, 'error');
+            showToast('Failed to update team', 'error');
             onOpenChange(false);
         }
         setLoading(false);
@@ -102,7 +102,7 @@ export function TeamSettingsDialog({ open, onOpenChange, teamId, onTeamUpdated, 
             showToast('Team name updated', 'success');
             onTeamUpdated?.();
         } else {
-            showToast(result.error.message, 'error');
+            showToast('Failed to update team', 'error');
         }
         setSaving(false);
     };
@@ -117,7 +117,7 @@ export function TeamSettingsDialog({ open, onOpenChange, teamId, onTeamUpdated, 
             onOpenChange(false);
             setDeleteTeamOpen(false);
         } else {
-            showToast(result.error.message, 'error');
+            showToast('Failed to delete team', 'error');
         }
     };
 
@@ -131,7 +131,7 @@ export function TeamSettingsDialog({ open, onOpenChange, teamId, onTeamUpdated, 
             setLeaveTeamOpen(false);
             onOpenChange(false);
         } else {
-            showToast(result.error.message, 'error');
+            showToast('Failed to leave team', 'error');
         }
     };
 
@@ -147,7 +147,7 @@ export function TeamSettingsDialog({ open, onOpenChange, teamId, onTeamUpdated, 
             setNewMemberRole('MEMBER');
             showToast('Member added', 'success');
         } else {
-            showToast(result.error.message, 'error');
+            showToast('Failed to add member', 'error');
         }
         setAddingMember(false);
     };
@@ -166,7 +166,7 @@ export function TeamSettingsDialog({ open, onOpenChange, teamId, onTeamUpdated, 
             });
             showToast('Member role updated', 'success');
         } else {
-            showToast(result.error.message, 'error');
+            showToast('Failed to update member role', 'error');
         }
     };
 
@@ -187,7 +187,7 @@ export function TeamSettingsDialog({ open, onOpenChange, teamId, onTeamUpdated, 
             setRemoveMemberOpen(false);
             setMemberToRemove(null);
         } else {
-            showToast(result.error.message, 'error');
+            showToast('Failed to remove member', 'error');
         }
     };
 

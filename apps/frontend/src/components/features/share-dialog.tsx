@@ -57,7 +57,7 @@ export function ShareDialog({ open, onOpenChange, pageId, isTeamPage = false }: 
         if (result.success) {
             setPermissions(result.data.permissions);
         } else {
-            showToast(result.error?.message || 'Failed to load permissions', 'error');
+            showToast('Failed to load permissions', 'error');
         }
         setIsLoadingPermissions(false);
     }, [pageId]);
@@ -110,7 +110,7 @@ export function ShareDialog({ open, onOpenChange, pageId, isTeamPage = false }: 
             setEmail('');
             showToast('Shared successfully', 'success');
         } else {
-            showToast(result.error?.message || 'Failed to share', 'error');
+            showToast('Failed to share', 'error');
         }
         setIsAdding(false);
     };
@@ -123,7 +123,7 @@ export function ShareDialog({ open, onOpenChange, pageId, isTeamPage = false }: 
             setPermissions(prev => prev.map(p => (p.id === permissionId ? { ...p, role: newRole } : p)));
             showToast('Permission updated', 'success');
         } else {
-            showToast(result.error?.message || 'Failed to update', 'error');
+            showToast('Failed to update permission', 'error');
         }
         setUpdatingId(null);
     };
@@ -136,7 +136,7 @@ export function ShareDialog({ open, onOpenChange, pageId, isTeamPage = false }: 
             setPermissions(prev => prev.filter(p => p.id !== permissionId));
             showToast('Access removed', 'success');
         } else {
-            showToast(result.error?.message || 'Failed to remove', 'error');
+            showToast('Failed to remove access', 'error');
         }
         setUpdatingId(null);
     };
@@ -155,7 +155,7 @@ export function ShareDialog({ open, onOpenChange, pageId, isTeamPage = false }: 
             setPublish(result.data.publish);
             showToast('Published successfully', 'success');
         } else {
-            showToast(result.error?.message || 'Failed to publish', 'error');
+            showToast('Failed to publish', 'error');
         }
         setIsPublishing(false);
     };
@@ -170,7 +170,7 @@ export function ShareDialog({ open, onOpenChange, pageId, isTeamPage = false }: 
             setSlug(result.data.publish.slug || '');
             showToast('Unpublished successfully', 'success');
         } else {
-            showToast(result.error?.message || 'Failed to unpublish', 'error');
+            showToast('Failed to unpublish', 'error');
         }
         setIsUpdating(false);
     };
@@ -185,7 +185,7 @@ export function ShareDialog({ open, onOpenChange, pageId, isTeamPage = false }: 
             setPublish(result.data.publish);
             showToast('Slug updated', 'success');
         } else {
-            showToast(result.error?.message || 'Failed to update slug', 'error');
+            showToast('Failed to update slug', 'error');
         }
         setIsUpdating(false);
     };

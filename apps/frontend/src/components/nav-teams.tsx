@@ -85,7 +85,7 @@ export function NavTeams() {
         if (result.success) {
             setTeams(result.data.teams);
         } else {
-            showToast(result.error.message, 'error');
+            showToast('Error fetching teams', 'error');
         }
         setLoading(false);
     }, []);
@@ -103,7 +103,7 @@ export function NavTeams() {
         if (pagesResult.success) {
             setTeamPages(prev => ({ ...prev, [teamId]: pagesResult.data.pages }));
         } else {
-            showToast(pagesResult.error.message, 'error');
+            showToast('Error fetching team pages', 'error');
         }
 
         if (teamResult.success) {
@@ -146,7 +146,7 @@ export function NavTeams() {
             setNewTeamName('');
             showToast('Team created', 'success');
         } else {
-            showToast(result.error.message, 'error');
+            showToast('Failed to create team', 'error');
         }
         setSubmitting(false);
     };
