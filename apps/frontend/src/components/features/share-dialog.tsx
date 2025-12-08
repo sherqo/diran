@@ -11,7 +11,8 @@ import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { listPermissionsApi, addPermissionApi, updatePermissionApi, removePermissionApi } from '@/lib/api/permission';
-import { getPublishApi, createPublishApi, updatePublishApi, deletePublishApi } from '@/lib/api/publish';
+import { getPublishApi, createPublishApi, updatePublishApi } from '@/lib/api/publish';
+import type { UpdatePublishBodyInput } from '@/shared/validation/publish';
 import { showToast } from '@/lib/toast';
 import type { PermissionResponse } from '@/shared/types/permission';
 import type { PublishResponse } from '@/shared/types/publish';
@@ -139,7 +140,9 @@ export function ShareDialog({ open, onOpenChange, pageId }: ShareDialogProps) {
         if (!slug.trim()) return;
 
         setIsPublishing(true);
-        const result = await createPublishApi(pageId, { slug: slug.trim() });
+        // If a publish exists (active or inactive), update it (reactivate + update slug) instead of creating a new one
+        const payload: UpdatePublishBodyInput = { slug: slug.trim(), isActive: true };
+        const result = publish ? await updatePublishApi(pageId, payload) : await createPublishApi(pageId, { slug: slug.trim() });
 
         if (result.success) {
             setPublish(result.data.publish);
@@ -152,11 +155,12 @@ export function ShareDialog({ open, onOpenChange, pageId }: ShareDialogProps) {
 
     const handleUnpublish = async () => {
         setIsUpdating(true);
-        const result = await deletePublishApi(pageId);
+        // Soft-unpublish: mark the publish record as inactive
+        const result = await updatePublishApi(pageId, { isActive: false });
 
         if (result.success) {
-            setPublish(null);
-            setSlug('');
+            setPublish(result.data.publish);
+            setSlug(result.data.publish.slug || '');
             showToast('Unpublished successfully', 'success');
         } else {
             showToast(result.error?.message || 'Failed to unpublish', 'error');
@@ -313,7 +317,7 @@ export function ShareDialog({ open, onOpenChange, pageId }: ShareDialogProps) {
                             <div className="flex justify-center py-8">
                                 <Loader2 className="text-muted-foreground size-5 animate-spin" />
                             </div>
-                        ) : publish ? (
+                        ) : publish && publish.isActive ? (
                             <div className="space-y-5">
                                 <div className="flex items-start gap-3 rounded-lg border border-green-500/30 bg-green-500/10 p-4">
                                     <Globe className="mt-0.5 size-5 shrink-0 text-green-600 dark:text-green-500" />
@@ -355,7 +359,7 @@ export function ShareDialog({ open, onOpenChange, pageId }: ShareDialogProps) {
                                         {copied ? 'Copied' : 'Copy'}
                                     </Button>
                                     <Button variant="outline" className="flex-1" asChild>
-                                        <a href={`/page/s/${publish.slug}`} target="_blank" rel="noopener noreferrer">
+                                        <a href={`/s/${publish.slug}`} target="_blank" rel="noopener noreferrer">
                                             <LinkIcon className="mr-2 size-4" />
                                             Open
                                         </a>
