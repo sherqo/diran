@@ -3,7 +3,6 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { Loader } from '../ui/loader';
 
 interface ProtectedRouteProps {
     children: React.ReactNode;
@@ -29,16 +28,7 @@ export function ProtectedRoute({ children, redirectTo = '/login' }: ProtectedRou
     return (
         <div className="relative min-h-screen">
             {/* children are visible; when loading they get dimmed and interaction is disabled */}
-            <div className={'h-full w-full ' + (loading ? 'pointer-events-none opacity-40' : '')}>{children}</div>
-
-            {loading && (
-                // overlay loader centered
-                <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                    <div className="bg-transparent">
-                        <Loader />
-                    </div>
-                </div>
-            )}
+            <div className={'h-full w-full'}>{children}</div>
         </div>
     );
 }

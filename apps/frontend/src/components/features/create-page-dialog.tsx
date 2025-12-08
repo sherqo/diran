@@ -9,11 +9,20 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { createBlockApi } from '@/lib/api/block';
+import { createTeamPageApi } from '@/lib/api/team';
 import { usePage } from '@/contexts/PageContext';
 import { BlockTypeEnum } from '@/shared/types/block';
 import { showToast } from '@/lib/toast';
 
-export function CreatePageDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+interface CreatePageDialogProps {
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    teamId?: string;
+    teamName?: string;
+    onPageCreated?: (pageId: string) => void;
+}
+
+export function CreatePageDialog({ open, onOpenChange, teamId, teamName, onPageCreated }: CreatePageDialogProps) {
     const router = useRouter();
     const { fetchPages, pages } = usePage();
     const [pageName, setPageName] = React.useState('');
@@ -42,33 +51,50 @@ export function CreatePageDialog({ open, onOpenChange }: { open: boolean; onOpen
         setError('');
 
         try {
-            // Set nextId to the first page's ID if pages exist, otherwise null
-            const firstPageId = pages.length > 0 ? pages[0].id : null;
+            let pageId: string;
 
-            const result = await createBlockApi({
-                type: BlockTypeEnum.PAGE,
-                parentId: null,
-                prevId: null,
-                nextId: firstPageId,
-                content: {
-                    title: pageName.trim(),
-                    ...(pageIcon && { icon: pageIcon }),
-                },
-            });
-
-            if (result.success) {
-                // Refresh pages list
-                await fetchPages();
-                // Navigate to the newly created page
-                router.push(`/page/${result.data.block.id}`);
-                // Show success message
-                showToast('Page created successfully', 'success');
-                // Close dialog
-                onOpenChange(false);
+            if (teamId) {
+                // Create team page
+                const result = await createTeamPageApi(teamId, pageName.trim(), pageIcon);
+                if (result.success) {
+                    pageId = result.data.page.id;
+                } else {
+                    setError(result.error?.message || 'Failed to create page');
+                    showToast('Failed to create page', 'error');
+                    return;
+                }
             } else {
-                setError(result.error?.message || 'Failed to create page');
-                showToast('Failed to create page', 'error');
+                // Create personal page
+                const firstPageId = pages.length > 0 ? pages[0].id : null;
+                const result = await createBlockApi({
+                    type: BlockTypeEnum.PAGE,
+                    parentId: null,
+                    prevId: null,
+                    nextId: firstPageId,
+                    content: {
+                        title: pageName.trim(),
+                        ...(pageIcon && { icon: pageIcon }),
+                    },
+                });
+
+                if (result.success) {
+                    pageId = result.data.block.id;
+                    await fetchPages();
+                } else {
+                    setError(result.error?.message || 'Failed to create page');
+                    showToast('Failed to create page', 'error');
+                    return;
+                }
             }
+
+            // Navigate to the newly created page
+            router.push(`/page/${pageId}`);
+            // Show success message
+            showToast('Page created successfully', 'success');
+            // Callback for parent to update state
+            onPageCreated?.(pageId);
+            // Close dialog
+            onOpenChange(false);
         } catch (err) {
             setError('An unexpected error occurred');
             console.error('Error creating page:', err);
@@ -79,9 +105,9 @@ export function CreatePageDialog({ open, onOpenChange }: { open: boolean; onOpen
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="w-[calc(100%-2rem)] max-w-md">
+            <DialogContent className="w-[min(92vw,32rem)] max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Create New Page</DialogTitle>
+                    <DialogTitle>{teamId ? `New Page in ${teamName || 'Team'}` : 'Create New Page'}</DialogTitle>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -112,7 +138,7 @@ export function CreatePageDialog({ open, onOpenChange }: { open: boolean; onOpen
                         </Button>
                         <Button type="submit" disabled={isCreating || !pageName.trim()} className="flex-1 sm:flex-initial">
                             {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            {isCreating ? 'Creating...' : 'Create'}
+                            Create
                         </Button>
                     </DialogFooter>
                 </form>

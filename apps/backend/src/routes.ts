@@ -8,6 +8,7 @@ import {
     registerUserRoutes,
     registerBlockRoutes,
     registerPageRoutes,
+    registerTeamRoutes,
     registerExtrasRoutes,
 } from '#features';
 
@@ -31,6 +32,7 @@ export const registerAllRoutes = async (fastify: FastifyInstance) => {
 
     await fastify.register(registerBlockRoutes, { prefix: '/block' });
     await fastify.register(registerPageRoutes, { prefix: '/page' });
+    await fastify.register(registerTeamRoutes, { prefix: '/team' });
 
     await fastify.register(registerHealthRoutes, { prefix: '/health' });
     await fastify.register(registerExtrasRoutes, { prefix: '/extras' });

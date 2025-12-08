@@ -17,11 +17,13 @@ import { showToast } from '@/lib/toast';
 import type { PermissionResponse } from '@/shared/types/permission';
 import type { PublishResponse } from '@/shared/types/publish';
 import type { ShareableRole } from '@/shared/validation/permission';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface ShareDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     pageId: string;
+    isTeamPage?: boolean;
 }
 
 const ROLE_LABELS: Record<string, string> = {
@@ -30,8 +32,8 @@ const ROLE_LABELS: Record<string, string> = {
     VIEWER: 'Can view',
 };
 
-export function ShareDialog({ open, onOpenChange, pageId }: ShareDialogProps) {
-    const [activeTab, setActiveTab] = React.useState<'share' | 'publish'>('share');
+export function ShareDialog({ open, onOpenChange, pageId, isTeamPage = false }: ShareDialogProps) {
+    const [activeTab, setActiveTab] = React.useState<'share' | 'publish'>(isTeamPage ? 'publish' : 'share');
 
     // Share state
     const [permissions, setPermissions] = React.useState<PermissionResponse[]>([]);
@@ -55,7 +57,7 @@ export function ShareDialog({ open, onOpenChange, pageId }: ShareDialogProps) {
         if (result.success) {
             setPermissions(result.data.permissions);
         } else {
-            showToast(result.error?.message || 'Failed to load permissions', 'error');
+            showToast('Failed to load permissions', 'error');
         }
         setIsLoadingPermissions(false);
     }, [pageId]);
@@ -75,10 +77,15 @@ export function ShareDialog({ open, onOpenChange, pageId }: ShareDialogProps) {
     // Fetch data when dialog opens
     React.useEffect(() => {
         if (open && pageId) {
-            fetchPermissions();
+            // Only fetch permissions for non-team pages
+            if (!isTeamPage) {
+                fetchPermissions();
+            }
             fetchPublish();
+            // Set the correct default tab based on page type
+            setActiveTab(isTeamPage ? 'publish' : 'share');
         }
-    }, [open, pageId, fetchPermissions, fetchPublish]);
+    }, [open, pageId, isTeamPage, fetchPermissions, fetchPublish]);
 
     // Reset form when dialog closes
     React.useEffect(() => {
@@ -103,7 +110,7 @@ export function ShareDialog({ open, onOpenChange, pageId }: ShareDialogProps) {
             setEmail('');
             showToast('Shared successfully', 'success');
         } else {
-            showToast(result.error?.message || 'Failed to share', 'error');
+            showToast('Failed to share', 'error');
         }
         setIsAdding(false);
     };
@@ -116,7 +123,7 @@ export function ShareDialog({ open, onOpenChange, pageId }: ShareDialogProps) {
             setPermissions(prev => prev.map(p => (p.id === permissionId ? { ...p, role: newRole } : p)));
             showToast('Permission updated', 'success');
         } else {
-            showToast(result.error?.message || 'Failed to update', 'error');
+            showToast('Failed to update permission', 'error');
         }
         setUpdatingId(null);
     };
@@ -129,7 +136,7 @@ export function ShareDialog({ open, onOpenChange, pageId }: ShareDialogProps) {
             setPermissions(prev => prev.filter(p => p.id !== permissionId));
             showToast('Access removed', 'success');
         } else {
-            showToast(result.error?.message || 'Failed to remove', 'error');
+            showToast('Failed to remove access', 'error');
         }
         setUpdatingId(null);
     };
@@ -148,7 +155,7 @@ export function ShareDialog({ open, onOpenChange, pageId }: ShareDialogProps) {
             setPublish(result.data.publish);
             showToast('Published successfully', 'success');
         } else {
-            showToast(result.error?.message || 'Failed to publish', 'error');
+            showToast('Failed to publish', 'error');
         }
         setIsPublishing(false);
     };
@@ -163,7 +170,7 @@ export function ShareDialog({ open, onOpenChange, pageId }: ShareDialogProps) {
             setSlug(result.data.publish.slug || '');
             showToast('Unpublished successfully', 'success');
         } else {
-            showToast(result.error?.message || 'Failed to unpublish', 'error');
+            showToast('Failed to unpublish', 'error');
         }
         setIsUpdating(false);
     };
@@ -178,7 +185,7 @@ export function ShareDialog({ open, onOpenChange, pageId }: ShareDialogProps) {
             setPublish(result.data.publish);
             showToast('Slug updated', 'success');
         } else {
-            showToast(result.error?.message || 'Failed to update slug', 'error');
+            showToast('Failed to update slug', 'error');
         }
         setIsUpdating(false);
     };
@@ -211,111 +218,140 @@ export function ShareDialog({ open, onOpenChange, pageId }: ShareDialogProps) {
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="w-[calc(100%-2rem)] max-w-lg">
+            <DialogContent className="w-[min(92vw,40rem)] max-w-lg">
                 <DialogHeader>
-                    <DialogTitle>Share & Publish</DialogTitle>
+                    <DialogTitle>{isTeamPage ? 'Publish' : 'Share & Publish'}</DialogTitle>
                 </DialogHeader>
 
                 <Tabs value={activeTab} onValueChange={(v: string) => setActiveTab(v as 'share' | 'publish')} className="w-full">
-                    <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="share">Share</TabsTrigger>
-                        <TabsTrigger value="publish">Publish</TabsTrigger>
-                    </TabsList>
+                    {!isTeamPage && (
+                        <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="share">Share</TabsTrigger>
+                            <TabsTrigger value="publish">Publish</TabsTrigger>
+                        </TabsList>
+                    )}
 
-                    {/* Share Tab */}
-                    <TabsContent value="share" className="mt-6 space-y-4">
-                        <form onSubmit={handleAddPermission} className="flex flex-col gap-2 sm:flex-row">
-                            <Input
-                                type="email"
-                                placeholder="Enter email address"
-                                value={email}
-                                onChange={e => setEmail(e.target.value)}
-                                disabled={isAdding}
-                                className="flex-1"
-                            />
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="outline" type="button" disabled={isAdding}>
-                                        {ROLE_LABELS[selectedRole]}
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                    <DropdownMenuItem onClick={() => setSelectedRole('EDITOR')}>Can edit</DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => setSelectedRole('VIEWER')}>Can view</DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                            <Button type="submit" disabled={isAdding || !email.trim()}>
-                                {isAdding ? <Loader2 className="size-4 animate-spin" /> : <UserPlus className="size-4" />}
-                            </Button>
-                        </form>
+                    {/* Share Tab - only rendered for non-team pages */}
+                    {!isTeamPage && (
+                        <TabsContent value="share" className="mt-6 space-y-4">
+                            <form onSubmit={handleAddPermission} className="flex flex-col gap-2 sm:flex-row">
+                                <Input
+                                    type="email"
+                                    placeholder="Enter email address"
+                                    value={email}
+                                    onChange={e => setEmail(e.target.value)}
+                                    disabled={isAdding}
+                                    className="flex-1"
+                                />
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="outline" type="button" disabled={isAdding}>
+                                            {ROLE_LABELS[selectedRole]}
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuItem onClick={() => setSelectedRole('EDITOR')}>Can edit</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setSelectedRole('VIEWER')}>Can view</DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                                <Button type="submit" disabled={isAdding || !email.trim()}>
+                                    <UserPlus className="size-4" />
+                                </Button>
+                            </form>
 
-                        <div className="max-h-[300px] space-y-2 overflow-y-auto">
-                            {isLoadingPermissions ? (
-                                <div className="flex justify-center py-8">
-                                    <Loader2 className="text-muted-foreground size-5 animate-spin" />
-                                </div>
-                            ) : permissions.length === 0 ? (
-                                <p className="text-muted-foreground py-8 text-center text-sm">No one has access yet</p>
-                            ) : (
-                                permissions.map(permission => (
-                                    <div
-                                        key={permission.id}
-                                        className="hover:bg-accent/50 flex items-center justify-between gap-3 rounded-lg border p-3 transition-colors">
-                                        <div className="flex min-w-0 items-center gap-3">
-                                            <Avatar className="size-8">
-                                                <AvatarImage src={permission.user.photo || undefined} />
-                                                <AvatarFallback className="text-xs">{getInitials(permission.user.name)}</AvatarFallback>
-                                            </Avatar>
-                                            <div className="min-w-0">
-                                                <p className="truncate text-sm font-medium">{permission.user.name}</p>
-                                                <p className="text-muted-foreground truncate text-xs">{permission.user.email}</p>
+                            <div className="max-h-[300px] space-y-2 overflow-y-auto">
+                                {isLoadingPermissions ? (
+                                    <div className="space-y-2">
+                                        {[1, 2].map(i => (
+                                            <div key={i} className="mx-auto flex w-full max-w-md items-center gap-3 rounded-lg border p-3">
+                                                <Skeleton className="size-8 rounded-full" />
+                                                <div className="w-0 min-w-0 flex-1 space-y-1.5 overflow-hidden">
+                                                    <Skeleton className="h-4 w-28" />
+                                                    <Skeleton className="h-3 w-32" />
+                                                </div>
+                                                <Skeleton className="h-8 w-14" />
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : permissions.length === 0 ? (
+                                    <p className="text-muted-foreground py-8 text-center text-sm">No one has access yet</p>
+                                ) : (
+                                    permissions.map(permission => (
+                                        <div
+                                            key={permission.id}
+                                            className="hover:bg-accent/50 flex items-center justify-between gap-3 rounded-lg border p-3 transition-colors">
+                                            <div className="flex min-w-0 flex-1 items-center gap-3">
+                                                <Avatar className="size-8">
+                                                    <AvatarImage src={permission.user.photo || undefined} />
+                                                    <AvatarFallback className="text-xs">{getInitials(permission.user.name)}</AvatarFallback>
+                                                </Avatar>
+                                                <div className="w-0 min-w-0 flex-1 overflow-hidden">
+                                                    <p className="truncate text-sm font-medium" title={permission.user.name}>
+                                                        {permission.user.name}
+                                                    </p>
+                                                    <p className="text-muted-foreground truncate text-xs" title={permission.user.email}>
+                                                        {permission.user.email}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                {permission.role === 'OWNER' ? (
+                                                    <span className="text-muted-foreground px-2 text-xs">Owner</span>
+                                                ) : (
+                                                    <>
+                                                        <DropdownMenu>
+                                                            <DropdownMenuTrigger asChild>
+                                                                <Button variant="ghost" size="sm" disabled={updatingId === permission.id}>
+                                                                    {ROLE_LABELS[permission.role]}
+                                                                </Button>
+                                                            </DropdownMenuTrigger>
+                                                            <DropdownMenuContent align="end">
+                                                                <DropdownMenuItem onClick={() => handleUpdateRole(permission.id, 'EDITOR')}>
+                                                                    Can edit
+                                                                </DropdownMenuItem>
+                                                                <DropdownMenuItem onClick={() => handleUpdateRole(permission.id, 'VIEWER')}>
+                                                                    Can view
+                                                                </DropdownMenuItem>
+                                                            </DropdownMenuContent>
+                                                        </DropdownMenu>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon-sm"
+                                                            onClick={() => handleRemove(permission.id)}
+                                                            disabled={updatingId === permission.id}>
+                                                            <Trash2 className="text-destructive size-4" />
+                                                        </Button>
+                                                    </>
+                                                )}
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-1">
-                                            {permission.role === 'OWNER' ? (
-                                                <span className="text-muted-foreground px-2 text-xs">Owner</span>
-                                            ) : (
-                                                <>
-                                                    <DropdownMenu>
-                                                        <DropdownMenuTrigger asChild>
-                                                            <Button variant="ghost" size="sm" disabled={updatingId === permission.id}>
-                                                                {updatingId === permission.id ? (
-                                                                    <Loader2 className="size-3 animate-spin" />
-                                                                ) : (
-                                                                    ROLE_LABELS[permission.role]
-                                                                )}
-                                                            </Button>
-                                                        </DropdownMenuTrigger>
-                                                        <DropdownMenuContent align="end">
-                                                            <DropdownMenuItem onClick={() => handleUpdateRole(permission.id, 'EDITOR')}>
-                                                                Can edit
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuItem onClick={() => handleUpdateRole(permission.id, 'VIEWER')}>
-                                                                Can view
-                                                            </DropdownMenuItem>
-                                                        </DropdownMenuContent>
-                                                    </DropdownMenu>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon-sm"
-                                                        onClick={() => handleRemove(permission.id)}
-                                                        disabled={updatingId === permission.id}>
-                                                        <Trash2 className="text-destructive size-4" />
-                                                    </Button>
-                                                </>
-                                            )}
-                                        </div>
-                                    </div>
-                                ))
-                            )}
-                        </div>
-                    </TabsContent>
+                                    ))
+                                )}
+                            </div>
+                        </TabsContent>
+                    )}
 
                     {/* Publish Tab */}
                     <TabsContent value="publish" className="mt-6 space-y-4">
                         {isLoadingPublish ? (
-                            <div className="flex justify-center py-8">
-                                <Loader2 className="text-muted-foreground size-5 animate-spin" />
+                            <div className="mx-auto w-full max-w-md space-y-5">
+                                <div className="rounded-lg border p-4">
+                                    <div className="flex items-start gap-3">
+                                        <Skeleton className="size-5 rounded" />
+                                        <div className="w-0 min-w-0 flex-1 space-y-1.5 overflow-hidden">
+                                            <Skeleton className="h-4 w-28" />
+                                            <Skeleton className="h-3 w-32" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="space-y-3">
+                                    <Skeleton className="h-4 w-20" />
+                                    <Skeleton className="mx-auto h-10 w-full max-w-md" />
+                                </div>
+                                <div className="flex gap-2">
+                                    <Skeleton className="h-10 max-w-44 flex-1" />
+                                    <Skeleton className="h-10 max-w-44 flex-1" />
+                                </div>
                             </div>
                         ) : publish && publish.isActive ? (
                             <div className="space-y-5">
@@ -347,7 +383,8 @@ export function ShareDialog({ open, onOpenChange, pageId }: ShareDialogProps) {
                                                 onClick={handleUpdateSlug}
                                                 disabled={isUpdating || !slug.trim()}
                                                 className="w-full sm:w-auto">
-                                                {isUpdating ? <Loader2 className="size-4 animate-spin" /> : 'Update'}
+                                                {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                                Update
                                             </Button>
                                         )}
                                     </div>
@@ -367,7 +404,7 @@ export function ShareDialog({ open, onOpenChange, pageId }: ShareDialogProps) {
                                 </div>
 
                                 <Button variant="destructive" size="sm" className="w-full" onClick={handleUnpublish} disabled={isUpdating}>
-                                    {isUpdating ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
+                                    {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                     Unpublish
                                 </Button>
                             </div>

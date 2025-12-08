@@ -13,6 +13,22 @@ import {
 } from '@diran/shared/validation/permission.js';
 
 /**
+ * Check if a block is owned by a team (team page).
+ * Returns true if the block has an OWNER permission with teamId set.
+ */
+const isTeamOwnedBlock = async (blockId: string): Promise<boolean> => {
+    const ownerPermission = await db.permission.findFirst({
+        where: {
+            blockId,
+            role: RoleType.OWNER,
+            teamId: { not: null },
+        },
+        select: { teamId: true },
+    });
+    return !!ownerPermission;
+};
+
+/**
  * List all permissions for a block.
  * Requires OWNER role.
  */
@@ -37,10 +53,10 @@ export const listPermissions = async (req: AuthenticatedRequest, reply: FastifyR
     const response = permissions.map(p => ({
         id: p.id,
         user: {
-            id: p.user.id,
-            name: p.user.name,
-            email: p.user.email,
-            photo: p.user.photo,
+            id: p.user?.id,
+            name: p.user?.name,
+            email: p.user?.email,
+            photo: p.user?.photo,
         },
         role: p.role,
         createdAt: p.createdAt.toISOString(),
@@ -52,11 +68,21 @@ export const listPermissions = async (req: AuthenticatedRequest, reply: FastifyR
 /**
  * Add a permission (share block with a user by email).
  * Requires OWNER role.
+ * Not allowed for team-owned pages.
  */
 export const addPermission = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     const { id: blockId } = req.params as BlockIdParamInput;
     const { email, role } = req.body as AddPermissionBodyInput;
     const currentUserId = req.user!.id;
+
+    // Check if this is a team page - sharing not allowed
+    if (await isTeamOwnedBlock(blockId)) {
+        throw new ApiError(
+            'Cannot share team pages. Team pages are automatically shared with team members.',
+            HttpStatus.FORBIDDEN,
+            ErrorCode.PERMISSION_DENIED
+        );
+    }
 
     // Find user by email
     const targetUser = await db.user.findUnique({
@@ -119,11 +145,21 @@ export const addPermission = async (req: AuthenticatedRequest, reply: FastifyRep
 /**
  * Update a permission (change role).
  * Requires OWNER role.
+ * Not allowed for team-owned pages.
  */
 export const updatePermission = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     const { id: blockId, permissionId } = req.params as PermissionIdParamInput;
     const { role } = req.body as UpdatePermissionBodyInput;
     const currentUserId = req.user!.id;
+
+    // Check if this is a team page - sharing modifications not allowed
+    if (await isTeamOwnedBlock(blockId)) {
+        throw new ApiError(
+            'Cannot modify permissions on team pages. Team pages are managed by team membership.',
+            HttpStatus.FORBIDDEN,
+            ErrorCode.PERMISSION_DENIED
+        );
+    }
 
     // Find the permission
     const permission = await db.permission.findUnique({
@@ -161,10 +197,10 @@ export const updatePermission = async (req: AuthenticatedRequest, reply: Fastify
             permission: {
                 id: updated.id,
                 user: {
-                    id: permission.user.id,
-                    name: permission.user.name,
-                    email: permission.user.email,
-                    photo: permission.user.photo,
+                    id: permission.user?.id,
+                    name: permission.user?.name,
+                    email: permission.user?.email,
+                    photo: permission.user?.photo,
                 },
                 role: updated.role,
                 createdAt: updated.createdAt.toISOString(),
@@ -177,10 +213,20 @@ export const updatePermission = async (req: AuthenticatedRequest, reply: Fastify
 /**
  * Remove a permission.
  * Requires OWNER role.
+ * Not allowed for team-owned pages.
  */
 export const removePermission = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     const { id: blockId, permissionId } = req.params as PermissionIdParamInput;
     const currentUserId = req.user!.id;
+
+    // Check if this is a team page - sharing modifications not allowed
+    if (await isTeamOwnedBlock(blockId)) {
+        throw new ApiError(
+            'Cannot modify permissions on team pages. Team pages are managed by team membership.',
+            HttpStatus.FORBIDDEN,
+            ErrorCode.PERMISSION_DENIED
+        );
+    }
 
     // Find the permission
     const permission = await db.permission.findUnique({

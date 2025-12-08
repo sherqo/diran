@@ -90,7 +90,7 @@ export function EditPageDialog({ open, onOpenChange, page }: EditPageDialogProps
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="w-[calc(100%-2rem)] max-w-md">
+            <DialogContent className="w-[min(92vw,32rem)] max-w-md">
                 <DialogHeader>
                     <DialogTitle>Edit Page</DialogTitle>
                 </DialogHeader>
@@ -123,7 +123,7 @@ export function EditPageDialog({ open, onOpenChange, page }: EditPageDialogProps
                         </Button>
                         <Button type="submit" disabled={isSaving || !pageName.trim()} className="flex-1 sm:flex-initial">
                             {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            {isSaving ? 'Saving...' : 'Save Changes'}
+                            Save Changes
                         </Button>
                     </DialogFooter>
                 </form>

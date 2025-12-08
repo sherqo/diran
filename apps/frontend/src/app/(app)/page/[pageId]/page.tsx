@@ -4,12 +4,13 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { usePage } from '@/contexts/PageContext';
 import { PageHeader } from '@/components/page-header';
-import { Loader2 } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Editor } from '@/components/features/editor/DynamicEditor';
 import { EditablePageTitle } from '@/components/features/editable-page-title';
 import type { PartialBlock, BlockNoteEditor } from '@blocknote/core';
 import type { EmbeddedBlockContent, ApiBlock } from '@/shared/types/block';
 import { getBlockTreeApi } from '@/lib/api/block';
+import NotFoundInline from '@/components/not-found-inline';
 
 export default function PageView() {
     const params = useParams();
@@ -106,30 +107,36 @@ export default function PageView() {
     if (pageLoading) {
         return (
             <>
-                <PageHeader title="Loading..." />
-                <div className="flex flex-1 items-center justify-center">
-                    <Loader2 className="h-8 w-8 animate-spin" />
-                </div>
-            </>
-        );
-    }
-
-    if (!currentPage) {
-        return (
-            <>
-                <PageHeader title="Error" />
-                <div className="flex flex-1 items-center justify-center">
-                    <div className="text-center">
-                        <p className="text-destructive text-lg">Page not found</p>
+                <PageHeader title="" loading />
+                <div className="flex-1 overflow-y-auto">
+                    <div className="container mx-auto max-w-4xl px-4 pt-10 pb-40">
+                        {/* Title skeleton - icon above title */}
+                        <div className="mb-4">
+                            <Skeleton className="mb-2 h-12 w-12 rounded-lg" />
+                            <Skeleton className="h-10 w-72" />
+                        </div>
+                        {/* Content skeleton */}
+                        <div className="space-y-4 pt-4">
+                            <Skeleton className="h-5 w-full" />
+                            <Skeleton className="h-5 w-4/5" />
+                            <Skeleton className="h-5 w-3/4" />
+                            <div className="py-2" />
+                            <Skeleton className="h-5 w-full" />
+                            <Skeleton className="h-5 w-2/3" />
+                        </div>
                     </div>
                 </div>
             </>
         );
     }
 
+    if (!currentPage) {
+        return <NotFoundInline />;
+    }
+
     return (
         <>
-            <PageHeader title={pageTitle} icon={pageIcon} pageId={pageId} role={currentPage.role} />
+            <PageHeader title={pageTitle} icon={pageIcon} pageId={pageId} role={currentPage.role} isTeamPage={currentPage.isTeamPage} />
             <div className="flex-1 overflow-y-auto">
                 <div className="container mx-auto max-w-4xl px-4 pt-10 pb-40">
                     <EditablePageTitle
@@ -140,8 +147,13 @@ export default function PageView() {
                     />
 
                     {initialContent === null ? (
-                        <div className="flex items-center justify-center p-10">
-                            <Loader2 className="h-8 w-8 animate-spin" />
+                        <div className="space-y-4 pt-4">
+                            <Skeleton className="h-5 w-full" />
+                            <Skeleton className="h-5 w-4/5" />
+                            <Skeleton className="h-5 w-3/4" />
+                            <div className="py-2" />
+                            <Skeleton className="h-5 w-full" />
+                            <Skeleton className="h-5 w-2/3" />
                         </div>
                     ) : (
                         <Editor

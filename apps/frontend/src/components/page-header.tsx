@@ -9,6 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Skeleton } from '@/components/ui/skeleton';
 import { ShareDialog } from '@/components/features/share-dialog';
 import SyncStatusIndicator from './features/editor/SyncStatusIndicator';
 
@@ -17,9 +18,11 @@ interface PageHeaderProps {
     icon?: string;
     pageId?: string;
     role?: string | null;
+    loading?: boolean;
+    isTeamPage?: boolean;
 }
 
-export function PageHeader({ title, icon, pageId, role }: PageHeaderProps) {
+export function PageHeader({ title, icon, pageId, role, loading, isTeamPage = false }: PageHeaderProps) {
     const [shareOpen, setShareOpen] = React.useState(false);
     const isOwner = role === 'OWNER';
     const canShare = isOwner && pageId;
@@ -29,20 +32,31 @@ export function PageHeader({ title, icon, pageId, role }: PageHeaderProps) {
             <div className="flex flex-1 items-center gap-2 px-3">
                 <SidebarTrigger />
                 <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
-                <Breadcrumb>
-                    <BreadcrumbList>
-                        <BreadcrumbItem>
-                            <BreadcrumbPage className="line-clamp-1 flex items-center gap-1.5">
-                                {icon && <span>{icon}</span>}
-                                {title}
-                            </BreadcrumbPage>
-                        </BreadcrumbItem>
-                    </BreadcrumbList>
-                </Breadcrumb>
-                <SyncStatusIndicator />
+                {loading ? (
+                    <div className="flex items-center gap-1.5">
+                        <Skeleton className="h-4 w-4 rounded" />
+                        <Skeleton className="h-4 w-32" />
+                    </div>
+                ) : (
+                    <Breadcrumb>
+                        <BreadcrumbList>
+                            <BreadcrumbItem>
+                                <BreadcrumbPage className="line-clamp-1 flex min-w-0 items-center gap-1.5">
+                                    {icon && <span className="shrink-0">{icon}</span>}
+                                    <span className="max-w-[40vw] truncate sm:max-w-[40ch]" title={title}>
+                                        {title}
+                                    </span>
+                                </BreadcrumbPage>
+                            </BreadcrumbItem>
+                        </BreadcrumbList>
+                    </Breadcrumb>
+                )}
+                {!loading && <SyncStatusIndicator />}
             </div>
             <div className="ml-auto flex items-center gap-1 px-3">
-                {pageId && (
+                {loading ? (
+                    <Skeleton className="h-8 w-16 rounded-md" />
+                ) : pageId ? (
                     <>
                         {canShare ? (
                             <>
@@ -50,12 +64,12 @@ export function PageHeader({ title, icon, pageId, role }: PageHeaderProps) {
                                     <TooltipTrigger asChild>
                                         <Button variant="ghost" size="sm" onClick={() => setShareOpen(true)} className="gap-1.5">
                                             <Users className="size-4" />
-                                            <span className="hidden sm:inline">Share</span>
+                                            <span className="hidden sm:inline">{isTeamPage ? 'Publish' : 'Share'}</span>
                                         </Button>
                                     </TooltipTrigger>
-                                    <TooltipContent>Share this page</TooltipContent>
+                                    <TooltipContent>{isTeamPage ? 'Publish' : 'Share'} this page</TooltipContent>
                                 </Tooltip>
-                                <ShareDialog open={shareOpen} onOpenChange={setShareOpen} pageId={pageId} />
+                                <ShareDialog open={shareOpen} onOpenChange={setShareOpen} pageId={pageId} isTeamPage={isTeamPage} />
                             </>
                         ) : role ? (
                             <Tooltip>
@@ -69,7 +83,7 @@ export function PageHeader({ title, icon, pageId, role }: PageHeaderProps) {
                             </Tooltip>
                         ) : null}
                     </>
-                )}
+                ) : null}
                 <NavActions />
             </div>
         </header>

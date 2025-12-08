@@ -17,30 +17,30 @@ import {
  */
 export async function registerPermissionRoutes(fastify: FastifyInstance): Promise<void> {
     // All permission routes require auth + owner role
-    fastify.addHook('preHandler', auth);
-    fastify.addHook('preHandler', requireOwnerRole);
+    // fastify.addHook('preHandler', auth);
+    // fastify.addHook('preHandler', requireOwnerRole);
 
     // List all permissions for a block
     fastify.get('/', {
-        preHandler: [vr({ paramsSchema: blockIdParamSchema })],
+        preHandler: [vr({ paramsSchema: blockIdParamSchema }), auth, requireOwnerRole],
         handler: listPermissions,
     });
 
     // Add a permission (share with user by email)
     fastify.post('/', {
-        preHandler: [vr({ paramsSchema: blockIdParamSchema, bodySchema: addPermissionBodySchema })],
+        preHandler: [vr({ paramsSchema: blockIdParamSchema, bodySchema: addPermissionBodySchema }), auth, requireOwnerRole],
         handler: addPermission,
     });
 
     // Update a permission (change role)
     fastify.put('/:permissionId', {
-        preHandler: [vr({ paramsSchema: permissionIdParamSchema, bodySchema: updatePermissionBodySchema })],
+        preHandler: [vr({ paramsSchema: permissionIdParamSchema, bodySchema: updatePermissionBodySchema }), auth, requireOwnerRole],
         handler: updatePermission,
     });
 
     // Remove a permission
     fastify.delete('/:permissionId', {
-        preHandler: [vr({ paramsSchema: permissionIdParamSchema })],
+        preHandler: [vr({ paramsSchema: permissionIdParamSchema }), auth, requireOwnerRole],
         handler: removePermission,
     });
 }

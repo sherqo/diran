@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Loader2 } from 'lucide-react';
 import { onSyncStatusChange, SyncStatus } from './changes-engine';
 
 export default function SyncStatusIndicator() {
@@ -9,10 +10,16 @@ export default function SyncStatusIndicator() {
         return unsubscribe;
     }, []);
 
+    if (status === 'saved') return null;
+
     return (
         <div className="text-xs">
-            {status === 'saved' && <span className="text-muted-foreground">Saved</span>}
-            {status === 'saving' && <span className="text-muted-foreground animate-pulse">Saving...</span>}
+            {status === 'saving' && (
+                <span className="text-muted-foreground flex items-center gap-1">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    Saving
+                </span>
+            )}
             {status === 'error' && <span className="text-destructive">Error saving</span>}
         </div>
     );
