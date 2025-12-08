@@ -6,7 +6,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import Link from 'next/link';
 
-import { SidebarMenuSubButton, SidebarMenuSubItem, SidebarMenuAction } from '@/components/ui/sidebar';
+import { SidebarMenuButton, SidebarMenuItem, SidebarMenuAction } from '@/components/ui/sidebar';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -73,13 +73,13 @@ export function SortableTeamPageItem({
     };
 
     return (
-        <SidebarMenuSubItem ref={setNodeRef} style={style} {...attributes} {...listeners}>
-            <SidebarMenuSubButton asChild isActive={isActive}>
+        <SidebarMenuItem ref={setNodeRef} style={style} {...attributes} {...listeners}>
+            <SidebarMenuButton asChild isActive={isActive} size="sm">
                 <Link scroll={false} href={`/page/${page.id}`} onClick={handleClick}>
                     {pageIcon ? <span className="text-base">{pageIcon}</span> : <FileText className="h-4 w-4" />}
                     <span>{pageName}</span>
                 </Link>
-            </SidebarMenuSubButton>
+            </SidebarMenuButton>
 
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -88,10 +88,7 @@ export function SortableTeamPageItem({
                         <span className="sr-only">More</span>
                     </SidebarMenuAction>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent
-                    className="z-50 w-56 rounded-lg"
-                    side={isMobile ? 'bottom' : 'right'}
-                    align={isMobile ? 'end' : 'start'}>
+                <DropdownMenuContent className="w-56 rounded-lg" side={isMobile ? 'bottom' : 'right'} align={isMobile ? 'end' : 'start'}>
                     {canEdit && (
                         <DropdownMenuItem onClick={() => onEditClick(page)}>
                             <Pencil className="text-muted-foreground" />
@@ -120,6 +117,6 @@ export function SortableTeamPageItem({
                     )}
                 </DropdownMenuContent>
             </DropdownMenu>
-        </SidebarMenuSubItem>
+        </SidebarMenuItem>
     );
 }

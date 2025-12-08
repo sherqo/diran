@@ -14,8 +14,6 @@ import {
     SidebarMenuAction,
     SidebarMenuButton,
     SidebarMenuItem,
-    SidebarMenuSub,
-    SidebarMenuSubItem,
     useSidebar,
 } from '@/components/ui/sidebar';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -252,16 +250,16 @@ export function NavTeams() {
 
                                     <CollapsibleContent>
                                         {loadingTeamId === team.id ? (
-                                            <SidebarMenuSub>
+                                            <SidebarMenu className="ml-4 border-l pl-2">
                                                 {[1, 2, 3].map(i => (
-                                                    <SidebarMenuSubItem key={i}>
-                                                        <div className="flex items-center gap-2 px-2 py-1.5">
+                                                    <SidebarMenuItem key={i}>
+                                                        <SidebarMenuButton size="sm">
                                                             <Skeleton className="h-4 w-4" />
                                                             <Skeleton className="h-3.5 w-20" />
-                                                        </div>
-                                                    </SidebarMenuSubItem>
+                                                        </SidebarMenuButton>
+                                                    </SidebarMenuItem>
                                                 ))}
-                                            </SidebarMenuSub>
+                                            </SidebarMenu>
                                         ) : teamPages[team.id] ? (
                                             <TeamPagesList
                                                 teamId={team.id}
@@ -379,7 +377,7 @@ function TeamPagesList({ teamId, pages, setPages, canEdit, isMobile, sensors, on
                 onDragEnd={handleDragEnd}
                 onDragCancel={handleDragCancel}>
                 <SortableContext items={pageIds} strategy={verticalListSortingStrategy}>
-                    <SidebarMenuSub>
+                    <SidebarMenu className="ml-4 border-l pl-2">
                         {pages.map(page => (
                             <SortableTeamPageItem
                                 key={page.id}
@@ -395,16 +393,14 @@ function TeamPagesList({ teamId, pages, setPages, canEdit, isMobile, sensors, on
                             />
                         ))}
                         {canEdit && (
-                            <SidebarMenuSubItem>
-                                <button
-                                    className="text-muted-foreground hover:text-foreground flex w-full items-center gap-2 px-2 py-1.5 text-sm"
-                                    onClick={onCreatePage}>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton size="sm" onClick={onCreatePage} className="text-muted-foreground">
                                     <Plus className="h-4 w-4" />
                                     <span>Add page</span>
-                                </button>
-                            </SidebarMenuSubItem>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
                         )}
-                    </SidebarMenuSub>
+                    </SidebarMenu>
                 </SortableContext>
                 <DragOverlay>
                     {activePage ? (

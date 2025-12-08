@@ -73,7 +73,10 @@ export function SortablePageItem({
                         <span className="sr-only">More</span>
                     </SidebarMenuAction>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 rounded-lg" side={isMobile ? 'bottom' : 'right'} align={isMobile ? 'end' : 'start'}>
+                <DropdownMenuContent
+                    className="z-50 w-56 rounded-lg"
+                    side={isMobile ? 'bottom' : 'right'}
+                    align={isMobile ? 'end' : 'start'}>
                     <DropdownMenuItem onClick={() => onEditClick(page)}>
                         <Pencil className="text-muted-foreground" />
                         <span>Edit</span>
