@@ -238,13 +238,13 @@ export function NavTeams() {
                                             className="w-56 rounded-lg"
                                             side={isMobile ? 'bottom' : 'right'}
                                             align={isMobile ? 'end' : 'start'}>
-                                            <DropdownMenuItem onClick={() => handleOpenCreatePageDialog(team)}>
-                                                <Plus className="text-muted-foreground" />
-                                                <span>New page</span>
-                                            </DropdownMenuItem>
                                             <DropdownMenuItem onClick={() => handleOpenTeamSettings(team)}>
                                                 <Settings className="text-muted-foreground" />
                                                 <span>Team settings</span>
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => handleOpenCreatePageDialog(team)}>
+                                                <Plus className="text-muted-foreground" />
+                                                <span>New page</span>
                                             </DropdownMenuItem>
                                         </DropdownMenuContent>
                                     </DropdownMenu>
