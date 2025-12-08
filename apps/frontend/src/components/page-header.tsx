@@ -19,9 +19,10 @@ interface PageHeaderProps {
     pageId?: string;
     role?: string | null;
     loading?: boolean;
+    isTeamPage?: boolean;
 }
 
-export function PageHeader({ title, icon, pageId, role, loading }: PageHeaderProps) {
+export function PageHeader({ title, icon, pageId, role, loading, isTeamPage = false }: PageHeaderProps) {
     const [shareOpen, setShareOpen] = React.useState(false);
     const isOwner = role === 'OWNER';
     const canShare = isOwner && pageId;
@@ -61,12 +62,12 @@ export function PageHeader({ title, icon, pageId, role, loading }: PageHeaderPro
                                     <TooltipTrigger asChild>
                                         <Button variant="ghost" size="sm" onClick={() => setShareOpen(true)} className="gap-1.5">
                                             <Users className="size-4" />
-                                            <span className="hidden sm:inline">Share</span>
+                                            <span className="hidden sm:inline">{isTeamPage ? 'Publish' : 'Share'}</span>
                                         </Button>
                                     </TooltipTrigger>
-                                    <TooltipContent>Share this page</TooltipContent>
+                                    <TooltipContent>{isTeamPage ? 'Publish' : 'Share'} this page</TooltipContent>
                                 </Tooltip>
-                                <ShareDialog open={shareOpen} onOpenChange={setShareOpen} pageId={pageId} />
+                                <ShareDialog open={shareOpen} onOpenChange={setShareOpen} pageId={pageId} isTeamPage={isTeamPage} />
                             </>
                         ) : role ? (
                             <Tooltip>

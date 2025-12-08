@@ -23,6 +23,7 @@ interface ShareDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     pageId: string;
+    isTeamPage?: boolean;
 }
 
 const ROLE_LABELS: Record<string, string> = {
@@ -31,8 +32,8 @@ const ROLE_LABELS: Record<string, string> = {
     VIEWER: 'Can view',
 };
 
-export function ShareDialog({ open, onOpenChange, pageId }: ShareDialogProps) {
-    const [activeTab, setActiveTab] = React.useState<'share' | 'publish'>('share');
+export function ShareDialog({ open, onOpenChange, pageId, isTeamPage = false }: ShareDialogProps) {
+    const [activeTab, setActiveTab] = React.useState<'share' | 'publish'>(isTeamPage ? 'publish' : 'share');
 
     // Share state
     const [permissions, setPermissions] = React.useState<PermissionResponse[]>([]);
@@ -76,10 +77,15 @@ export function ShareDialog({ open, onOpenChange, pageId }: ShareDialogProps) {
     // Fetch data when dialog opens
     React.useEffect(() => {
         if (open && pageId) {
-            fetchPermissions();
+            // Only fetch permissions for non-team pages
+            if (!isTeamPage) {
+                fetchPermissions();
+            }
             fetchPublish();
+            // Set the correct default tab based on page type
+            setActiveTab(isTeamPage ? 'publish' : 'share');
         }
-    }, [open, pageId, fetchPermissions, fetchPublish]);
+    }, [open, pageId, isTeamPage, fetchPermissions, fetchPublish]);
 
     // Reset form when dialog closes
     React.useEffect(() => {
@@ -214,108 +220,112 @@ export function ShareDialog({ open, onOpenChange, pageId }: ShareDialogProps) {
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="w-[calc(100%-2rem)] max-w-lg">
                 <DialogHeader>
-                    <DialogTitle>Share & Publish</DialogTitle>
+                    <DialogTitle>{isTeamPage ? 'Publish' : 'Share & Publish'}</DialogTitle>
                 </DialogHeader>
 
                 <Tabs value={activeTab} onValueChange={(v: string) => setActiveTab(v as 'share' | 'publish')} className="w-full">
-                    <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="share">Share</TabsTrigger>
-                        <TabsTrigger value="publish">Publish</TabsTrigger>
-                    </TabsList>
+                    {!isTeamPage && (
+                        <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="share">Share</TabsTrigger>
+                            <TabsTrigger value="publish">Publish</TabsTrigger>
+                        </TabsList>
+                    )}
 
-                    {/* Share Tab */}
-                    <TabsContent value="share" className="mt-6 space-y-4">
-                        <form onSubmit={handleAddPermission} className="flex flex-col gap-2 sm:flex-row">
-                            <Input
-                                type="email"
-                                placeholder="Enter email address"
-                                value={email}
-                                onChange={e => setEmail(e.target.value)}
-                                disabled={isAdding}
-                                className="flex-1"
-                            />
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="outline" type="button" disabled={isAdding}>
-                                        {ROLE_LABELS[selectedRole]}
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                    <DropdownMenuItem onClick={() => setSelectedRole('EDITOR')}>Can edit</DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => setSelectedRole('VIEWER')}>Can view</DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                            <Button type="submit" disabled={isAdding || !email.trim()}>
-                                <UserPlus className="size-4" />
-                            </Button>
-                        </form>
+                    {/* Share Tab - only rendered for non-team pages */}
+                    {!isTeamPage && (
+                        <TabsContent value="share" className="mt-6 space-y-4">
+                            <form onSubmit={handleAddPermission} className="flex flex-col gap-2 sm:flex-row">
+                                <Input
+                                    type="email"
+                                    placeholder="Enter email address"
+                                    value={email}
+                                    onChange={e => setEmail(e.target.value)}
+                                    disabled={isAdding}
+                                    className="flex-1"
+                                />
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="outline" type="button" disabled={isAdding}>
+                                            {ROLE_LABELS[selectedRole]}
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuItem onClick={() => setSelectedRole('EDITOR')}>Can edit</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setSelectedRole('VIEWER')}>Can view</DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                                <Button type="submit" disabled={isAdding || !email.trim()}>
+                                    <UserPlus className="size-4" />
+                                </Button>
+                            </form>
 
-                        <div className="max-h-[300px] space-y-2 overflow-y-auto">
-                            {isLoadingPermissions ? (
-                                <div className="space-y-2">
-                                    {[1, 2].map(i => (
-                                        <div key={i} className="flex items-center gap-3 rounded-lg border p-3">
-                                            <Skeleton className="size-8 rounded-full" />
-                                            <div className="flex-1 space-y-1.5">
-                                                <Skeleton className="h-4 w-32" />
-                                                <Skeleton className="h-3 w-40" />
+                            <div className="max-h-[300px] space-y-2 overflow-y-auto">
+                                {isLoadingPermissions ? (
+                                    <div className="space-y-2">
+                                        {[1, 2].map(i => (
+                                            <div key={i} className="flex items-center gap-3 rounded-lg border p-3">
+                                                <Skeleton className="size-8 rounded-full" />
+                                                <div className="flex-1 space-y-1.5">
+                                                    <Skeleton className="h-4 w-32" />
+                                                    <Skeleton className="h-3 w-40" />
+                                                </div>
+                                                <Skeleton className="h-8 w-20" />
                                             </div>
-                                            <Skeleton className="h-8 w-20" />
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : permissions.length === 0 ? (
-                                <p className="text-muted-foreground py-8 text-center text-sm">No one has access yet</p>
-                            ) : (
-                                permissions.map(permission => (
-                                    <div
-                                        key={permission.id}
-                                        className="hover:bg-accent/50 flex items-center justify-between gap-3 rounded-lg border p-3 transition-colors">
-                                        <div className="flex min-w-0 items-center gap-3">
-                                            <Avatar className="size-8">
-                                                <AvatarImage src={permission.user.photo || undefined} />
-                                                <AvatarFallback className="text-xs">{getInitials(permission.user.name)}</AvatarFallback>
-                                            </Avatar>
-                                            <div className="min-w-0">
-                                                <p className="truncate text-sm font-medium">{permission.user.name}</p>
-                                                <p className="text-muted-foreground truncate text-xs">{permission.user.email}</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                            {permission.role === 'OWNER' ? (
-                                                <span className="text-muted-foreground px-2 text-xs">Owner</span>
-                                            ) : (
-                                                <>
-                                                    <DropdownMenu>
-                                                        <DropdownMenuTrigger asChild>
-                                                            <Button variant="ghost" size="sm" disabled={updatingId === permission.id}>
-                                                                {ROLE_LABELS[permission.role]}
-                                                            </Button>
-                                                        </DropdownMenuTrigger>
-                                                        <DropdownMenuContent align="end">
-                                                            <DropdownMenuItem onClick={() => handleUpdateRole(permission.id, 'EDITOR')}>
-                                                                Can edit
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuItem onClick={() => handleUpdateRole(permission.id, 'VIEWER')}>
-                                                                Can view
-                                                            </DropdownMenuItem>
-                                                        </DropdownMenuContent>
-                                                    </DropdownMenu>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon-sm"
-                                                        onClick={() => handleRemove(permission.id)}
-                                                        disabled={updatingId === permission.id}>
-                                                        <Trash2 className="text-destructive size-4" />
-                                                    </Button>
-                                                </>
-                                            )}
-                                        </div>
+                                        ))}
                                     </div>
-                                ))
-                            )}
-                        </div>
-                    </TabsContent>
+                                ) : permissions.length === 0 ? (
+                                    <p className="text-muted-foreground py-8 text-center text-sm">No one has access yet</p>
+                                ) : (
+                                    permissions.map(permission => (
+                                        <div
+                                            key={permission.id}
+                                            className="hover:bg-accent/50 flex items-center justify-between gap-3 rounded-lg border p-3 transition-colors">
+                                            <div className="flex min-w-0 items-center gap-3">
+                                                <Avatar className="size-8">
+                                                    <AvatarImage src={permission.user.photo || undefined} />
+                                                    <AvatarFallback className="text-xs">{getInitials(permission.user.name)}</AvatarFallback>
+                                                </Avatar>
+                                                <div className="min-w-0">
+                                                    <p className="truncate text-sm font-medium">{permission.user.name}</p>
+                                                    <p className="text-muted-foreground truncate text-xs">{permission.user.email}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                {permission.role === 'OWNER' ? (
+                                                    <span className="text-muted-foreground px-2 text-xs">Owner</span>
+                                                ) : (
+                                                    <>
+                                                        <DropdownMenu>
+                                                            <DropdownMenuTrigger asChild>
+                                                                <Button variant="ghost" size="sm" disabled={updatingId === permission.id}>
+                                                                    {ROLE_LABELS[permission.role]}
+                                                                </Button>
+                                                            </DropdownMenuTrigger>
+                                                            <DropdownMenuContent align="end">
+                                                                <DropdownMenuItem onClick={() => handleUpdateRole(permission.id, 'EDITOR')}>
+                                                                    Can edit
+                                                                </DropdownMenuItem>
+                                                                <DropdownMenuItem onClick={() => handleUpdateRole(permission.id, 'VIEWER')}>
+                                                                    Can view
+                                                                </DropdownMenuItem>
+                                                            </DropdownMenuContent>
+                                                        </DropdownMenu>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon-sm"
+                                                            onClick={() => handleRemove(permission.id)}
+                                                            disabled={updatingId === permission.id}>
+                                                            <Trash2 className="text-destructive size-4" />
+                                                        </Button>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </TabsContent>
+                    )}
 
                     {/* Publish Tab */}
                     <TabsContent value="publish" className="mt-6 space-y-4">

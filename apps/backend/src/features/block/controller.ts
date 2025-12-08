@@ -227,6 +227,20 @@ const getBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Promise
         throw new ApiError('Block not found', HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND);
     }
 
+    // Check if this is a team page (has an OWNER permission with teamId set)
+    let isTeamPage = false;
+    if (found.type === BlockType.page && !found.parentId) {
+        const ownerPermission = await db.permission.findFirst({
+            where: {
+                blockId: id,
+                role: RoleType.OWNER,
+                teamId: { not: null },
+            },
+            select: { teamId: true },
+        });
+        isTeamPage = !!ownerPermission;
+    }
+
     const block = {
         id: found.id,
         type: found.type,
@@ -234,6 +248,7 @@ const getBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Promise
         order: found.order,
         content: found.content,
         role: req.permissions?.role || null, // Role from middleware
+        isTeamPage,
         createdAt: found.createdAt.toISOString(),
         updatedAt: found.updatedAt.toISOString(),
     };

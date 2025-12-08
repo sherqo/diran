@@ -7,6 +7,7 @@ import type { ApiBlock } from '@/shared/types/block';
 // TODO: Define Page type properly in diran/shared and import here and define the inner content
 export interface Page extends ApiBlock {
     role?: string;
+    isTeamPage?: boolean;
 }
 
 interface PageContextType {
