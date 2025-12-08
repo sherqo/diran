@@ -90,20 +90,20 @@ export function EditPageDialog({ open, onOpenChange, page }: EditPageDialogProps
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="w-[calc(100%-2rem)] max-w-md">
                 <DialogHeader>
                     <DialogTitle>Edit Page</DialogTitle>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="space-y-2">
-                        <div className="flex items-center gap-2">
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="space-y-3">
+                        <div className="flex items-center gap-3">
                             <EmojiPicker value={pageIcon} onChange={setPageIcon} disabled={isSaving} />
                             <Input
                                 id="pageName"
                                 value={pageName}
                                 onChange={e => setPageName(e.target.value)}
-                                placeholder="Enter page name"
+                                placeholder="Page name"
                                 autoFocus
                                 disabled={isSaving}
                                 className="flex-1"
@@ -112,11 +112,16 @@ export function EditPageDialog({ open, onOpenChange, page }: EditPageDialogProps
                         {error && <p className="text-destructive text-sm">{error}</p>}
                     </div>
 
-                    <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSaving}>
+                    <DialogFooter className="gap-2 sm:gap-2">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => onOpenChange(false)}
+                            disabled={isSaving}
+                            className="flex-1 sm:flex-initial">
                             Cancel
                         </Button>
-                        <Button type="submit" disabled={isSaving || !pageName.trim()}>
+                        <Button type="submit" disabled={isSaving || !pageName.trim()} className="flex-1 sm:flex-initial">
                             {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             {isSaving ? 'Saving...' : 'Save Changes'}
                         </Button>

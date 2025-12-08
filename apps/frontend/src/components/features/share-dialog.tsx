@@ -207,9 +207,9 @@ export function ShareDialog({ open, onOpenChange, pageId }: ShareDialogProps) {
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="w-[calc(100%-2rem)] max-w-lg">
                 <DialogHeader>
-                    <DialogTitle className="sr-only">Share & Publish</DialogTitle>
+                    <DialogTitle>Share & Publish</DialogTitle>
                 </DialogHeader>
 
                 <Tabs value={activeTab} onValueChange={(v: string) => setActiveTab(v as 'share' | 'publish')} className="w-full">
@@ -219,8 +219,8 @@ export function ShareDialog({ open, onOpenChange, pageId }: ShareDialogProps) {
                     </TabsList>
 
                     {/* Share Tab */}
-                    <TabsContent value="share" className="mt-4">
-                        <form onSubmit={handleAddPermission} className="flex gap-2">
+                    <TabsContent value="share" className="mt-6 space-y-4">
+                        <form onSubmit={handleAddPermission} className="flex flex-col gap-2 sm:flex-row">
                             <Input
                                 type="email"
                                 placeholder="Enter email address"
@@ -245,16 +245,18 @@ export function ShareDialog({ open, onOpenChange, pageId }: ShareDialogProps) {
                             </Button>
                         </form>
 
-                        <div className="mt-4 max-h-64 space-y-2 overflow-y-auto">
+                        <div className="max-h-[300px] space-y-2 overflow-y-auto">
                             {isLoadingPermissions ? (
-                                <div className="flex justify-center py-4">
-                                    <Loader2 className="text-muted-foreground size-6 animate-spin" />
+                                <div className="flex justify-center py-8">
+                                    <Loader2 className="text-muted-foreground size-5 animate-spin" />
                                 </div>
                             ) : permissions.length === 0 ? (
-                                <p className="text-muted-foreground py-4 text-center text-sm">No one else has access yet</p>
+                                <p className="text-muted-foreground py-8 text-center text-sm">No one has access yet</p>
                             ) : (
                                 permissions.map(permission => (
-                                    <div key={permission.id} className="flex items-center justify-between gap-3 rounded-lg border p-3">
+                                    <div
+                                        key={permission.id}
+                                        className="hover:bg-accent/50 flex items-center justify-between gap-3 rounded-lg border p-3 transition-colors">
                                         <div className="flex min-w-0 items-center gap-3">
                                             <Avatar className="size-8">
                                                 <AvatarImage src={permission.user.photo || undefined} />
@@ -306,24 +308,26 @@ export function ShareDialog({ open, onOpenChange, pageId }: ShareDialogProps) {
                     </TabsContent>
 
                     {/* Publish Tab */}
-                    <TabsContent value="publish" className="mt-4">
+                    <TabsContent value="publish" className="mt-6 space-y-4">
                         {isLoadingPublish ? (
                             <div className="flex justify-center py-8">
-                                <Loader2 className="text-muted-foreground size-6 animate-spin" />
+                                <Loader2 className="text-muted-foreground size-5 animate-spin" />
                             </div>
                         ) : publish ? (
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-2 rounded-lg border border-green-500/20 bg-green-500/10 p-3">
-                                    <Globe className="size-5 text-green-500" />
-                                    <div className="flex-1">
-                                        <p className="text-sm font-medium">This page is live</p>
+                            <div className="space-y-5">
+                                <div className="flex items-start gap-3 rounded-lg border border-green-500/30 bg-green-500/10 p-4">
+                                    <Globe className="mt-0.5 size-5 shrink-0 text-green-600 dark:text-green-500" />
+                                    <div className="min-w-0 flex-1">
+                                        <p className="text-sm font-medium">Page is live</p>
                                         <p className="text-muted-foreground text-xs">Anyone with the link can view</p>
                                     </div>
                                 </div>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="slug">Public URL</Label>
-                                    <div className="flex gap-2">
+                                <div className="space-y-3">
+                                    <Label htmlFor="slug" className="text-sm font-medium">
+                                        Public URL
+                                    </Label>
+                                    <div className="flex flex-col gap-2 sm:flex-row">
                                         <div className="bg-muted flex flex-1 items-center rounded-md border px-3">
                                             <span className="text-muted-foreground text-sm">s/</span>
                                             <Input
@@ -335,63 +339,67 @@ export function ShareDialog({ open, onOpenChange, pageId }: ShareDialogProps) {
                                             />
                                         </div>
                                         {slug !== publish.slug && (
-                                            <Button onClick={handleUpdateSlug} disabled={isUpdating || !slug.trim()}>
-                                                {isUpdating ? <Loader2 className="size-4 animate-spin" /> : 'Save'}
+                                            <Button
+                                                onClick={handleUpdateSlug}
+                                                disabled={isUpdating || !slug.trim()}
+                                                className="w-full sm:w-auto">
+                                                {isUpdating ? <Loader2 className="size-4 animate-spin" /> : 'Update'}
                                             </Button>
                                         )}
                                     </div>
                                 </div>
 
-                                <div className="flex gap-2">
+                                <div className="flex flex-col gap-2 sm:flex-row">
                                     <Button variant="outline" className="flex-1" onClick={handleCopyLink}>
                                         {copied ? <Check className="mr-2 size-4" /> : <Copy className="mr-2 size-4" />}
-                                        {copied ? 'Copied!' : 'Copy link'}
+                                        {copied ? 'Copied' : 'Copy'}
                                     </Button>
-                                    <Button variant="outline" asChild>
-                                        <a href={`/s/${publish.slug}`} target="_blank" rel="noopener noreferrer">
+                                    <Button variant="outline" className="flex-1" asChild>
+                                        <a href={`/page/s/${publish.slug}`} target="_blank" rel="noopener noreferrer">
                                             <LinkIcon className="mr-2 size-4" />
                                             Open
                                         </a>
                                     </Button>
                                 </div>
 
-                                <Button variant="destructive" className="w-full" onClick={handleUnpublish} disabled={isUpdating}>
+                                <Button variant="destructive" size="sm" className="w-full" onClick={handleUnpublish} disabled={isUpdating}>
                                     {isUpdating ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
                                     Unpublish
                                 </Button>
                             </div>
                         ) : (
-                            <form onSubmit={handlePublish} className="space-y-4">
-                                <div className="text-muted-foreground flex flex-col items-center gap-2 py-4 text-center">
-                                    <Globe className="size-10 opacity-50" />
-                                    <p className="text-sm">Publish this page to share it with anyone</p>
+                            <form onSubmit={handlePublish} className="space-y-5">
+                                <div className="text-muted-foreground flex flex-col items-center gap-3 py-6 text-center">
+                                    <Globe className="size-12 opacity-40" />
+                                    <p className="text-sm">Publish to share with anyone</p>
                                 </div>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="new-slug">Choose a URL slug</Label>
-                                    <div className="flex gap-2">
+                                <div className="space-y-3">
+                                    <Label htmlFor="new-slug" className="text-sm font-medium">
+                                        URL Slug
+                                    </Label>
+                                    <div className="flex flex-col gap-2 sm:flex-row">
                                         <div className="bg-muted flex flex-1 items-center rounded-md border px-3">
                                             <span className="text-muted-foreground text-sm">s/</span>
-
                                             <Input
                                                 id="new-slug"
                                                 placeholder="my-page"
                                                 value={slug}
                                                 onChange={e => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
-                                                className="border-0 bg-transparent px-0 focus-visible:ring-0"
+                                                className="border-0 bg-transparent px-1 focus-visible:ring-0"
                                                 disabled={isPublishing}
                                             />
                                         </div>
-                                        <Button type="button" variant="outline" onClick={generateSlug}>
+                                        <Button type="button" variant="outline" onClick={generateSlug} className="w-full sm:w-auto">
                                             Generate
                                         </Button>
                                     </div>
-                                    <p className="text-muted-foreground text-xs">Only lowercase letters, numbers, and hyphens</p>
+                                    <p className="text-muted-foreground text-xs">Lowercase letters, numbers, and hyphens only</p>
                                 </div>
 
                                 <Button type="submit" className="w-full" disabled={isPublishing || !slug.trim()}>
                                     {isPublishing ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Globe className="mr-2 size-4" />}
-                                    Publish to web
+                                    Publish
                                 </Button>
                             </form>
                         )}

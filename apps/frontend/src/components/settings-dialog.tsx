@@ -251,7 +251,7 @@ export function SettingsDialog({ open, onOpenChange }: { open: boolean; onOpenCh
                                 {passwordForm.newPassword &&
                                     passwordForm.confirmPassword &&
                                     passwordForm.newPassword !== passwordForm.confirmPassword && (
-                                        <p className="text-destructive text-xs">Passwords don't match</p>
+                                        <p className="text-destructive text-xs">Passwords don&#39;t match</p>
                                     )}
                             </div>
 
