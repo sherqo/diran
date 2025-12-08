@@ -194,6 +194,14 @@ export const removeMember = async (req: AuthenticatedRequest, reply: FastifyRepl
         throw new ApiError('Use leave endpoint to leave the team', HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR);
     }
 
+    if (member.userId === userId && isOwner) {
+        throw new ApiError(
+            'Owner cannot remove themselves. Transfer ownership or delete the team.',
+            HttpStatus.BAD_REQUEST,
+            ErrorCode.VALIDATION_ERROR
+        );
+    }
+
     await db.teamMember.delete({ where: { id: memberId } });
 
     return sendSuccess(reply, { deleted: true }, 'Member removed successfully');
