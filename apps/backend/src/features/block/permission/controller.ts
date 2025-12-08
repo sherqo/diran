@@ -37,10 +37,10 @@ export const listPermissions = async (req: AuthenticatedRequest, reply: FastifyR
     const response = permissions.map(p => ({
         id: p.id,
         user: {
-            id: p.user.id,
-            name: p.user.name,
-            email: p.user.email,
-            photo: p.user.photo,
+            id: p.user?.id,
+            name: p.user?.name,
+            email: p.user?.email,
+            photo: p.user?.photo,
         },
         role: p.role,
         createdAt: p.createdAt.toISOString(),
@@ -161,10 +161,10 @@ export const updatePermission = async (req: AuthenticatedRequest, reply: Fastify
             permission: {
                 id: updated.id,
                 user: {
-                    id: permission.user.id,
-                    name: permission.user.name,
-                    email: permission.user.email,
-                    photo: permission.user.photo,
+                    id: permission.user?.id,
+                    name: permission.user?.name,
+                    email: permission.user?.email,
+                    photo: permission.user?.photo,
                 },
                 role: updated.role,
                 createdAt: updated.createdAt.toISOString(),
