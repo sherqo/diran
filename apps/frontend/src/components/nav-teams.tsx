@@ -256,7 +256,7 @@ export function NavTeams() {
                                                     <SidebarMenuItem key={i}>
                                                         <SidebarMenuButton size="sm">
                                                             <Skeleton className="h-4 w-4" />
-                                                            <Skeleton className="h-3.5 w-20" />
+                                                            <Skeleton className="h-3.5 w-40" />
                                                         </SidebarMenuButton>
                                                     </SidebarMenuItem>
                                                 ))}
