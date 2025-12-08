@@ -120,27 +120,27 @@ export function SettingsDialog({ open, onOpenChange }: { open: boolean; onOpenCh
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-h-full overflow-hidden p-0 sm:max-w-xl! md:max-w-2xl!">
-                <DialogHeader className="border-b px-6 py-4">
+            <DialogContent className="w-[calc(100%-2rem)] max-w-2xl max-h-[90vh] overflow-hidden p-0">
+                <DialogHeader className="border-b px-6 py-4 text-left">
                     <DialogTitle>Settings</DialogTitle>
                 </DialogHeader>
 
-                <div className="max-h-[calc(70vh)] w-full overflow-y-auto px-6 py-4">
+                <div className="max-h-[calc(90vh-80px)] w-full overflow-y-auto px-6 py-6">
                     {/* Profile Information Section */}
-                    <div className="mb-8 space-y-6">
+                    <div className="mb-8 space-y-5">
                         <div>
-                            <h2 className="mb-2 text-lg font-semibold">Profile Information</h2>
-                            <p className="text-muted-foreground mb-4 text-sm">Update your personal information and profile photo.</p>
+                            <h2 className="mb-1 text-base font-semibold">Profile</h2>
+                            <p className="text-muted-foreground text-sm">Manage your profile information</p>
                         </div>
 
-                        <form onSubmit={handleProfileSubmit} className="space-y-4">
-                            <div className="flex items-center gap-4">
-                                <Avatar className="h-20 w-20">
+                        <form onSubmit={handleProfileSubmit} className="space-y-5">
+                            <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+                                <Avatar className="h-16 w-16 sm:h-20 sm:w-20">
                                     <AvatarImage src={profileForm.photo} alt={profileForm.name} />
                                     <AvatarFallback className="text-lg">{profileForm.name?.[0] || 'U'}</AvatarFallback>
                                 </Avatar>
-                                <div className="flex-1 space-y-2">
-                                    <Label htmlFor="photo">Profile Photo URL</Label>
+                                <div className="flex-1 w-full space-y-2">
+                                    <Label htmlFor="photo" className="text-sm">Photo URL</Label>
                                     <Input
                                         id="photo"
                                         type="url"
@@ -152,25 +152,25 @@ export function SettingsDialog({ open, onOpenChange }: { open: boolean; onOpenCh
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="name">Display Name</Label>
+                                <Label htmlFor="name" className="text-sm">Name</Label>
                                 <Input
                                     id="name"
                                     value={profileForm.name}
                                     onChange={e => setProfileForm(prev => ({ ...prev, name: e.target.value }))}
-                                    placeholder="Enter your display name"
+                                    placeholder="Your name"
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <Label>Email</Label>
-                                <Input value={user?.email || ''} disabled />
-                                <p className="text-muted-foreground text-sm">Email cannot be changed.</p>
+                                <Label className="text-sm">Email</Label>
+                                <Input value={user?.email || ''} disabled className="bg-muted" />
+                                <p className="text-muted-foreground text-xs">Email cannot be changed</p>
                             </div>
 
                             {profileValidation.hasErrors && <p className="text-destructive text-sm">{profileValidation.errorMessage}</p>}
 
-                            <Button type="submit" disabled={isUpdatingProfile}>
-                                {isUpdatingProfile ? 'Updating...' : 'Update Profile'}
+                            <Button type="submit" disabled={isUpdatingProfile} size="sm">
+                                {isUpdatingProfile ? 'Saving...' : 'Save Changes'}
                             </Button>
                         </form>
                     </div>
@@ -178,28 +178,29 @@ export function SettingsDialog({ open, onOpenChange }: { open: boolean; onOpenCh
                     <Separator className="mb-8" />
 
                     {/* Change Password Section */}
-                    <div className="mb-8 space-y-6">
+                    <div className="mb-8 space-y-5">
                         <div>
-                            <h2 className="mb-2 text-lg font-semibold">Change Password</h2>
-                            <p className="text-muted-foreground mb-4 text-sm">Update your password to keep your account secure.</p>
+                            <h2 className="mb-1 text-base font-semibold">Password</h2>
+                            <p className="text-muted-foreground text-sm">Update your password</p>
                         </div>
 
                         <form onSubmit={handlePasswordSubmit} className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="currentPassword">Current Password</Label>
+                                <Label htmlFor="currentPassword" className="text-sm">Current Password</Label>
                                 <div className="relative">
                                     <Input
                                         id="currentPassword"
                                         type={showCurrentPassword ? 'text' : 'password'}
                                         value={passwordForm.currentPassword}
                                         onChange={e => setPasswordForm(prev => ({ ...prev, currentPassword: e.target.value }))}
-                                        placeholder="Enter current password"
+                                        placeholder="Current password"
+                                        className="pr-10"
                                     />
                                     <Button
                                         type="button"
                                         variant="ghost"
                                         size="sm"
-                                        className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
+                                        className="absolute top-0 right-0 h-full px-3 hover:bg-transparent"
                                         onClick={() => setShowCurrentPassword(!showCurrentPassword)}>
                                         {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                     </Button>
@@ -207,20 +208,21 @@ export function SettingsDialog({ open, onOpenChange }: { open: boolean; onOpenCh
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="newPassword">New Password</Label>
+                                <Label htmlFor="newPassword" className="text-sm">New Password</Label>
                                 <div className="relative">
                                     <Input
                                         id="newPassword"
                                         type={showNewPassword ? 'text' : 'password'}
                                         value={passwordForm.newPassword}
                                         onChange={e => setPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))}
-                                        placeholder="Enter new password"
+                                        placeholder="New password"
+                                        className="pr-10"
                                     />
                                     <Button
                                         type="button"
                                         variant="ghost"
                                         size="sm"
-                                        className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
+                                        className="absolute top-0 right-0 h-full px-3 hover:bg-transparent"
                                         onClick={() => setShowNewPassword(!showNewPassword)}>
                                         {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                                     </Button>
@@ -228,18 +230,18 @@ export function SettingsDialog({ open, onOpenChange }: { open: boolean; onOpenCh
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                                <Label htmlFor="confirmPassword" className="text-sm">Confirm Password</Label>
                                 <Input
                                     id="confirmPassword"
                                     type="password"
                                     value={passwordForm.confirmPassword}
                                     onChange={e => setPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                                    placeholder="Confirm new password"
+                                    placeholder="Confirm password"
                                 />
                                 {passwordForm.newPassword &&
                                     passwordForm.confirmPassword &&
                                     passwordForm.newPassword !== passwordForm.confirmPassword && (
-                                        <p className="text-destructive text-sm">Passwords do not match</p>
+                                        <p className="text-destructive text-xs">Passwords don't match</p>
                                     )}
                             </div>
 
@@ -247,8 +249,9 @@ export function SettingsDialog({ open, onOpenChange }: { open: boolean; onOpenCh
 
                             <Button
                                 type="submit"
+                                size="sm"
                                 disabled={isChangingPassword || passwordForm.newPassword !== passwordForm.confirmPassword}>
-                                {isChangingPassword ? 'Changing...' : 'Change Password'}
+                                {isChangingPassword ? 'Saving...' : 'Change Password'}
                             </Button>
                         </form>
                     </div>
@@ -256,29 +259,28 @@ export function SettingsDialog({ open, onOpenChange }: { open: boolean; onOpenCh
                     <Separator className="mb-8" />
 
                     {/* Appearance Section */}
-                    <div className="mb-8 space-y-6">
+                    <div className="mb-8 space-y-5">
                         <div>
-                            <h2 className="mb-2 text-lg font-semibold">Appearance</h2>
-                            <p className="text-muted-foreground mb-4 text-sm">Customize the look and feel of the application.</p>
+                            <h2 className="mb-1 text-base font-semibold">Appearance</h2>
+                            <p className="text-muted-foreground text-sm">Choose your theme</p>
                         </div>
 
-                        <div className="space-y-4">
-                            <div className="space-y-2">
-                                <Label>Theme</Label>
-                                <div className="flex gap-2">
-                                    <Button variant={theme === 'light' ? 'default' : 'outline'} size="sm" onClick={() => setTheme('light')}>
-                                        Light
-                                    </Button>
-                                    <Button variant={theme === 'dark' ? 'default' : 'outline'} size="sm" onClick={() => setTheme('dark')}>
-                                        Dark
-                                    </Button>
-                                    <Button
-                                        variant={theme === 'system' ? 'default' : 'outline'}
-                                        size="sm"
-                                        onClick={() => setTheme('system')}>
-                                        System
-                                    </Button>
-                                </div>
+                        <div className="space-y-3">
+                            <Label className="text-sm">Theme</Label>
+                            <div className="flex gap-2">
+                                <Button variant={theme === 'light' ? 'default' : 'outline'} size="sm" onClick={() => setTheme('light')} className="flex-1">
+                                    Light
+                                </Button>
+                                <Button variant={theme === 'dark' ? 'default' : 'outline'} size="sm" onClick={() => setTheme('dark')} className="flex-1">
+                                    Dark
+                                </Button>
+                                <Button
+                                    variant={theme === 'system' ? 'default' : 'outline'}
+                                    size="sm"
+                                    onClick={() => setTheme('system')}
+                                    className="flex-1">
+                                    System
+                                </Button>
                             </div>
                         </div>
                     </div>
@@ -286,25 +288,25 @@ export function SettingsDialog({ open, onOpenChange }: { open: boolean; onOpenCh
                     <Separator className="mb-8" />
 
                     {/* Notifications Section */}
-                    <div className="mb-8 space-y-6">
+                    <div className="mb-8 space-y-5">
                         <div>
-                            <h2 className="mb-2 text-lg font-semibold">Notifications</h2>
-                            <p className="text-muted-foreground mb-4 text-sm">Manage your notification preferences.</p>
+                            <h2 className="mb-1 text-base font-semibold">Notifications</h2>
+                            <p className="text-muted-foreground text-sm">Manage notification preferences</p>
                         </div>
 
-                        <p className="text-muted-foreground">Notification settings coming soon...</p>
+                        <p className="text-muted-foreground text-sm">Coming soon...</p>
                     </div>
 
                     <Separator className="mb-8" />
 
                     {/* Advanced Section */}
-                    <div className="space-y-6">
+                    <div className="space-y-5">
                         <div>
-                            <h2 className="mb-2 text-lg font-semibold">Advanced Settings</h2>
-                            <p className="text-muted-foreground mb-4 text-sm">Advanced options and account management.</p>
+                            <h2 className="mb-1 text-base font-semibold">Advanced</h2>
+                            <p className="text-muted-foreground text-sm">Advanced options</p>
                         </div>
 
-                        <p className="text-muted-foreground">Advanced settings coming soon...</p>
+                        <p className="text-muted-foreground text-sm">Coming soon...</p>
                     </div>
                 </div>
             </DialogContent>
