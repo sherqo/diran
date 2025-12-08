@@ -120,7 +120,7 @@ export function SettingsDialog({ open, onOpenChange }: { open: boolean; onOpenCh
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="w-[calc(100%-2rem)] max-w-2xl max-h-[90vh] overflow-hidden p-0">
+            <DialogContent className="max-h-[90vh] w-[calc(100%-2rem)] max-w-2xl overflow-hidden p-0">
                 <DialogHeader className="border-b px-6 py-4 text-left">
                     <DialogTitle>Settings</DialogTitle>
                 </DialogHeader>
@@ -139,8 +139,10 @@ export function SettingsDialog({ open, onOpenChange }: { open: boolean; onOpenCh
                                     <AvatarImage src={profileForm.photo} alt={profileForm.name} />
                                     <AvatarFallback className="text-lg">{profileForm.name?.[0] || 'U'}</AvatarFallback>
                                 </Avatar>
-                                <div className="flex-1 w-full space-y-2">
-                                    <Label htmlFor="photo" className="text-sm">Photo URL</Label>
+                                <div className="w-full flex-1 space-y-2">
+                                    <Label htmlFor="photo" className="text-sm">
+                                        Photo URL
+                                    </Label>
                                     <Input
                                         id="photo"
                                         type="url"
@@ -152,7 +154,9 @@ export function SettingsDialog({ open, onOpenChange }: { open: boolean; onOpenCh
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="name" className="text-sm">Name</Label>
+                                <Label htmlFor="name" className="text-sm">
+                                    Name
+                                </Label>
                                 <Input
                                     id="name"
                                     value={profileForm.name}
@@ -186,7 +190,9 @@ export function SettingsDialog({ open, onOpenChange }: { open: boolean; onOpenCh
 
                         <form onSubmit={handlePasswordSubmit} className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="currentPassword" className="text-sm">Current Password</Label>
+                                <Label htmlFor="currentPassword" className="text-sm">
+                                    Current Password
+                                </Label>
                                 <div className="relative">
                                     <Input
                                         id="currentPassword"
@@ -208,7 +214,9 @@ export function SettingsDialog({ open, onOpenChange }: { open: boolean; onOpenCh
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="newPassword" className="text-sm">New Password</Label>
+                                <Label htmlFor="newPassword" className="text-sm">
+                                    New Password
+                                </Label>
                                 <div className="relative">
                                     <Input
                                         id="newPassword"
@@ -230,7 +238,9 @@ export function SettingsDialog({ open, onOpenChange }: { open: boolean; onOpenCh
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="confirmPassword" className="text-sm">Confirm Password</Label>
+                                <Label htmlFor="confirmPassword" className="text-sm">
+                                    Confirm Password
+                                </Label>
                                 <Input
                                     id="confirmPassword"
                                     type="password"
@@ -268,10 +278,18 @@ export function SettingsDialog({ open, onOpenChange }: { open: boolean; onOpenCh
                         <div className="space-y-3">
                             <Label className="text-sm">Theme</Label>
                             <div className="flex gap-2">
-                                <Button variant={theme === 'light' ? 'default' : 'outline'} size="sm" onClick={() => setTheme('light')} className="flex-1">
+                                <Button
+                                    variant={theme === 'light' ? 'default' : 'outline'}
+                                    size="sm"
+                                    onClick={() => setTheme('light')}
+                                    className="flex-1">
                                     Light
                                 </Button>
-                                <Button variant={theme === 'dark' ? 'default' : 'outline'} size="sm" onClick={() => setTheme('dark')} className="flex-1">
+                                <Button
+                                    variant={theme === 'dark' ? 'default' : 'outline'}
+                                    size="sm"
+                                    onClick={() => setTheme('dark')}
+                                    className="flex-1">
                                     Dark
                                 </Button>
                                 <Button
