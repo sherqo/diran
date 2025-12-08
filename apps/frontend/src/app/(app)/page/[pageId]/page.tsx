@@ -6,6 +6,7 @@ import { usePage } from '@/contexts/PageContext';
 import { PageHeader } from '@/components/page-header';
 import { Loader2 } from 'lucide-react';
 import { Editor } from '@/components/features/editor/DynamicEditor';
+import { EditablePageTitle } from '@/components/features/editable-page-title';
 import type { PartialBlock, BlockNoteEditor } from '@blocknote/core';
 import type { EmbeddedBlockContent, ApiBlock } from '@/shared/types/block';
 import { getBlockTreeApi } from '@/lib/api/block';
@@ -131,6 +132,13 @@ export default function PageView() {
             <PageHeader title={pageTitle} icon={pageIcon} pageId={pageId} role={currentPage.role} />
             <div className="flex-1 overflow-y-auto">
                 <div className="container mx-auto max-w-4xl px-4 pt-10 pb-40">
+                    <EditablePageTitle
+                        pageId={pageId}
+                        initialTitle={pageTitle}
+                        initialIcon={pageIcon}
+                        editable={currentPage.role !== 'VIEWER'}
+                    />
+
                     {initialContent === null ? (
                         <div className="flex items-center justify-center p-10">
                             <Loader2 className="h-8 w-8 animate-spin" />

@@ -109,9 +109,9 @@ export function PublishedPageContent({ page }: PublishedPageContentProps) {
             {/* Content */}
             <main className="container mx-auto max-w-4xl flex-1 px-4 py-8">
                 {/* Page Title */}
-                <div className="mb-6">
-                    {page.icon && <span className="mb-2 block text-4xl">{page.icon}</span>}
-                    <h1 className="text-3xl font-bold">{page.title}</h1>
+                <div className="mb-4">
+                    {page.icon && <span className="mb-2 block text-5xl">{page.icon}</span>}
+                    <h1 className="text-4xl font-bold">{page.title}</h1>
                 </div>
 
                 {/* Editor Content */}
