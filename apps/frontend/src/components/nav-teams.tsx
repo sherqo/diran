@@ -213,18 +213,19 @@ export function NavTeams() {
                                 <SidebarMenuItem>
                                     <CollapsibleTrigger asChild>
                                         <SidebarMenuAction
-                                            className="bg-sidebar-accent text-sidebar-accent-foreground left-2 data-[state=open]:rotate-90"
+                                            className="bg-sidebar-accent text-sidebar-accent-foreground left-1.5 data-[state=open]:rotate-90"
                                             showOnHover>
                                             <ChevronRight />
                                         </SidebarMenuAction>
                                     </CollapsibleTrigger>
-
-                                    <SidebarMenuButton asChild>
-                                        <button className="flex w-full items-center gap-2">
-                                            <Users className="h-4 w-4" />
-                                            <span className="truncate">{team.name}</span>
-                                        </button>
-                                    </SidebarMenuButton>
+                                    <CollapsibleTrigger asChild>
+                                        <SidebarMenuButton asChild>
+                                            <button className="flex w-full items-center gap-2">
+                                                <Users className="h-4 w-4" />
+                                                <span className="truncate">{team.name}</span>
+                                            </button>
+                                        </SidebarMenuButton>
+                                    </CollapsibleTrigger>
 
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
