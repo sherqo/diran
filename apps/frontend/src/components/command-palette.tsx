@@ -29,11 +29,11 @@ type StaticItem = {
 
 function SearchResultSkeleton() {
     return (
-        <div className="flex items-center gap-2 px-2 py-3">
-            <Skeleton className="h-5 w-5 shrink-0 animate-pulse rounded" />
+        <div className="flex items-center gap-2 px-2 py-3" aria-hidden="true">
+            <Skeleton className="h-6 w-6 shrink-0 rounded" />
             <div className="flex flex-1 flex-col gap-1.5">
-                <Skeleton className="h-4 w-32 animate-pulse" />
-                <Skeleton className="h-3 w-48 animate-pulse" />
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-3 w-48" />
             </div>
         </div>
     );
@@ -198,15 +198,18 @@ export function CommandPalette() {
                             </CommandGroup>
                         )}
 
-                        {isSearching ? (
-                            <CommandGroup heading="Searching...">
+                        {isSearching && (
+                            <div className="px-1 py-2">
+                                <p className="text-muted-foreground px-2 pb-2 text-xs font-medium">Searching...</p>
                                 <div className="space-y-1">
                                     <SearchResultSkeleton />
                                     <SearchResultSkeleton />
                                     <SearchResultSkeleton />
                                 </div>
-                            </CommandGroup>
-                        ) : hasSearchResults ? (
+                            </div>
+                        )}
+
+                        {!isSearching && hasSearchResults && (
                             <>
                                 {filteredStaticItems.length > 0 && <CommandSeparator />}
                                 <CommandGroup heading="Pages">
@@ -219,7 +222,7 @@ export function CommandPalette() {
                                                 key={result.id}
                                                 value={`search-${result.id}-${result.title}-${result.snippet || ''}`}
                                                 onSelect={() => runCommand(() => router.push(`/page/${targetPageId}`))}>
-                                                <div className="bg-muted/50 mr-2 flex h-6 w-6 shrink-0 items-center justify-center rounded">
+                                                <div className="mr-2 flex h-6 w-6 shrink-0 items-center justify-center rounded">
                                                     {result.icon ? (
                                                         <span className="text-sm">{result.icon}</span>
                                                     ) : (
@@ -237,9 +240,9 @@ export function CommandPalette() {
                                     })}
                                 </CommandGroup>
                             </>
-                        ) : filteredStaticItems.length === 0 ? (
-                            <NoResultsFound query={query} />
-                        ) : null}
+                        )}
+
+                        {!isSearching && !hasSearchResults && filteredStaticItems.length === 0 && <NoResultsFound query={query} />}
                     </>
                 )}
 
