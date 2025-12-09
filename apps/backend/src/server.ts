@@ -6,6 +6,7 @@ import fastifyRateLimit from '@fastify/rate-limit';
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
 import fastifyUnderPressure from '@fastify/under-pressure';
+import fastifyWebSocket from '@fastify/websocket';
 import dotenv from 'dotenv';
 import { serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
 import { db } from '#lib/database/connection';
@@ -13,6 +14,7 @@ import { isDevelopment, logStartup } from '#lib/utils/common';
 import { errorHandler, notFoundHandler } from '#lib/middleware/errorHandler';
 import { loggerHook } from '#lib/middleware/logger';
 import { registerAllRoutes } from '#routes';
+import { collaborationRoutes } from '#features/collaboration';
 
 // Load environment variables
 dotenv.config({ debug: isDevelopment });
@@ -88,6 +90,9 @@ async function setupPlugins() {
         timeWindow: '1 minute',
     });
 
+    // WebSocket support for real-time collaboration
+    await app.register(fastifyWebSocket);
+
     // request logger (only in development)
     if (isDevelopment) {
         app.addHook('preHandler', loggerHook);
@@ -120,6 +125,9 @@ async function start() {
     try {
         await setupPlugins();
         await app.register(registerAllRoutes, { prefix: '/v1' });
+
+        // WebSocket collaboration routes (no /v1 prefix for WebSocket)
+        await app.register(collaborationRoutes, { prefix: '/ws' });
 
         await app.listen({ port: PORT, host: '0.0.0.0' });
         logStartup(PORT, !!db);
