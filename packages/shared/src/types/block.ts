@@ -184,38 +184,3 @@ export interface SearchResult {
 export interface SearchBlocksResponseData {
   results: SearchResult[];
 }
-
-// ================ Content Extraction (for search) ================
-
-/**
- * Flexible type for extracting text from any content format.
- * Used by backend for search indexing.
- */
-export interface ExtractableContent {
-  // Page fields
-  title?: string;
-  icon?: string;
-  // Embedded block fields
-  __props?: BlockProps;
-  __content?: InlineContent[];
-  // For recursive extraction
-  content?: InlineContent[] | ExtractableContent[];
-  children?: ExtractableContent[];
-  // Table fields
-  rows?: { cells: (InlineContent[] | TableCell)[] }[];
-  // Direct text
-  text?: string;
-}
-
-// ================ Legacy Aliases ================
-
-/** @deprecated Use BlockProps */
-export type DefaultBlockProps = BlockProps;
-/** @deprecated Use BlockProps */
-export type DefaultProps = BlockProps;
-/** @deprecated Use TextStyles */
-export type Styles = TextStyles;
-/** @deprecated Use ExtractableContent */
-export type ExtractableBlockContent = ExtractableContent;
-/** @deprecated Use PageContent | EmbeddedBlockContent */
-export type BlockContent = PageContent | EmbeddedBlockContent;
