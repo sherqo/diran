@@ -17,6 +17,7 @@ import * as Input from '@/components/ui/input';
 import * as Label from '@/components/ui/label';
 import * as Popover from '@/components/ui/popover';
 import * as Tooltip from '@/components/ui/tooltip';
+import { Skeleton } from '@/components/ui/skeleton';
 
 import { handleChanges } from './changes-engine';
 import { SlashMenu, getSlashMenuItems, filterSlashMenuItems, CustomFormattingToolbar, CustomSideMenu } from './menus';
@@ -91,7 +92,16 @@ export default function Editor({
     }, [editor, editable]);
 
     if (!editor) {
-        return null;
+        return (
+            <div className="space-y-4 pt-4">
+                <Skeleton className="h-5 w-full" />
+                <Skeleton className="h-5 w-4/5" />
+                <Skeleton className="h-5 w-3/4" />
+                <div className="py-2" />
+                <Skeleton className="h-5 w-full" />
+                <Skeleton className="h-5 w-2/3" />
+            </div>
+        );
     }
 
     return (

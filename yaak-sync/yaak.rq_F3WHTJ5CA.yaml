@@ -1,0 +1,19 @@
+type: http_request
+model: http_request
+id: rq_F3WHTJ5CAf
+createdAt: 2025-12-01T13:59:06.856142361
+updatedAt: 2025-12-09T06:58:24.432450076
+workspaceId: wk_xHj4uko5i5
+folderId: fl_ATSPWaW5T7
+authentication: {}
+authenticationType: null
+body:
+  text: ''
+bodyType: null
+description: ''
+headers: []
+method: GET
+name: direct block children tree
+sortPriority: -1760017295647.998
+url: ${[ base_url ]}/block/search?q=g
+urlParameters: []

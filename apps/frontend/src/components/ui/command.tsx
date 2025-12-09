@@ -20,9 +20,11 @@ function Command({ className, ...props }: React.ComponentProps<typeof CommandPri
 function CommandDialog({ children, ...props }: React.ComponentProps<typeof Dialog>) {
     return (
         <Dialog {...props}>
-            <DialogContent showCloseButton={false} className="max-w-xl overflow-hidden p-0 shadow-2xl">
+            <DialogContent
+                showCloseButton={false}
+                className="bg-background/80 dark:bg-background/90 max-w-xl overflow-hidden border-white/10 p-0 shadow-2xl backdrop-blur-xl">
                 <DialogTitle className="sr-only">Command Palette</DialogTitle>
-                <Command className="[&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group]]:px-2 [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5">
+                <Command className="[&_[cmdk-group-heading]]:text-muted-foreground bg-transparent [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group]]:px-2 [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5">
                     {children}
                 </Command>
             </DialogContent>
