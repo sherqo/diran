@@ -6,6 +6,7 @@ import type {
     ServerMessage,
     ClientInfo,
     BlockOperation,
+    CursorPosition,
 } from './types';
 
 // In-memory room storage (for production, use Redis)
@@ -117,11 +118,7 @@ export function handleConnection(socket: WebSocket): void {
     }
 
     // Handle join request
-    function handleJoin(
-        connId: string,
-        sock: WebSocket,
-        message: Extract<ClientMessage, { type: 'join' }>
-    ): void {
+    function handleJoin(connId: string, sock: WebSocket, message: Extract<ClientMessage, { type: 'join' }>): void {
         // Leave current room if in one
         if (currentRoom) {
             handleLeave(connId);
@@ -168,9 +165,7 @@ export function handleConnection(socket: WebSocket): void {
             connId
         );
 
-        console.log(
-            `[Collab] ${message.userName} joined room ${message.pageId} (${room.clients.size} users)`
-        );
+        console.log(`[Collab] ${message.userName} joined room ${message.pageId} (${room.clients.size} users)`);
     }
 
     // Handle leave
@@ -185,9 +180,7 @@ export function handleConnection(socket: WebSocket): void {
             oderId: connId,
         });
 
-        console.log(
-            `[Collab] User left room ${currentRoom.pageId} (${currentRoom.clients.size} users remaining)`
-        );
+        console.log(`[Collab] User left room ${currentRoom.pageId} (${currentRoom.clients.size} users remaining)`);
 
         // Clean up empty rooms
         if (currentRoom.clients.size === 0) {
@@ -221,9 +214,7 @@ export function handleConnection(socket: WebSocket): void {
             connId
         );
 
-        console.log(
-            `[Collab] Operation ${operation.op} in room ${currentRoom.pageId} (v${currentRoom.version})`
-        );
+        console.log(`[Collab] Operation ${operation.op} in room ${currentRoom.pageId} (v${currentRoom.version})`);
     }
 
     // Handle cursor update
