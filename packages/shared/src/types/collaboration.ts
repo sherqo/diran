@@ -1,5 +1,6 @@
 import type { WebSocket } from 'ws';
 
+export type { WebSocket };
 // Client connection with metadata
 export interface CollaborationClient {
   socket: WebSocket;

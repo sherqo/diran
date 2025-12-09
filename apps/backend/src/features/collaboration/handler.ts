@@ -1,5 +1,5 @@
-import type { WebSocket } from 'ws';
 import type {
+    WebSocket,
     CollaborationClient,
     CollaborationRoom,
     ClientMessage,
@@ -181,7 +181,6 @@ export function handleConnection(socket: WebSocket): void {
         });
 
         console.log(`[Collab] User left room ${currentRoom.pageId} (${currentRoom.clients.size} users remaining)`);
-
         // Clean up empty rooms
         if (currentRoom.clients.size === 0) {
             rooms.delete(currentRoom.pageId);

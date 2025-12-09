@@ -9,9 +9,11 @@
     "dev": "tsc -w -p tsconfig.json"
   },
   "dependencies": {
+    "ws": "^8.18.3",
     "zod": "^4.1.12"
   },
   "devDependencies": {
+    "@types/ws": "^8.18.1",
     "typescript": "^5.4.0"
   }
 }
