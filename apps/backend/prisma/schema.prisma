@@ -36,6 +36,7 @@ model Block {
   parentId    String?      @map("parent_id") @db.Uuid
   order       String
   content     Json
+  contentText String?      @map("content_text")
   createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt   DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
   parent      Block?       @relation("BlockToChildren", fields: [parentId], references: [id], onDelete: Cascade)
