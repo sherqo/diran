@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { FileText, Settings, User, Plus, Home, Search, FileSearch, Moon, Sun } from 'lucide-react';
+import { FileText, Settings, User, Home, Search, FileSearch, Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
 import {
@@ -30,10 +30,10 @@ type StaticItem = {
 function SearchResultSkeleton() {
     return (
         <div className="flex items-center gap-2 px-2 py-3">
-            <Skeleton className="h-5 w-5 shrink-0 rounded" />
+            <Skeleton className="h-5 w-5 shrink-0 animate-pulse rounded" />
             <div className="flex flex-1 flex-col gap-1.5">
-                <Skeleton className="h-4 w-32" />
-                <Skeleton className="h-3 w-48" />
+                <Skeleton className="h-4 w-32 animate-pulse" />
+                <Skeleton className="h-3 w-48 animate-pulse" />
             </div>
         </div>
     );
@@ -76,7 +76,7 @@ export function CommandPalette() {
                 id: 'home',
                 label: 'Home',
                 icon: <Home className="h-4 w-4" />,
-                action: () => router.push('/'),
+                action: () => router.push('/home'),
                 keywords: ['home', 'dashboard', 'main', 'start'],
             },
             {
@@ -92,13 +92,6 @@ export function CommandPalette() {
                 icon: <Settings className="h-4 w-4" />,
                 action: () => window.dispatchEvent(new CustomEvent('openSettings')),
                 keywords: ['settings', 'preferences', 'options', 'config', 'configuration'],
-            },
-            {
-                id: 'new-page',
-                label: 'Create New Page',
-                icon: <Plus className="h-4 w-4" />,
-                action: () => window.dispatchEvent(new CustomEvent('createNewPage')),
-                keywords: ['create', 'new', 'page', 'add', 'document'],
             },
             {
                 id: 'toggle-theme',
@@ -182,7 +175,6 @@ export function CommandPalette() {
 
     const hasSearchResults = searchResults.length > 0;
     const showSearchSection = query.trim().length > 0;
-    const hasAnyResults = hasSearchResults || filteredStaticItems.length > 0;
 
     return (
         <CommandDialog open={open} onOpenChange={setOpen}>
@@ -191,6 +183,21 @@ export function CommandPalette() {
                 {/* When searching, show combined results */}
                 {showSearchSection && (
                     <>
+                        {/* Show filtered static items immediately while searching */}
+                        {filteredStaticItems.length > 0 && (
+                            <CommandGroup heading="Commands">
+                                {filteredStaticItems.map(item => (
+                                    <CommandItem
+                                        key={item.id}
+                                        value={`static-${item.id}-${item.label}`}
+                                        onSelect={() => runCommand(item.action)}>
+                                        <span className="text-muted-foreground mr-2">{item.icon}</span>
+                                        <span>{item.label}</span>
+                                    </CommandItem>
+                                ))}
+                            </CommandGroup>
+                        )}
+
                         {isSearching ? (
                             <CommandGroup heading="Searching...">
                                 <div className="space-y-1">
@@ -199,60 +206,40 @@ export function CommandPalette() {
                                     <SearchResultSkeleton />
                                 </div>
                             </CommandGroup>
-                        ) : hasAnyResults ? (
+                        ) : hasSearchResults ? (
                             <>
-                                {/* Pages & Blocks from API */}
-                                {hasSearchResults && (
-                                    <CommandGroup heading="Pages">
-                                        {searchResults.map(result => {
-                                            const isPage = result.type === 'page';
-                                            const targetPageId = isPage ? result.id : result.rootPageId;
+                                {filteredStaticItems.length > 0 && <CommandSeparator />}
+                                <CommandGroup heading="Pages">
+                                    {searchResults.map(result => {
+                                        const isPage = result.type === 'page';
+                                        const targetPageId = isPage ? result.id : result.rootPageId;
 
-                                            return (
-                                                <CommandItem
-                                                    key={result.id}
-                                                    value={`search-${result.id}-${result.title}-${result.snippet || ''}`}
-                                                    onSelect={() => runCommand(() => router.push(`/page/${targetPageId}`))}>
-                                                    <div className="bg-muted/50 mr-2 flex h-6 w-6 shrink-0 items-center justify-center rounded">
-                                                        {result.icon ? (
-                                                            <span className="text-sm">{result.icon}</span>
-                                                        ) : (
-                                                            <FileText className="text-muted-foreground h-3.5 w-3.5" />
-                                                        )}
-                                                    </div>
-                                                    <div className="flex min-w-0 flex-1 flex-col">
-                                                        <span className="truncate text-sm">{result.title}</span>
-                                                        {result.snippet && (
-                                                            <span className="text-muted-foreground truncate text-xs">{result.snippet}</span>
-                                                        )}
-                                                    </div>
-                                                </CommandItem>
-                                            );
-                                        })}
-                                    </CommandGroup>
-                                )}
-
-                                {/* Filtered static items */}
-                                {filteredStaticItems.length > 0 && (
-                                    <>
-                                        {hasSearchResults && <CommandSeparator />}
-                                        <CommandGroup heading="Commands">
-                                            {filteredStaticItems.map(item => (
-                                                <CommandItem
-                                                    key={item.id}
-                                                    value={`static-${item.id}-${item.label}`}
-                                                    onSelect={() => runCommand(item.action)}>
-                                                    <span className="text-muted-foreground mr-2">{item.icon}</span>
-                                                    <span>{item.label}</span>
-                                                </CommandItem>
-                                            ))}
-                                        </CommandGroup>
-                                    </>
-                                )}
+                                        return (
+                                            <CommandItem
+                                                key={result.id}
+                                                value={`search-${result.id}-${result.title}-${result.snippet || ''}`}
+                                                onSelect={() => runCommand(() => router.push(`/page/${targetPageId}`))}>
+                                                <div className="bg-muted/50 mr-2 flex h-6 w-6 shrink-0 items-center justify-center rounded">
+                                                    {result.icon ? (
+                                                        <span className="text-sm">{result.icon}</span>
+                                                    ) : (
+                                                        <FileText className="text-muted-foreground h-3.5 w-3.5" />
+                                                    )}
+                                                </div>
+                                                <div className="flex min-w-0 flex-1 flex-col">
+                                                    <span className="truncate text-sm">{result.title}</span>
+                                                    {result.snippet && (
+                                                        <span className="text-muted-foreground truncate text-xs">{result.snippet}</span>
+                                                    )}
+                                                </div>
+                                            </CommandItem>
+                                        );
+                                    })}
+                                </CommandGroup>
                             </>
-                        ) : (
+                        ) : filteredStaticItems.length === 0 ? (
                             <NoResultsFound query={query} />
-                        )}
+                        ) : null}
                     </>
                 )}
 
