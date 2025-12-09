@@ -6,6 +6,7 @@ import fastifyRateLimit from '@fastify/rate-limit';
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
 import fastifyUnderPressure from '@fastify/under-pressure';
+import fastifyWebSocket from '@fastify/websocket';
 import dotenv from 'dotenv';
 import { serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
 import { db } from '#lib/database/connection';
@@ -87,6 +88,9 @@ async function setupPlugins() {
         max: 100,
         timeWindow: '1 minute',
     });
+
+    // WebSocket support for real-time collaboration
+    await app.register(fastifyWebSocket);
 
     // request logger (only in development)
     if (isDevelopment) {

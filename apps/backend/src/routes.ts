@@ -11,6 +11,7 @@ import {
     registerTeamRoutes,
     registerExtrasRoutes,
 } from '#features';
+import { collaborationRoutes } from '#features/collaboration/routes';
 
 /**
  * OLD EXPRESS ROUTES STRUCTURE (for reference):
@@ -36,4 +37,6 @@ export const registerAllRoutes = async (fastify: FastifyInstance) => {
 
     await fastify.register(registerHealthRoutes, { prefix: '/health' });
     await fastify.register(registerExtrasRoutes, { prefix: '/extras' });
+
+    await fastify.register(collaborationRoutes, { prefix: '/ws/collab' }); // i really love u <3
 };

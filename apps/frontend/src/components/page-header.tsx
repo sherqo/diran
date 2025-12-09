@@ -20,9 +20,10 @@ interface PageHeaderProps {
     role?: string | null;
     loading?: boolean;
     isTeamPage?: boolean;
+    children?: React.ReactNode;
 }
 
-export function PageHeader({ title, icon, pageId, role, loading, isTeamPage = false }: PageHeaderProps) {
+export function PageHeader({ title, icon, pageId, role, loading, isTeamPage = false, children }: PageHeaderProps) {
     const [shareOpen, setShareOpen] = React.useState(false);
     const isOwner = role === 'OWNER';
     const canShare = isOwner && pageId;
@@ -84,6 +85,7 @@ export function PageHeader({ title, icon, pageId, role, loading, isTeamPage = fa
                         ) : null}
                     </>
                 ) : null}
+                {children}
                 <NavActions />
             </div>
         </header>

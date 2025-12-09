@@ -3,19 +3,23 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { usePage } from '@/contexts/PageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { PageHeader } from '@/components/page-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Editor } from '@/components/features/editor/DynamicEditor';
 import { EditablePageTitle } from '@/components/features/editable-page-title';
+import { CollaborationProvider } from '@/lib/collaboration';
 import type { PartialBlock, BlockNoteEditor } from '@blocknote/core';
 import type { EmbeddedBlockContent, ApiBlock } from '@/shared/types/block';
 import { getBlockTreeApi } from '@/lib/api/block';
 import NotFoundInline from '@/components/not-found-inline';
+import { CollaboratorsPresence } from '@/components/features/collaboration/CollaboratorsPresence';
 
 export default function PageView() {
     const params = useParams();
     const pageId = params.pageId as string;
     const { currentPage, pageLoading, loadPage } = usePage();
+    const { user } = useAuth();
     const editorRef = useRef<BlockNoteEditor | null>(null);
     const isLoadingChildrenRef = useRef(false);
 
@@ -135,8 +139,10 @@ export default function PageView() {
     }
 
     return (
-        <>
-            <PageHeader title={pageTitle} icon={pageIcon} pageId={pageId} role={currentPage.role} isTeamPage={currentPage.isTeamPage} />
+        <CollaborationProvider pageId={pageId} userId={user?.id || 'anonymous'} userName={user?.name || 'Anonymous'} enabled={!!user}>
+            <PageHeader title={pageTitle} icon={pageIcon} pageId={pageId} role={currentPage.role} isTeamPage={currentPage.isTeamPage}>
+                <CollaboratorsPresence />
+            </PageHeader>
             <div className="flex-1 overflow-y-auto">
                 <div className="container mx-auto max-w-4xl px-4 pt-10 pb-40">
                     <EditablePageTitle
@@ -167,6 +173,6 @@ export default function PageView() {
                     )}
                 </div>
             </div>
-        </>
+        </CollaborationProvider>
     );
 }
