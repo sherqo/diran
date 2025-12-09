@@ -7,7 +7,7 @@ import type {
     ClientInfo,
     BlockOperation,
     CursorPosition,
-} from './types';
+} from '@diran/shared/types/collaboration';
 
 // In-memory room storage (for production, use Redis)
 const rooms = new Map<string, CollaborationRoom>();

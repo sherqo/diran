@@ -14,7 +14,6 @@ import { isDevelopment, logStartup } from '#lib/utils/common';
 import { errorHandler, notFoundHandler } from '#lib/middleware/errorHandler';
 import { loggerHook } from '#lib/middleware/logger';
 import { registerAllRoutes } from '#routes';
-import { collaborationRoutes } from '#features/collaboration';
 
 // Load environment variables
 dotenv.config({ debug: isDevelopment });
@@ -125,9 +124,6 @@ async function start() {
     try {
         await setupPlugins();
         await app.register(registerAllRoutes, { prefix: '/v1' });
-
-        // WebSocket collaboration routes (no /v1 prefix for WebSocket)
-        await app.register(collaborationRoutes, { prefix: '/ws' });
 
         await app.listen({ port: PORT, host: '0.0.0.0' });
         logStartup(PORT, !!db);
