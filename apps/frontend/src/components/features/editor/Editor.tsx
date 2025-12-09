@@ -21,6 +21,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 import { handleChanges } from './changes-engine';
 import { SlashMenu, getSlashMenuItems, filterSlashMenuItems, CustomFormattingToolbar, CustomSideMenu } from './menus';
+import { useCollaborativeEditor } from '@/lib/collaboration';
 
 interface EditorProps {
     editable?: boolean;
@@ -44,6 +45,9 @@ export default function Editor({
     const [editor, setEditor] = useState<BlockNoteEditor | null>(null);
     const { resolvedTheme } = useTheme();
     const colorScheme = resolvedTheme === 'dark' ? 'dark' : 'light';
+
+    // Enable real-time collaboration
+    useCollaborativeEditor({ editor });
 
     // Create new editor for each page
     useEffect(() => {
