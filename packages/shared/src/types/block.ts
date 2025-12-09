@@ -1,175 +1,90 @@
-// ================ Block Types (matching BlockNote editor) ================
+// ================ Block Types (matching BlockNote editor & Prisma enum) ================
 
 /**
- * Block types matching BlockNote's built-in blocks.
- * Using lowercase to match BlockNote's type names exactly.
+ * Block types matching BlockNote's built-in blocks and Prisma BlockType enum.
  * @see https://www.blocknotejs.org/docs/features/blocks
  */
 export enum BlockTypeEnum {
-  // Special type for pages (not a BlockNote type)
   PAGE = 'page',
-
-  // Typography blocks
   PARAGRAPH = 'paragraph',
   HEADING = 'heading',
   QUOTE = 'quote',
-
-  // List types
   BULLET_LIST_ITEM = 'bulletListItem',
   NUMBERED_LIST_ITEM = 'numberedListItem',
   CHECK_LIST_ITEM = 'checkListItem',
   TOGGLE_LIST_ITEM = 'toggleListItem',
-
-  // Table
   TABLE = 'table',
-
-  // Code
   CODE_BLOCK = 'codeBlock',
-
-  // Embeds (store URLs, no storage API needed)
   IMAGE = 'image',
   VIDEO = 'video',
 }
 
-// ================ Text Styles (for inline content) ================
+// ================ Inline Content (text inside blocks) ================
 
 /**
- * Text styles matching BlockNote's default styles.
- * @see https://www.blocknotejs.org/docs/features/blocks/inline-content
+ * Text styling options.
  */
-export interface Styles {
+export interface TextStyles {
   bold?: boolean;
   italic?: boolean;
   underline?: boolean;
   strike?: boolean;
+  code?: boolean;
   textColor?: string;
   backgroundColor?: string;
 }
 
-// ================ Inline Content Types ================
-
 /**
- * Styled text inline content.
+ * Inline content item (text, link, etc.)
+ * This is what goes inside __content array.
  */
-export interface StyledText {
-  type: 'text';
-  text: string;
-  styles: Styles;
+export interface InlineContent {
+  type: string;
+  text?: string;
+  styles?: TextStyles;
+  content?: InlineContent[]; // for links
+  href?: string; // for links
 }
 
-/**
- * Link inline content.
- */
-export interface Link {
-  type: 'link';
-  content: StyledText[];
-  href: string;
-}
+// ================ Block Props ================
 
 /**
- * Union of all inline content types.
+ * Common props for all blocks.
  */
-export type InlineContent = StyledText | Link;
-
-// ================ Default Block Props ================
-
-/**
- * Default props that apply to all blocks.
- * @see https://www.blocknotejs.org/docs/features/blocks
- */
-export interface DefaultProps {
+export interface BlockProps {
   backgroundColor?: string;
   textColor?: string;
   textAlignment?: 'left' | 'center' | 'right' | 'justify';
-}
-
-// ================ Typography Block Props ================
-
-/**
- * Heading block specific props.
- */
-export interface HeadingProps extends DefaultProps {
-  level: 1 | 2 | 3;
+  // Heading
+  level?: 1 | 2 | 3;
   isToggleable?: boolean;
-}
-
-// ================ List Block Props ================
-
-/**
- * Numbered list item props.
- */
-export interface NumberedListItemProps extends DefaultProps {
+  // Lists
   start?: number;
-}
-
-/**
- * Check list item props.
- */
-export interface CheckListItemProps extends DefaultProps {
-  checked: boolean;
-}
-
-// ================ Code Block Props ================
-
-/**
- * Code block props.
- */
-export interface CodeBlockProps extends DefaultProps {
-  language: string;
-}
-
-// ================ Embed Block Props ================
-
-/**
- * Image block props.
- */
-export interface ImageProps extends DefaultProps {
+  checked?: boolean;
+  // Code
+  language?: string;
+  // Embeds
   name?: string;
   url?: string;
   caption?: string;
   previewWidth?: number;
-}
-
-/**
- * Video block props.
- */
-export interface VideoProps extends DefaultProps {
-  name?: string;
-  url?: string;
-  caption?: string;
   showPreview?: boolean;
-  previewWidth?: number;
+  // Allow any additional props
+  [key: string]: unknown;
 }
 
-// ================ Table Content Types ================
+// ================ Table Types ================
 
-/**
- * Table cell props.
- */
-export interface TableCellProps extends DefaultProps {
-  colspan?: number;
-  rowspan?: number;
-}
-
-/**
- * Table cell structure.
- */
 export interface TableCell {
   type: 'tableCell';
-  props?: TableCellProps;
+  props?: BlockProps;
   content: InlineContent[];
 }
 
-/**
- * Table row structure.
- */
 export interface TableRow {
-  cells: (TableCell | string)[];
+  cells: (TableCell | InlineContent[])[];
 }
 
-/**
- * Table content structure.
- */
 export interface TableContent {
   type: 'tableContent';
   columnWidths?: number[];
@@ -177,118 +92,130 @@ export interface TableContent {
   rows: TableRow[];
 }
 
-// ================ Block Content Types ================
+// ================ Content Stored in DB ================
 
 /**
- * Content structure for paragraph blocks.
+ * Content for PAGE blocks.
+ * Stored directly in Block.content for pages.
  */
-export interface ParagraphContent {
-  props?: DefaultProps;
-  content: InlineContent[];
+export interface PageContent {
+  title?: string;
+  icon?: string;
+  cover?: string;
 }
 
 /**
- * Content structure for heading blocks.
- */
-export interface HeadingContent {
-  props: HeadingProps;
-  content: InlineContent[];
-}
-
-/**
- * Content structure for quote blocks.
- */
-export interface QuoteContent {
-  props?: DefaultProps;
-  content: InlineContent[];
-}
-
-/**
- * All possible block props types.
- */
-export type BlockProps =
-  | DefaultProps
-  | HeadingProps
-  | NumberedListItemProps
-  | CheckListItemProps
-  | CodeBlockProps
-  | ImageProps
-  | VideoProps;
-
-/**
- * Union of all block content types.
- */
-export type BlockContent =
-  | ParagraphContent
-  | HeadingContent
-  | QuoteContent
-  | TableContent
-  | InlineContent[]
-  | undefined
-  | Record<string, unknown>;
-
-// ================ Embedded Content Format ================
-
-/**
- * When storing blocks to the backend, we embed props inside content.
- * This structure allows the backend to store props without a dedicated field.
+ * Content for non-PAGE blocks.
+ * Stored in Block.content with __props and __content.
  */
 export interface EmbeddedBlockContent {
-  __props: BlockProps | Record<string, unknown>;
+  __props: BlockProps;
   __content: InlineContent[] | TableContent | undefined;
 }
 
-/**
- * Content can be either the embedded format (for storage) or raw inline content.
- */
-export type StorageBlockContent = EmbeddedBlockContent | BlockContent;
-
-// ================ Block Interface ================
+// ================ API Types ================
 
 /**
- * Block structure matching BlockNote's block format.
- * @see https://www.blocknotejs.org/docs/features/blocks
+ * Block as stored in DB and returned from API.
  */
 export interface Block {
   id: string;
-  type: BlockTypeEnum;
-  parentId: string | null; // null for root blocks like PAGE
-  order: number;
-  content: BlockContent;
+  type: BlockTypeEnum | string;
+  parentId: string | null;
+  order: string;
+  content: PageContent | EmbeddedBlockContent;
   createdAt: string;
   updatedAt: string;
   children?: Block[];
 }
 
-export interface CreateBlockResponseData {
-  block: Block; // do i really need to return it????
+/**
+ * Block returned from tree/children endpoints.
+ */
+export interface ApiBlock {
+  id: string;
+  type: string;
+  content: PageContent | EmbeddedBlockContent;
+  children?: ApiBlock[];
 }
 
-export interface GetBlockResponseData {
+// ================ API Response Types ================
+
+export interface CreateBlockResponseData {
   block: Block;
 }
 
+export interface GetBlockResponseData {
+  block: Block & {
+    role: string | null;
+    isTeamPage: boolean;
+  };
+}
+
 export interface UpdateBlockResponseData {
-  block: Block; // do i really need to return it????
+  block: Block;
 }
 
 export interface DeleteBlockResponseData {}
 
 export interface GetBlockChildrenResponseData {
-  blocks: Block[];
-}
-
-/**
- * Block structure as returned from API (with embedded content format).
- */
-export interface ApiBlock {
-  id: string;
-  type: string;
-  content: EmbeddedBlockContent | Record<string, unknown>;
-  children?: ApiBlock[];
+  children: ApiBlock[];
 }
 
 export interface GetBlockTreeResponseData {
   children: ApiBlock[];
   length: number;
 }
+
+// ================ Search Types ================
+
+export interface SearchResult {
+  id: string;
+  type: string;
+  title: string;
+  icon: string | null;
+  slug: string | null;
+  snippet: string | null;
+  parentId: string | null;
+  rootPageId: string;
+  updatedAt: string;
+}
+
+export interface SearchBlocksResponseData {
+  results: SearchResult[];
+}
+
+// ================ Content Extraction (for search) ================
+
+/**
+ * Flexible type for extracting text from any content format.
+ * Used by backend for search indexing.
+ */
+export interface ExtractableContent {
+  // Page fields
+  title?: string;
+  icon?: string;
+  // Embedded block fields
+  __props?: BlockProps;
+  __content?: InlineContent[];
+  // For recursive extraction
+  content?: InlineContent[] | ExtractableContent[];
+  children?: ExtractableContent[];
+  // Table fields
+  rows?: { cells: (InlineContent[] | TableCell)[] }[];
+  // Direct text
+  text?: string;
+}
+
+// ================ Legacy Aliases ================
+
+/** @deprecated Use BlockProps */
+export type DefaultBlockProps = BlockProps;
+/** @deprecated Use BlockProps */
+export type DefaultProps = BlockProps;
+/** @deprecated Use TextStyles */
+export type Styles = TextStyles;
+/** @deprecated Use ExtractableContent */
+export type ExtractableBlockContent = ExtractableContent;
+/** @deprecated Use PageContent | EmbeddedBlockContent */
+export type BlockContent = PageContent | EmbeddedBlockContent;

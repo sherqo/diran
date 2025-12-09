@@ -17,6 +17,7 @@ import { RoleType, BlockType } from '@prisma/client';
 import { generateKeyBetween } from 'fractional-indexing';
 import { canWrite } from './middlewares';
 import { getRoleWithInheritance } from '#lib/services/permission';
+import { extractPlainTextFromContent } from '#lib/utils/content';
 
 // CREATE
 // !note: today is 27-Nov-2025, 3:42 AM. i'm keeping these comments for remebering how i thought about the creation process :)
@@ -143,6 +144,9 @@ const createBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Prom
         // Generate order between prev and next (handles nulls for first/last positions)
         const order = generateKeyBetween(prevOrder, nextOrder);
 
+        // Extract plain text for search indexing
+        const contentText = extractPlainTextFromContent(content);
+
         // Create the block
         const created = await tx.block.create({
             data: {
@@ -151,6 +155,7 @@ const createBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Prom
                 parentId: parentId ?? null,
                 order,
                 content,
+                contentText: contentText || null,
             },
             select: {
                 id: true,
@@ -291,7 +296,11 @@ const updateBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Prom
 
         // Handle basic fields
         if (payload.type !== undefined) dataToUpdate.type = payload.type;
-        if (payload.content !== undefined) dataToUpdate.content = payload.content;
+        if (payload.content !== undefined) {
+            dataToUpdate.content = payload.content;
+            // Update content_text for search indexing
+            dataToUpdate.contentText = extractPlainTextFromContent(payload.content) || null;
+        }
 
         // Handle parentId (null is valid)
         if ('parentId' in payload) {
@@ -477,4 +486,125 @@ const getChildrenTree = async (req: AuthenticatedRequest, reply: FastifyReply): 
     return sendSuccess(reply, { children }, 'Block tree retrieved successfully');
 };
 
-export { createBlock, getBlock, updateBlock, deleteBlock, getDirectChildrenBlocks, getChildrenTree };
+// SEARCH - search blocks by content text (pages and their child blocks)
+const searchBlocks = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
+    const { q, limit: limitParam = '10' } = req.query as { q?: string; limit?: string };
+    const limit = parseInt(String(limitParam), 10) || 10;
+
+    if (!q || q.trim().length === 0) {
+        return sendSuccess(reply, { results: [] }, 'Search results');
+    }
+
+    const query = q.trim();
+    const userId = req.user!.id;
+    const searchPattern = `%${query}%`;
+
+    // Use a single query with recursive CTE to:
+    // 1. Get all pages the user has access to
+    // 2. Get all descendant blocks of those pages
+    // 3. Search across all of them
+    const results = await db.$queryRaw<
+        Array<{
+            id: string;
+            type: string;
+            content: any;
+            content_text: string | null;
+            parent_id: string | null;
+            root_page_id: string;
+            root_page_title: string | null;
+            root_page_icon: string | null;
+            slug: string | null;
+            updated_at: Date;
+        }>
+    >`
+        WITH RECURSIVE accessible_pages AS (
+            -- Get all root pages the user has access to
+            SELECT DISTINCT b.id, b.content
+            FROM blocks b
+            INNER JOIN permissions p ON p.block_id = b.id
+            LEFT JOIN team_members tm ON tm.team_id = p.team_id AND tm.user_id = ${userId}::uuid
+            WHERE b.parent_id IS NULL
+              AND b.type = 'page'
+              AND (
+                  p.user_id = ${userId}::uuid
+                  OR tm.user_id IS NOT NULL
+              )
+        ),
+        all_accessible_blocks AS (
+            -- Base: the accessible pages themselves
+            SELECT b.id, b.type, b.content, b.content_text, b.parent_id, b.updated_at,
+                   b.id as root_page_id
+            FROM blocks b
+            INNER JOIN accessible_pages ap ON b.id = ap.id
+            
+            UNION ALL
+            
+            -- Recursive: all descendants of accessible pages
+            SELECT b.id, b.type, b.content, b.content_text, b.parent_id, b.updated_at,
+                   aab.root_page_id
+            FROM blocks b
+            INNER JOIN all_accessible_blocks aab ON b.parent_id = aab.id
+        )
+        SELECT 
+            aab.id,
+            aab.type,
+            aab.content,
+            aab.content_text,
+            aab.parent_id,
+            aab.root_page_id,
+            (SELECT (rp.content->>'title') FROM blocks rp WHERE rp.id = aab.root_page_id) as root_page_title,
+            (SELECT (rp.content->>'icon') FROM blocks rp WHERE rp.id = aab.root_page_id) as root_page_icon,
+            pub.slug,
+            aab.updated_at
+        FROM all_accessible_blocks aab
+        LEFT JOIN publish pub ON pub.block_id = aab.root_page_id
+        WHERE aab.content_text ILIKE ${searchPattern}
+           OR aab.content::text ILIKE ${searchPattern}
+        ORDER BY aab.updated_at DESC
+        LIMIT ${limit}::int
+    `;
+
+    // Transform results
+    const searchResults = results.map(row => {
+        const content = row.content as { title?: string; icon?: string; __content?: Array<{ text?: string }> };
+        const isPage = row.type === 'page';
+
+        // For pages, use the page title; for blocks, extract from __content or use parent page info
+        let title: string;
+        let icon: string | null;
+
+        if (isPage) {
+            title = content?.title || 'Untitled';
+            icon = content?.icon || null;
+        } else {
+            // For child blocks, show the root page context
+            title = row.root_page_title || 'Untitled';
+            icon = row.root_page_icon || null;
+        }
+
+        // Generate snippet from content_text or __content
+        let snippet: string | null = null;
+        if (row.content_text) {
+            snippet = row.content_text.length > 150 ? row.content_text.substring(0, 150) + '...' : row.content_text;
+        } else if (content?.__content) {
+            const text = content.__content.map(c => c.text || '').join('');
+            snippet = text.length > 150 ? text.substring(0, 150) + '...' : text;
+        }
+
+        return {
+            id: row.id,
+            type: row.type,
+            title,
+            icon,
+            slug: row.slug,
+            snippet,
+            parentId: row.parent_id,
+            rootPageId: row.root_page_id,
+            updatedAt: row.updated_at.toISOString(),
+        };
+    });
+
+    sendSuccess(reply, { results: searchResults }, 'Search results');
+};
+
+export { createBlock, getBlock, updateBlock, deleteBlock, getDirectChildrenBlocks, getChildrenTree, searchBlocks };

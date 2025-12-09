@@ -5,6 +5,7 @@ import type {
     UpdateBlockResponseData,
     DeleteBlockResponseData,
     GetBlockTreeResponseData,
+    SearchBlocksResponseData,
     ApiBlock,
 } from '@/shared/types/block';
 import type { CreateBlockBodyInput, UpdateBlockBodyInput } from '@/shared/validation/block';
@@ -70,3 +71,9 @@ export const getAllPagesApi = () =>
         }>;
         length: number;
     }>('/page');
+
+/**
+ * Search blocks by content text
+ */
+export const searchBlocksApi = (query: string, limit = 20) =>
+    apiRequest<SearchBlocksResponseData>(`/block/search?q=${encodeURIComponent(query)}&limit=${limit}`);

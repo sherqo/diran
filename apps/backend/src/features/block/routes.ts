@@ -2,7 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { validateRequest as vr } from '#lib/middleware/validation.js';
 import { authenticate as auth } from '#lib/middleware/auth.js';
 import { requireReadPermission, requireWritePermission, requireParentPermission } from './middlewares.js';
-import { createBlock, getBlock, updateBlock, deleteBlock, getDirectChildrenBlocks, getChildrenTree } from './controller.js';
+import { createBlock, getBlock, updateBlock, deleteBlock, getDirectChildrenBlocks, getChildrenTree, searchBlocks } from './controller.js';
 import { registerPermissionRoutes } from './permission/routes.js';
 import {
     createBlockBodySchema,
@@ -23,6 +23,12 @@ import {
 
 export async function registerBlockRoutes(fastify: FastifyInstance): Promise<void> {
     // All block routes require authentication
+
+    // Search blocks - requires authentication only
+    fastify.get('/search', {
+        preHandler: [auth],
+        handler: searchBlocks,
+    });
 
     // Create block - requires parent permission if parentId is provided
     fastify.post('/', {
