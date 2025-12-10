@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useMemo, useCallback, useRef } from 'react';
-import { useCollaboration } from './useCollaboration';
+import { useCollaboration, type TypingInfo } from './useCollaboration';
 import type { BlockOperation, CursorPosition, CollaboratorInfo, ConnectionState } from '@/shared/types/collaboration';
 import type { BlockNoteEditor } from '@blocknote/core';
 
@@ -9,11 +9,13 @@ interface CollaborationContextValue {
     // Connection state
     connectionState: ConnectionState;
     collaborators: Map<string, CollaboratorInfo>;
+    typingUsers: Map<string, TypingInfo>;
     version: number;
 
     // Actions
     sendOperation: (operation: BlockOperation) => void;
     sendCursor: (cursor: CursorPosition | null) => void;
+    sendTyping: (blockId: string | null) => void;
 
     // Editor binding
     bindEditor: (editor: BlockNoteEditor | null) => void;
@@ -101,7 +103,7 @@ export function CollaborationProvider({ children, pageId, userId, userName, enab
         []
     );
 
-    const { connectionState, collaborators, version, sendOperation, sendCursor } = useCollaboration({
+    const { connectionState, collaborators, typingUsers, version, sendOperation, sendCursor, sendTyping } = useCollaboration({
         pageId,
         userId,
         userName,
@@ -131,12 +133,14 @@ export function CollaborationProvider({ children, pageId, userId, userName, enab
         () => ({
             connectionState,
             collaborators,
+            typingUsers,
             version,
             sendOperation: wrappedSendOperation,
             sendCursor,
+            sendTyping,
             bindEditor,
         }),
-        [connectionState, collaborators, version, wrappedSendOperation, sendCursor, bindEditor]
+        [connectionState, collaborators, typingUsers, version, wrappedSendOperation, sendCursor, sendTyping, bindEditor]
     );
 
     return <CollaborationContext.Provider value={value}>{children}</CollaborationContext.Provider>;

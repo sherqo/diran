@@ -26,10 +26,11 @@ export interface CollaborationRoom {
 
 // Messages from client to server
 export type ClientMessage =
-  | { type: 'join'; pageId: string; userId: string; userName: string; userColor: string }
+  | { type: 'join'; pageId: string; userId: string; userName: string; userColor: string; token?: string }
   | { type: 'leave' }
   | { type: 'operation'; operation: BlockOperation }
-  | { type: 'cursor'; cursor: CursorPosition | null };
+  | { type: 'cursor'; cursor: CursorPosition | null }
+  | { type: 'typing'; blockId: string | null }; // null = stopped typing
 
 // Messages from server to client
 export type ServerMessage =
@@ -38,7 +39,8 @@ export type ServerMessage =
   | { type: 'user-left'; oderId: string }
   | { type: 'operation'; oderId: string; operation: BlockOperation; version: number }
   | { type: 'cursor'; oderId: string; userId: string; userName: string; userColor: string; cursor: CursorPosition | null }
-  | { type: 'error'; message: string };
+  | { type: 'typing'; oderId: string; userName: string; userColor: string; blockId: string | null }
+  | { type: 'error'; message: string; code?: string };
 
 // Simplified client info for broadcasting
 export interface ClientInfo {

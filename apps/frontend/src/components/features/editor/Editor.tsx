@@ -22,6 +22,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { handleChanges } from './changes-engine';
 import { SlashMenu, getSlashMenuItems, filterSlashMenuItems, CustomFormattingToolbar, CustomSideMenu } from './menus';
 import { useCollaborativeEditor } from '@/lib/collaboration';
+import { CursorOverlay } from '@/components/features/collaboration/CursorOverlay';
 
 interface EditorProps {
     editable?: boolean;
@@ -109,43 +110,46 @@ export default function Editor({
     }
 
     return (
-        <BlockNoteView
-            editor={editor}
-            className={`bn-container bn-shadcn ${className || ''}`}
-            data-theming-css-variables-editor
-            data-color-scheme={colorScheme}
-            shadCNComponents={{
-                Button,
-                DropdownMenu,
-                Card,
-                Input,
-                Label,
-                Popover,
-                Tooltip,
-            }}
-            theme={colorScheme}
-            editable={editable}
-            // Disable default menus to use custom ones (or hide when read-only)
-            slashMenu={false}
-            formattingToolbar={false}
-            sideMenu={false}>
-            {/* Only show editing menus when editable */}
-            {editable && (
-                <>
-                    {/* Slash Menu */}
-                    <SuggestionMenuController
-                        triggerCharacter="/"
-                        getItems={async query => filterSlashMenuItems(getSlashMenuItems(editor), query)}
-                        suggestionMenuComponent={SlashMenu}
-                    />
+        <div className="relative">
+            <CursorOverlay editor={editor} />
+            <BlockNoteView
+                editor={editor}
+                className={`bn-container bn-shadcn ${className || ''}`}
+                data-theming-css-variables-editor
+                data-color-scheme={colorScheme}
+                shadCNComponents={{
+                    Button,
+                    DropdownMenu,
+                    Card,
+                    Input,
+                    Label,
+                    Popover,
+                    Tooltip,
+                }}
+                theme={colorScheme}
+                editable={editable}
+                // Disable default menus to use custom ones (or hide when read-only)
+                slashMenu={false}
+                formattingToolbar={false}
+                sideMenu={false}>
+                {/* Only show editing menus when editable */}
+                {editable && (
+                    <>
+                        {/* Slash Menu */}
+                        <SuggestionMenuController
+                            triggerCharacter="/"
+                            getItems={async query => filterSlashMenuItems(getSlashMenuItems(editor), query)}
+                            suggestionMenuComponent={SlashMenu}
+                        />
 
-                    {/* Formatting Toolbar */}
-                    <FormattingToolbarController formattingToolbar={CustomFormattingToolbar} />
+                        {/* Formatting Toolbar */}
+                        <FormattingToolbarController formattingToolbar={CustomFormattingToolbar} />
 
-                    {/* Side Menu - via drag button*/}
-                    <SideMenuController sideMenu={CustomSideMenu} />
-                </>
-            )}
-        </BlockNoteView>
+                        {/* Side Menu - via drag button*/}
+                        <SideMenuController sideMenu={CustomSideMenu} />
+                    </>
+                )}
+            </BlockNoteView>
+        </div>
     );
 }
