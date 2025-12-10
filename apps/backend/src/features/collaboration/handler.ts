@@ -8,6 +8,8 @@ import type {
     BlockOperation,
     CursorPosition,
 } from '@diran/shared/types/collaboration';
+import { verifyAccessToken } from '#lib/utils/auth.js';
+import type { AuthUser } from '@diran/shared/types/auth';
 
 // In-memory room storage (for production, use Redis)
 const rooms = new Map<string, CollaborationRoom>();
@@ -68,12 +70,15 @@ function getClientInfo(client: CollaborationClient, connectionId: string): Clien
 }
 
 // Handle a new WebSocket connection
-export function handleConnection(socket: WebSocket): void {
+export function handleConnection(socket: WebSocket, authUser: AuthUser | null = null): void {
     const connectionId = generateConnectionId();
     let currentRoom: CollaborationRoom | null = null;
     let currentClient: CollaborationClient | null = null;
 
-    console.log(`[Collab] New connection: ${connectionId}`);
+    // Store authenticated user ID (if any) for verification
+    const authenticatedUserId = authUser?.id || null;
+
+    console.log(`[Collab] New connection: ${connectionId}${authenticatedUserId ? ` (auth: ${authenticatedUserId})` : ' (anonymous)'}`);
 
     // Handle incoming messages
     socket.on('message', (data: Buffer) => {
@@ -112,6 +117,9 @@ export function handleConnection(socket: WebSocket): void {
             case 'cursor':
                 handleCursor(connId, message.cursor);
                 break;
+            case 'typing':
+                handleTyping(connId, message.blockId);
+                break;
             default:
                 sendError(sock, 'Unknown message type');
         }
@@ -119,6 +127,27 @@ export function handleConnection(socket: WebSocket): void {
 
     // Handle join request
     function handleJoin(connId: string, sock: WebSocket, message: Extract<ClientMessage, { type: 'join' }>): void {
+        // Verify authentication: if we have an authenticated user, verify it matches
+        if (authenticatedUserId && authenticatedUserId !== message.userId) {
+            console.warn(`[Collab] User ID mismatch: auth=${authenticatedUserId}, message=${message.userId}`);
+            sendError(sock, 'User ID does not match authenticated session', 'AUTH_MISMATCH');
+            return;
+        }
+
+        // If no cookie auth, try token from message (for fallback)
+        if (!authenticatedUserId && message.token) {
+            try {
+                const decoded = verifyAccessToken(message.token);
+                if (!decoded?.id || decoded.id !== message.userId) {
+                    sendError(sock, 'Invalid authentication token', 'AUTH_FAILED');
+                    return;
+                }
+            } catch (error) {
+                sendError(sock, 'Authentication failed', 'AUTH_FAILED');
+                return;
+            }
+        }
+
         // Leave current room if in one
         if (currentRoom) {
             handleLeave(connId);
@@ -237,19 +266,28 @@ export function handleConnection(socket: WebSocket): void {
         );
     }
 
+    // Handle typing indicator
+    function handleTyping(connId: string, blockId: string | null): void {
+        if (!currentRoom || !currentClient) return;
+
+        // Broadcast typing status to all OTHER clients
+        broadcastToRoom(
+            currentRoom,
+            {
+                type: 'typing',
+                oderId: connId,
+                userName: currentClient.userName,
+                userColor: currentClient.userColor,
+                blockId,
+            },
+            connId
+        );
+    }
+
     // Send error message
-    function sendError(sock: WebSocket, message: string): void {
+    function sendError(sock: WebSocket, message: string, code?: string): void {
         if (sock.readyState === 1) {
-            sock.send(JSON.stringify({ type: 'error', message }));
+            sock.send(JSON.stringify({ type: 'error', message, code }));
         }
     }
-}
-
-// Get room stats (for monitoring)
-export function getRoomStats(): { rooms: number; connections: number } {
-    let connections = 0;
-    for (const room of rooms.values()) {
-        connections += room.clients.size;
-    }
-    return { rooms: rooms.size, connections };
 }
