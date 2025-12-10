@@ -41,17 +41,28 @@ interface UseCollaborationOptions {
     enabled?: boolean;
     onOperation?: (operation: BlockOperation, senderId: string) => void;
     onCursorUpdate?: (senderId: string, cursor: CursorPosition | null, userInfo: { userName: string; userColor: string }) => void;
+    onTypingUpdate?: (senderId: string, blockId: string | null, userInfo: { userName: string; userColor: string }) => void;
+}
+
+// Typing info for UI display
+export interface TypingInfo {
+    oderId: string;
+    userName: string;
+    userColor: string;
+    blockId: string | null;
 }
 
 interface UseCollaborationReturn {
     // State
     connectionState: ConnectionState;
     collaborators: Map<string, CollaboratorInfo>;
+    typingUsers: Map<string, TypingInfo>;
     version: number;
 
     // Actions
     sendOperation: (operation: BlockOperation) => void;
     sendCursor: (cursor: CursorPosition | null) => void;
+    sendTyping: (blockId: string | null) => void;
     connect: () => void;
     disconnect: () => void;
 }
@@ -63,9 +74,11 @@ export function useCollaboration({
     enabled = true,
     onOperation,
     onCursorUpdate,
+    onTypingUpdate,
 }: UseCollaborationOptions): UseCollaborationReturn {
     const [connectionState, setConnectionState] = useState<ConnectionState>('disconnected');
     const [collaborators, setCollaborators] = useState<Map<string, CollaboratorInfo>>(new Map());
+    const [typingUsers, setTypingUsers] = useState<Map<string, TypingInfo>>(new Map());
     const [version, setVersion] = useState(0);
 
     const wsRef = useRef<WebSocket | null>(null);
@@ -140,12 +153,36 @@ export function useCollaboration({
                     case 'error':
                         console.error(`[Collab] Server error: ${message.message}`);
                         break;
+
+                    case 'typing':
+                        // Update typing users
+                        setTypingUsers(prev => {
+                            const next = new Map(prev);
+                            if (message.blockId === null) {
+                                // User stopped typing
+                                next.delete(message.oderId);
+                            } else {
+                                // User is typing
+                                next.set(message.oderId, {
+                                    oderId: message.oderId,
+                                    userName: message.userName,
+                                    userColor: message.userColor,
+                                    blockId: message.blockId,
+                                });
+                            }
+                            return next;
+                        });
+                        onTypingUpdate?.(message.oderId, message.blockId, {
+                            userName: message.userName,
+                            userColor: message.userColor,
+                        });
+                        break;
                 }
             } catch (error) {
                 console.error('[Collab] Failed to parse message:', error);
             }
         },
-        [onOperation, onCursorUpdate]
+        [onOperation, onCursorUpdate, onTypingUpdate]
     );
 
     // Connect to WebSocket
@@ -239,6 +276,14 @@ export function useCollaboration({
         [sendMessage]
     );
 
+    // Send typing indicator
+    const sendTyping = useCallback(
+        (blockId: string | null) => {
+            sendMessage({ type: 'typing', blockId });
+        },
+        [sendMessage]
+    );
+
     // Connect on mount, disconnect on unmount
     useEffect(() => {
         if (enabled && pageId) {
@@ -261,9 +306,11 @@ export function useCollaboration({
     return {
         connectionState,
         collaborators,
+        typingUsers,
         version,
         sendOperation,
         sendCursor,
+        sendTyping,
         connect,
         disconnect,
     };

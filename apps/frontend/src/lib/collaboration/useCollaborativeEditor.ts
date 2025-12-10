@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { useCollaborationContext } from '@/lib/collaboration';
 import type { BlockNoteEditor, Block } from '@blocknote/core';
 import type { BlockOperation } from '@/shared/types/collaboration';
@@ -9,6 +9,9 @@ interface UseCollaborativeEditorOptions {
     editor: BlockNoteEditor | null;
     enabled?: boolean;
 }
+
+// Typing indicator timeout (ms) - stop showing "typing" after this
+const TYPING_TIMEOUT = 2000;
 
 /**
  * Hook to connect a BlockNote editor to the collaboration system.
@@ -20,8 +23,51 @@ interface UseCollaborativeEditorOptions {
  */
 export function useCollaborativeEditor({ editor, enabled = true }: UseCollaborativeEditorOptions) {
     const collaboration = useCollaborationContext();
-    const isRemoteChangeRef = useRef(false);
     const lastDocumentRef = useRef<Block[]>([]);
+    const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const currentTypingBlockRef = useRef<string | null>(null);
+
+    // Use ref to avoid stale closure issues
+    const collaborationRef = useRef(collaboration);
+    // eslint-disable-next-line react-hooks/refs
+    collaborationRef.current = collaboration;
+
+    // Send typing indicator with debounce
+    const sendTypingIndicator = useCallback(
+        (blockId: string | null) => {
+            const collab = collaborationRef.current;
+            if (!collab) return;
+
+            // Clear previous timeout
+            if (typingTimeoutRef.current) {
+                clearTimeout(typingTimeoutRef.current);
+            }
+
+            // Only send if block changed
+            if (blockId !== currentTypingBlockRef.current) {
+                currentTypingBlockRef.current = blockId;
+                collab.sendTyping(blockId);
+            }
+
+            // Auto-clear typing after timeout
+            if (blockId !== null) {
+                typingTimeoutRef.current = setTimeout(() => {
+                    currentTypingBlockRef.current = null;
+                    collaborationRef.current?.sendTyping(null);
+                }, TYPING_TIMEOUT);
+            }
+        },
+        [] // No dependencies - uses refs
+    );
+
+    // Cleanup typing timeout on unmount only
+    useEffect(() => {
+        return () => {
+            if (typingTimeoutRef.current) {
+                clearTimeout(typingTimeoutRef.current);
+            }
+        };
+    }, []); // Empty deps - only runs on unmount
 
     // Bind editor to collaboration provider
     useEffect(() => {
@@ -41,13 +87,16 @@ export function useCollaborativeEditor({ editor, enabled = true }: UseCollaborat
         lastDocumentRef.current = editor.document;
 
         const unsubscribe = editor.onChange((editorInstance, { getChanges }) => {
-            // Skip if this change is from a remote operation
-            if (isRemoteChangeRef.current) {
-                return;
-            }
-
+            // Note: CollaborationProvider's wrappedSendOperation will skip
+            // sending if we're currently applying a remote operation
             const changes = getChanges();
             if (changes.length === 0) return;
+
+            // Send typing indicator for the first changed block
+            const firstChange = changes[0];
+            if (firstChange && firstChange.block?.id) {
+                sendTypingIndicator(firstChange.block.id);
+            }
 
             // Convert BlockNote changes to our operation format and send
             changes.forEach(change => {
@@ -101,7 +150,7 @@ export function useCollaborativeEditor({ editor, enabled = true }: UseCollaborat
         });
 
         return unsubscribe;
-    }, [editor, collaboration, enabled]);
+    }, [editor, collaboration, enabled, sendTypingIndicator]);
 
     // Track cursor position and send updates
     useEffect(() => {
@@ -144,6 +193,7 @@ export function useCollaborativeEditor({ editor, enabled = true }: UseCollaborat
     return {
         connectionState: collaboration?.connectionState ?? 'disconnected',
         collaborators: collaboration?.collaborators ?? new Map(),
+        typingUsers: collaboration?.typingUsers ?? new Map(),
         isCollaborating: enabled && collaboration?.connectionState === 'connected',
     };
 }

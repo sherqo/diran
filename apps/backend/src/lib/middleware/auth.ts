@@ -16,7 +16,8 @@ export interface AuthenticatedRequest extends FastifyRequest {
     };
 }
 
-export const authenticate: preHandlerHookHandler = async (req: FastifyRequest, _reply: FastifyReply): Promise<void> => {
+// TODO: some sort of caching for performance is required
+export const getAuthUser = (req: FastifyRequest): AuthUser => {
     const token = req.cookies?.accessToken;
 
     if (!token) {
@@ -28,6 +29,12 @@ export const authenticate: preHandlerHookHandler = async (req: FastifyRequest, _
     if (!decodedUser?.id) {
         throw new ApiError('Invalid token', HttpStatus.UNAUTHORIZED, ErrorCode.INVALID_ACCESS_TOKEN);
     }
+
+    return decodedUser;
+};
+
+export const authenticate: preHandlerHookHandler = async (req: FastifyRequest, _reply: FastifyReply): Promise<void> => {
+    const decodedUser = getAuthUser(req);
 
     // TODO: fix deleted users by them in a small datastructure for short time
     (req as AuthenticatedRequest).user = decodedUser;
