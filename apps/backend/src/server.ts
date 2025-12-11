@@ -90,7 +90,11 @@ async function setupPlugins() {
     });
 
     // WebSocket support for real-time collaboration
-    await app.register(fastifyWebSocket);
+    await app.register(fastifyWebSocket, {
+        options: {
+            maxPayload: 1024 * 50, // 50KB
+        },
+    });
 
     // request logger (only in development)
     if (isDevelopment) {
