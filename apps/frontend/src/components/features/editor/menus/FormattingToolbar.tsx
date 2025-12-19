@@ -10,22 +10,26 @@ import AiToolbarButton from './AiToolbarButton';
  */
 export function CustomFormattingToolbar() {
     return (
-        <FormattingToolbar>
-            {/* Text styles */}
-            <BasicTextStyleButton basicTextStyle="bold" key="boldStyleButton" />
-            <BasicTextStyleButton basicTextStyle="italic" key="italicStyleButton" />
-            <BasicTextStyleButton basicTextStyle="underline" key="underlineStyleButton" />
-            <BasicTextStyleButton basicTextStyle="strike" key="strikeStyleButton" />
-            <BasicTextStyleButton basicTextStyle="code" key="codeStyleButton" />
+        <div className="relative">
+            <FormattingToolbar>
+                {/* Text styles */}
+                <BasicTextStyleButton basicTextStyle="bold" key="boldStyleButton" />
+                <BasicTextStyleButton basicTextStyle="italic" key="italicStyleButton" />
+                <BasicTextStyleButton basicTextStyle="underline" key="underlineStyleButton" />
+                <BasicTextStyleButton basicTextStyle="strike" key="strikeStyleButton" />
+                <BasicTextStyleButton basicTextStyle="code" key="codeStyleButton" />
 
-            {/* Colors */}
-            <ColorStyleButton key="colorStyleButton" />
+                {/* Colors */}
+                <ColorStyleButton key="colorStyleButton" />
 
-            {/* Links */}
-            <CreateLinkButton key="createLinkButton" />
+                {/* Links */}
+                <CreateLinkButton key="createLinkButton" />
 
-            {/* AI */}
-            <AiToolbarButton />
-        </FormattingToolbar>
+                {/* Place AI */}
+                <div className="ml-auto flex items-center">
+                    <AiToolbarButton />
+                </div>
+            </FormattingToolbar>
+        </div>
     );
 }
