@@ -36,7 +36,7 @@ export default function AiPopupModal({ open, pos, messages, input, loading, onCh
     if (!open) return null;
 
     const node = (
-        <div ref={ref} className="fixed z-9999 w-80 rounded-lg bg-transparent p-3 shadow-lg" style={{ left: pos.x, top: pos.y }}>
+        <div ref={ref} className="fixed z-9999 w-180 rounded-lg bg-transparent p-3 shadow-lg" style={{ left: pos.x, top: pos.y }}>
             {messages.length > 0 && (
                 <div className="mb-3 max-h-48 space-y-2 overflow-y-auto">
                     {messages.map((msg, i) => (
