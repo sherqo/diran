@@ -1,3 +1,5 @@
+import type { BlockOperation } from './collaboration';
+
 // AI Request - includes editor context
 export interface AiRequest {
   prompt: string;
@@ -5,25 +7,18 @@ export interface AiRequest {
   currentBlock?: {
     id: string;
     type: string;
-    content: any;
+    content: unknown;
   };
   documentContext?: Array<{
     id: string;
     type: string;
-    content: any;
+    content: unknown;
   }>;
 }
 
-// Block operation types for AI edits
-export type AiBlockOperation =
-  | { op: 'update'; blockId: string; content: any[] }
-  | { op: 'insert'; afterBlockId: string | null; blocks: Array<{ type: string; content: any[]; props?: any }> }
-  | { op: 'delete'; blockId: string }
-  | { op: 'replace'; blockId: string; content: any[] };
-
-// AI Response
+// AI Response - uses the same BlockOperation type as collaboration
 export interface AiResponseData {
   type: 'edit' | 'message';
   message?: string;
-  operations?: AiBlockOperation[];
+  operations?: BlockOperation[];
 }

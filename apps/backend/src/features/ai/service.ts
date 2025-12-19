@@ -1,4 +1,5 @@
-import { AiRequest, AiResponseData, AiBlockOperation } from '@diran/shared';
+import { AiRequest, AiResponseData } from '@diran/shared';
+import type { BlockOperation } from '@diran/shared/types/collaboration';
 import { ApiError } from '#lib/middleware/errorHandler';
 import { HttpStatus, ErrorCode } from '@diran/shared/constants/errors';
 
@@ -51,27 +52,35 @@ OR
 {
   "type": "edit",
   "operations": [
-    { "op": "replace", "blockId": "actual-block-id", "content": [{"type": "text", "text": "..."}] },
-    { "op": "insert", "afterBlockId": "actual-block-id-or-null", "blocks": [{...}] },
+    { "op": "update", "blockId": "actual-block-id", "changes": {"content": [{"type": "text", "text": "..."}]} },
+    { "op": "insert", "blockId": "new-block-id", "afterBlockId": "actual-block-id-or-null", "block": {...} },
     { "op": "delete", "blockId": "actual-block-id" }
   ]
 }
 
 Operation types:
-- replace: Replace content of a block using its ID
-- insert: Add new blocks (afterBlockId can be null to insert at end)
-- delete: Remove a block by ID
+- update: Modify an existing block. Use "changes" object with the properties to update (e.g., {"content": [...]})
+- insert: Add a new block. Provide "blockId" for the new block, "afterBlockId" where to insert (null = at start), and "block" object
+- delete: Remove a block by its ID
 
-Block structure:
-- type: paragraph, heading, bulletListItem, numberedListItem, checkListItem
-- content: Array of inline content (required)
-- props: Optional properties object
+Block object structure:
+{
+  "id": "unique-block-id",
+  "type": "paragraph" | "heading" | "bulletListItem" | "numberedListItem" | "checkListItem",
+  "content": [{"type": "text", "text": "..."}],
+  "props": {} // Optional properties like {"level": 2} for headings
+}
 
 Examples:
-- Paragraph: {"type": "paragraph", "content": [{"type": "text", "text": "text"}]}
-- Heading: {"type": "heading", "props": {"level": 2}, "content": [{"type": "text", "text": "text"}]}
-- Bold text: [{"type": "text", "text": "bold", "styles": {"bold": true}}]
-- Multiple styles: [{"type": "text", "text": "normal "}, {"type": "text", "text": "bold", "styles": {"bold": true}}]
+- Update content: {"op": "update", "blockId": "block-123", "changes": {"content": [{"type": "text", "text": "new text"}]}}
+- Insert paragraph: {"op": "insert", "blockId": "new-456", "afterBlockId": "block-123", "block": {"id": "new-456", "type": "paragraph", "content": [{"type": "text", "text": "text"}]}}
+- Insert heading: {"op": "insert", "blockId": "new-789", "afterBlockId": "block-123", "block": {"id": "new-789", "type": "heading", "props": {"level": 2}, "content": [{"type": "text", "text": "Title"}]}}
+- Delete: {"op": "delete", "blockId": "block-123"}
+
+Content format:
+- Plain: [{"type": "text", "text": "text"}]
+- Bold: [{"type": "text", "text": "bold", "styles": {"bold": true}}]
+- Mixed: [{"type": "text", "text": "normal "}, {"type": "text", "text": "bold", "styles": {"bold": true}}]
 
 ## Message Response Structure:
 {
@@ -90,19 +99,27 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no code blocks, no extra text.`;
 }
 
 // this is AI generated function...
-function cleanOperations(operations: any[]): AiBlockOperation[] {
-    return operations.map((op: any) => {
-        if (op.op === 'insert' && op.blocks) {
-            op.blocks = op.blocks.map((block: any) => {
-                if (block.level !== undefined && !block.props) {
-                    block.props = { level: block.level };
-                    delete block.level;
+function cleanOperations(operations: unknown[]): BlockOperation[] {
+    if (!Array.isArray(operations)) return [];
+
+    return operations
+        .map((op: unknown) => {
+            if (!op || typeof op !== 'object') return null;
+
+            const operation = op as Record<string, unknown>;
+
+            // Ensure all operations have required fields
+            if (operation.op === 'insert' && typeof operation.block === 'object' && operation.block) {
+                const block = operation.block as Record<string, unknown>;
+                // Ensure block has an id
+                if (!block.id) {
+                    block.id = `ai-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
                 }
-                return block;
-            });
-        }
-        return op;
-    });
+            }
+
+            return operation as BlockOperation;
+        })
+        .filter((op): op is BlockOperation => op !== null);
 }
 
 function parseAiResponse(aiText: string): AiResponseData {

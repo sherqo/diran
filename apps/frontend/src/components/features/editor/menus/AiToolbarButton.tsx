@@ -3,9 +3,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import AiPopupModal from './AiPopupModal';
 import { Sparkles } from 'lucide-react';
-import { AiRequest, AiResponseData, AiBlockOperation } from '@diran/shared';
+import { AiRequest, AiResponseData } from '@diran/shared';
 import { apiRequest } from '@/lib/api/helpers';
 import { useBlockNoteEditor } from '@blocknote/react';
+import { applyBlockOperations } from '@/lib/editor/applyOperations';
 
 export default function AiToolbarButton() {
     const editor = useBlockNoteEditor();
@@ -108,7 +109,7 @@ export default function AiToolbarButton() {
             // Handle based on response type
             if (data.type === 'edit' && data.operations && data.operations.length > 0) {
                 console.log('[AI] Applying operations:', data.operations);
-                applyOperations(data.operations);
+                applyBlockOperations(editor, data.operations, '[AI]');
                 setMessages(m => [...m, `✓ Applied ${data.operations!.length} edit(s)`]);
                 setOpen(false);
             } else if (data.type === 'message' && data.message) {
@@ -125,53 +126,6 @@ export default function AiToolbarButton() {
             setMessages(m => [...m, 'Error: Network error occurred']);
         } finally {
             setLoading(false);
-        }
-    };
-
-    // Apply AI operations to the editor
-    const applyOperations = (operations: AiBlockOperation[]) => {
-        console.log('[AI] applyOperations called with:', operations);
-        for (const op of operations) {
-            try {
-                console.log('[AI] Processing operation:', op);
-                if (op.op === 'replace' || op.op === 'update') {
-                    // Update block content
-                    const block = editor.document.find(b => b.id === op.blockId);
-                    console.log('[AI] Found block for update:', block);
-                    if (block) {
-                        console.log('[AI] Updating block with content:', op.content);
-                        editor.updateBlock(block, {
-                            content: op.content,
-                        });
-                    }
-                } else if (op.op === 'insert') {
-                    // Insert new blocks after specified block
-                    if (op.afterBlockId) {
-                        const afterBlock = editor.document.find(b => b.id === op.afterBlockId);
-                        console.log('[AI] Found afterBlock for insert:', afterBlock);
-                        if (afterBlock && op.blocks) {
-                            console.log('[AI] Inserting blocks:', op.blocks);
-                            editor.insertBlocks(op.blocks as any, afterBlock, 'after');
-                        }
-                    } else {
-                        // Insert at the end if no afterBlockId
-                        console.log('[AI] Inserting blocks at end:', op.blocks);
-                        const lastBlock = editor.document[editor.document.length - 1];
-                        if (lastBlock && op.blocks) {
-                            editor.insertBlocks(op.blocks as any, lastBlock, 'after');
-                        }
-                    }
-                } else if (op.op === 'delete') {
-                    // Delete block
-                    const block = editor.document.find(b => b.id === op.blockId);
-                    console.log('[AI] Found block for delete:', block);
-                    if (block) {
-                        editor.removeBlocks([block]);
-                    }
-                }
-            } catch (err) {
-                console.error('Failed to apply operation:', op, err);
-            }
         }
     };
 

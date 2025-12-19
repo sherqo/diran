@@ -57,7 +57,7 @@ export type BlockOperation =
   | { op: 'update'; blockId: string; changes: unknown }
   | { op: 'delete'; blockId: string }
   | { op: 'move'; blockId: string; afterBlockId: string | null }
-  | { op: 'bulk-update'; blocks: unknown[] }; // For paste, initial load, etc.
+  | { op: 'bulk-update'; blocks: unknown[] }; // for later
 
 // Simplified client info
 export interface CollaboratorInfo {
