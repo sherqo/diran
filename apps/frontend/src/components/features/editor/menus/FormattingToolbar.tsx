@@ -3,6 +3,7 @@
 'use client';
 
 import { BasicTextStyleButton, ColorStyleButton, CreateLinkButton, FormattingToolbar } from '@blocknote/react';
+import AiToolbarButton from './AiToolbarButton';
 
 /**
  * Custom Formatting Toolbar - appears when selecting text.
@@ -22,6 +23,9 @@ export function CustomFormattingToolbar() {
 
             {/* Links */}
             <CreateLinkButton key="createLinkButton" />
+
+            {/* AI */}
+            <AiToolbarButton />
         </FormattingToolbar>
     );
 }
