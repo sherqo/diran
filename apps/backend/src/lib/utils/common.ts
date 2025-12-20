@@ -3,7 +3,7 @@ import chalk from 'chalk';
 export const isProduction = process.env.NODE_ENV === 'production';
 export const isDevelopment = process.env.NODE_ENV === 'development';
 
-// Professional startup logging with colors and extra data
+//  startup logging with colors and extra data
 export const logStartup = (port: number, dbConnected: boolean) => {
     const appName = process.env.APP_NAME || 'Diran AI';
     const appVersion = process.env.APP_VERSION || '0.1.0';

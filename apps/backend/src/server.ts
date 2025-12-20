@@ -5,8 +5,8 @@ import fastifyCookie from '@fastify/cookie';
 import fastifyRateLimit from '@fastify/rate-limit';
 import fastifyUnderPressure from '@fastify/under-pressure';
 import fastifyWebSocket from '@fastify/websocket';
-import dotenv from 'dotenv';
 import { serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
+import dotenv from 'dotenv';
 import { db } from '#lib/database/connection';
 import { isDevelopment, logStartup } from '#lib/utils/common';
 import { errorHandler, notFoundHandler } from '#lib/middleware/errorHandler';
@@ -30,15 +30,13 @@ app.setSerializerCompiler(serializerCompiler);
 
 // Register plugins
 async function setupPlugins() {
-    // Swagger removed — no API docs served from the backend in development
-
     // Cookie parser MUST be registered first before other plugins
     // This is critical for cookie parsing to work
     await app.register(fastifyCookie);
 
     // Under pressure - detect server overload
     await app.register(fastifyUnderPressure, {
-        maxEventLoopDelay: 8000, // 8s, Railway CPUs can lag easily
+        maxEventLoopDelay: 8000, 
         maxHeapUsedBytes: 256 * 1024 * 1024, // 256MB
         maxRssBytes: 512 * 1024 * 1024, // 512MB
         retryAfter: 5, // seconds
@@ -66,7 +64,7 @@ async function setupPlugins() {
         timeWindow: '1 minute',
     });
 
-    // WebSocket support for real-time collaboration
+    // WebSocket support
     await app.register(fastifyWebSocket, {
         options: {
             maxPayload: 1024 * 50, // 50KB
