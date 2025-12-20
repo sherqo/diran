@@ -15,6 +15,7 @@ export enum BlockTypeEnum {
   TOGGLE_LIST_ITEM = 'toggleListItem',
   TABLE = 'table',
   CODE_BLOCK = 'codeBlock',
+  DIVIDER = 'divider',
   IMAGE = 'image',
   VIDEO = 'video',
 }

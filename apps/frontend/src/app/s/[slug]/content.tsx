@@ -19,6 +19,7 @@ import * as Popover from '@/components/ui/popover';
 import * as Tooltip from '@/components/ui/tooltip';
 import { LogoButton } from '@/components/ui/logo-button';
 import Link from 'next/link';
+import { uploadEditorFileApi } from '@/lib/api/upload';
 
 interface ApiBlock {
     id: string;
@@ -79,6 +80,13 @@ export function PublishedPageContent({ page }: PublishedPageContentProps) {
     useEffect(() => {
         const editorInstance = BlockNoteEditor.create({
             initialContent: initialContent.length > 0 ? initialContent : undefined,
+            uploadFile: async (file: File) => {
+                const result = await uploadEditorFileApi(file);
+                if (result.success && result.data) {
+                    return result.data.url;
+                }
+                throw new Error(result.error?.message || 'Upload failed');
+            },
         });
         setEditor(editorInstance);
 

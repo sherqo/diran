@@ -17,9 +17,12 @@ const r2Client = new S3Client({
 const BUCKET_NAME = process.env.R2_BUCKET_NAME || 'diran-storage';
 const PUBLIC_URL = process.env.R2_PUBLIC_URL;
 
-// image MIME types
+// Allowed MIME types
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
+const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/ogg'];
+const ALLOWED_FILE_TYPES = [...ALLOWED_IMAGE_TYPES, ...ALLOWED_VIDEO_TYPES];
+const MAX_IMAGE_SIZE = 20 * 1024 * 1024; // 20MB
+const MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100MB
 
 interface UploadResult {
     key: string;
@@ -27,9 +30,9 @@ interface UploadResult {
 }
 
 /**
- * Generate a unique filename for uploaded images
+ * Generate a unique filename for uploaded files
  */
-function generateImageKey(userId: string, originalFilename: string, prefix = 'profiles'): string {
+function generateFileKey(userId: string, originalFilename: string, prefix: string): string {
     const ext = originalFilename.split('.').pop() || 'jpg';
     const randomId = crypto.randomBytes(16).toString('hex');
     const timestamp = Date.now();
@@ -43,25 +46,24 @@ function getPublicUrl(key: string): string {
     if (PUBLIC_URL) {
         return `${PUBLIC_URL}/${key}`;
     }
-    // Use R2.dev public URL if no custom domain is set
     return `https://${BUCKET_NAME}.r2.dev/${key}`;
 }
 
 /**
- * Validate image file
+ * Validate file before upload
  */
-function validateImage(buffer: Buffer, mimetype: string): void {
-    if (!ALLOWED_IMAGE_TYPES.includes(mimetype)) {
+function validateFile(buffer: Buffer, mimetype: string, allowedTypes: string[], maxSize: number): void {
+    if (!allowedTypes.includes(mimetype)) {
         throw new ApiError(
-            `Invalid file type. Allowed types: ${ALLOWED_IMAGE_TYPES.join(', ')}`,
+            `Invalid file type. Allowed types: ${allowedTypes.join(', ')}`,
             HttpStatus.BAD_REQUEST,
             ErrorCode.VALIDATION_ERROR
         );
     }
 
-    if (buffer.length > MAX_FILE_SIZE) {
+    if (buffer.length > maxSize) {
         throw new ApiError(
-            `File size exceeds maximum allowed size of ${MAX_FILE_SIZE / (1024 * 1024)}MB`,
+            `File size exceeds maximum allowed size of ${maxSize / (1024 * 1024)}MB`,
             HttpStatus.BAD_REQUEST,
             ErrorCode.VALIDATION_ERROR
         );
@@ -69,18 +71,37 @@ function validateImage(buffer: Buffer, mimetype: string): void {
 }
 
 /**
- * Upload an image to R2
+ * Upload a file to R2 storage
+ * Handles images, videos, and any other file type
  */
-export async function uploadImage(
+export async function uploadFile(
     buffer: Buffer,
     mimetype: string,
     originalFilename: string,
     userId: string,
-    prefix = 'profiles'
+    prefix = 'uploads'
 ): Promise<UploadResult> {
-    validateImage(buffer, mimetype);
+    // Determine allowed types and max size based on mimetype
+    const isVideo = ALLOWED_VIDEO_TYPES.includes(mimetype);
+    const isImage = ALLOWED_IMAGE_TYPES.includes(mimetype);
+    
+    if (!isVideo && !isImage) {
+        throw new ApiError(
+            `Invalid file type. Allowed types: ${ALLOWED_FILE_TYPES.join(', ')}`,
+            HttpStatus.BAD_REQUEST,
+            ErrorCode.VALIDATION_ERROR
+        );
+    }
 
-    const key = generateImageKey(userId, originalFilename, prefix);
+    const maxSize = isVideo ? MAX_VIDEO_SIZE : MAX_IMAGE_SIZE;
+    validateFile(buffer, mimetype, ALLOWED_FILE_TYPES, maxSize);
+
+    // Auto-determine prefix based on file type if not specified or if using default
+    if (prefix === 'uploads') {
+        prefix = isVideo ? 'videos' : 'images';
+    }
+
+    const key = generateFileKey(userId, originalFilename, prefix);
 
     try {
         const command = new PutObjectCommand({
@@ -88,27 +109,24 @@ export async function uploadImage(
             Key: key,
             Body: buffer,
             ContentType: mimetype,
-            // Make the object publicly readable
-            // Note: You need to configure bucket settings in Cloudflare dashboard
-            // to allow public access or use custom domain
         });
 
         await r2Client.send(command);
 
         return {
             key,
-            url: PUBLIC_URL ? `${PUBLIC_URL}/${key}` : `https://${BUCKET_NAME}.r2.dev/${key}`,
+            url: getPublicUrl(key),
         };
     } catch (error) {
-        console.error('[Storage] Failed to upload image:', error);
-        throw new ApiError('Failed to upload image', HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.INTERNAL_ERROR);
+        console.error('[Storage] Failed to upload file:', error);
+        throw new ApiError('Failed to upload file', HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.INTERNAL_ERROR);
     }
 }
 
 /**
- * Delete an image from R2
+ * Delete a file from R2
  */
-export async function deleteImage(key: string): Promise<void> {
+export async function deleteFile(key: string): Promise<void> {
     try {
         const command = new DeleteObjectCommand({
             Bucket: BUCKET_NAME,
@@ -117,10 +135,14 @@ export async function deleteImage(key: string): Promise<void> {
 
         await r2Client.send(command);
     } catch (error) {
-        console.error('[Storage] Failed to delete image:', error);
-        // Don't throw error, just log it (old image cleanup is not critical)
+        console.error('[Storage] Failed to delete file:', error);
+        // Don't throw error, just log it (cleanup is not critical)
     }
 }
+
+// Legacy function names for backward compatibility
+export const uploadImage = uploadFile;
+export const deleteImage = deleteFile;
 
 /**
  * Generate a presigned URL for temporary access (useful for private images)

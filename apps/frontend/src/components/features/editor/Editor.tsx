@@ -23,6 +23,8 @@ import { handleChanges } from './changes-engine';
 import { SlashMenu, getSlashMenuItems, filterSlashMenuItems, CustomFormattingToolbar, CustomSideMenu } from './menus';
 import { useCollaborativeEditor } from '@/lib/collaboration';
 import { CursorOverlay } from '@/components/features/collaboration/CursorOverlay';
+import { uploadEditorFileApi } from '@/lib/api/upload';
+import { showToast } from '@/lib/toast';
 
 interface EditorProps {
     editable?: boolean;
@@ -54,6 +56,21 @@ export default function Editor({
     useEffect(() => {
         const editorInstance = BlockNoteEditor.create({
             initialContent: initialContent,
+            uploadFile: async (file: File) => {
+                try {
+                    const result = await uploadEditorFileApi(file);
+                    if (result.success && result.data) {
+                        return result.data.url;
+                    } else {
+                        showToast(result.error?.message || 'Upload failed', 'error');
+                        throw new Error(result.error?.message || 'Upload failed');
+                    }
+                } catch (error) {
+                    console.error('Upload error:', error);
+                    showToast('Failed to upload file', 'error');
+                    throw error;
+                }
+            },
         });
 
         setEditor(editorInstance);

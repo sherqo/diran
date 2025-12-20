@@ -1,6 +1,3 @@
-// THIS FILE IS NO LONGER NEEDED - Routes are now registered directly in server.ts with Fastify
-// Kept for reference during migration
-
 import { FastifyInstance } from 'fastify';
 import {
     registerAuthRoutes,
@@ -12,6 +9,7 @@ import {
     registerExtrasRoutes,
     registerAiRoutes,
 } from '#features';
+import { registerUploadRoutes } from '#features/upload/routes';
 import { collaborationRoutes } from '#features/collaboration/routes';
 
 /**
@@ -35,6 +33,8 @@ export const registerAllRoutes = async (fastify: FastifyInstance) => {
     await fastify.register(registerBlockRoutes, { prefix: '/block' });
     await fastify.register(registerPageRoutes, { prefix: '/page' });
     await fastify.register(registerTeamRoutes, { prefix: '/team' });
+
+    await fastify.register(registerUploadRoutes, { prefix: '/upload' });
 
     await fastify.register(registerHealthRoutes, { prefix: '/health' });
     await fastify.register(registerExtrasRoutes, { prefix: '/extras' });
