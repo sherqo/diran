@@ -13,23 +13,26 @@ interface ProfilePhotoUploadProps {
     onUploadSuccess?: (newPhotoUrl: string) => void;
 }
 
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
+
 export function ProfilePhotoUpload({ currentPhotoUrl, userName, onUploadSuccess }: ProfilePhotoUploadProps) {
     const [uploading, setUploading] = useState(false);
     const [photoUrl, setPhotoUrl] = useState(currentPhotoUrl);
-    const fileInputRef = useRef<HTMLInputElement>(null);
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
 
     const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
         // Validate file type
-        if (!file.type.startsWith('image/')) {
-            showToast('Please select an image file', 'error');
+        if (!ALLOWED_TYPES.includes(file.type)) {
+            showToast('Please select a JPG, PNG, WebP or GIF image', 'error');
             return;
         }
 
         // Validate file size (20MB)
-        if (file.size > 20 * 1024 * 1024) {
+        if (file.size > MAX_FILE_SIZE) {
             showToast('Image size must be less than 20MB', 'error');
             return;
         }
@@ -47,20 +50,16 @@ export function ProfilePhotoUpload({ currentPhotoUrl, userName, onUploadSuccess 
             } else {
                 showToast(result.error.message || 'Failed to upload photo', 'error');
             }
-        } catch (error) {
-            console.error('Upload error:', error);
+        } catch (err) {
+            console.error('Upload error:', err);
             showToast('Failed to upload photo', 'error');
         } finally {
             setUploading(false);
-            // Reset input
-            if (fileInputRef.current) {
-                fileInputRef.current.value = '';
-            }
+            if (fileInputRef.current) fileInputRef.current.value = '';
         }
     };
 
     const handleButtonClick = (e: React.MouseEvent) => {
-        // Prevent clicks from bubbling to parent Dialog overlay which may close the modal
         e.stopPropagation();
         fileInputRef.current?.click();
     };
@@ -73,7 +72,7 @@ export function ProfilePhotoUpload({ currentPhotoUrl, userName, onUploadSuccess 
         .slice(0, 2);
 
     return (
-        <div className="flex flex-col items-center gap-4">
+        <div className="flex w-full flex-col items-center gap-4">
             <div className="relative">
                 <Avatar className="h-32 w-32">
                     <AvatarImage src={photoUrl} alt={userName} />
@@ -95,7 +94,7 @@ export function ProfilePhotoUpload({ currentPhotoUrl, userName, onUploadSuccess 
             <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/jpeg,image/png,image/webp,image/gif"
+                accept={ALLOWED_TYPES.join(',')}
                 onChange={e => {
                     e.stopPropagation();
                     handleFileSelect(e);
@@ -105,9 +104,9 @@ export function ProfilePhotoUpload({ currentPhotoUrl, userName, onUploadSuccess 
                 disabled={uploading}
             />
 
-            <div className="text-center">
+            <div className="w-full text-center">
                 <p className="text-muted-foreground text-sm">Click the camera icon to upload a new photo</p>
-                <p className="text-muted-foreground text-xs">JPG, PNG, WebP or GIF (max 5MB)</p>
+                <p className="text-muted-foreground text-xs">JPG, PNG, WebP or GIF (max 20MB)</p>
             </div>
         </div>
     );
