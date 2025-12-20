@@ -8,7 +8,9 @@ import { Dialog, DialogContent, DialogTitle, DialogHeader } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+// Avatar components are used inside the upload component
+import { ProfilePhotoUpload } from '@/components/profile/profile-photo-upload';
+import { showToast } from '@/lib/toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { updateProfileApi, changePasswordApi } from '@/lib/api/user';
 import { updateProfileSchema, changePasswordSchema } from '@/shared/validation/user';
@@ -119,8 +121,11 @@ export function SettingsDialog({ open, onOpenChange }: { open: boolean; onOpenCh
     };
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-h-[90vh] w-[min(92vw,64rem)] max-w-2xl overflow-hidden p-0">
+        <Dialog open={open} onOpenChange={onOpenChange} modal>
+            <DialogContent
+                className="max-h-[90vh] w-[min(92vw,64rem)] max-w-2xl overflow-hidden p-0"
+                onPointerDownOutside={e => e.preventDefault()}
+                onInteractOutside={e => e.preventDefault()}>
                 <DialogHeader className="m-0 border-b px-6 py-4 text-left">
                     <DialogTitle>Settings</DialogTitle>
                 </DialogHeader>
@@ -133,42 +138,46 @@ export function SettingsDialog({ open, onOpenChange }: { open: boolean; onOpenCh
                             <p className="text-muted-foreground text-sm">Manage your profile information</p>
                         </div>
 
-                        <form onSubmit={handleProfileSubmit} className="space-y-5">
-                            <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-                                <Avatar className="h-16 w-16 sm:h-20 sm:w-20">
-                                    <AvatarImage src={profileForm.photo} alt={profileForm.name} />
-                                    <AvatarFallback className="text-lg">{profileForm.name?.[0] || 'U'}</AvatarFallback>
-                                </Avatar>
-                                <div className="w-full flex-1 space-y-2">
-                                    <Label htmlFor="photo" className="text-sm">
-                                        Photo URL
-                                    </Label>
-                                    <Input
-                                        id="photo"
-                                        type="url"
-                                        placeholder="https://example.com/photo.jpg"
-                                        value={profileForm.photo}
-                                        onChange={e => setProfileForm(prev => ({ ...prev, photo: e.target.value }))}
+                        <form onSubmit={handleProfileSubmit} className="space-y-6">
+                            <div className="flex w-full flex-col items-stretch gap-6">
+                                <div className="flex w-full justify-center">
+                                    <ProfilePhotoUpload
+                                        currentPhotoUrl={profileForm.photo}
+                                        userName={profileForm.name || user?.name || 'User'}
+                                        onUploadSuccess={async newUrl => {
+                                            setProfileForm(prev => ({ ...prev, photo: newUrl }));
+                                            try {
+                                                await checkAuth();
+                                                showToast('Profile photo updated', 'success');
+                                            } catch {
+                                                // ignore
+                                            }
+                                        }}
                                     />
                                 </div>
-                            </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="name" className="text-sm">
-                                    Name
-                                </Label>
-                                <Input
-                                    id="name"
-                                    value={profileForm.name}
-                                    onChange={e => setProfileForm(prev => ({ ...prev, name: e.target.value }))}
-                                    placeholder="Your name"
-                                />
-                            </div>
+                                <div className="w-full">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="name" className="text-sm">
+                                            Name
+                                        </Label>
+                                        <Input
+                                            id="name"
+                                            className="w-full"
+                                            value={profileForm.name}
+                                            onChange={e => setProfileForm(prev => ({ ...prev, name: e.target.value }))}
+                                            placeholder="Your name"
+                                        />
+                                    </div>
+                                </div>
 
-                            <div className="space-y-2">
-                                <Label className="text-sm">Email</Label>
-                                <Input value={user?.email || ''} disabled className="bg-muted" />
-                                <p className="text-muted-foreground text-xs">Email cannot be changed</p>
+                                <div className="w-full">
+                                    <div className="space-y-2">
+                                        <Label className="text-sm">Email</Label>
+                                        <Input value={user?.email || ''} disabled className="bg-muted w-full text-left" />
+                                        <p className="text-muted-foreground text-left text-xs">Email cannot be changed</p>
+                                    </div>
+                                </div>
                             </div>
 
                             {profileValidation.hasErrors && <p className="text-destructive text-sm">{profileValidation.errorMessage}</p>}
