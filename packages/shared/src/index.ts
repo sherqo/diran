@@ -3,6 +3,7 @@ export * from './types/user';
 export * from './types/auth';
 export * from './types/health';
 export * from './types/block';
+export * from './types/collaboration';
 export * from './types/permission';
 export * from './types/publish';
 export * from './types/team';
