@@ -22,6 +22,8 @@ const BlockTypeValues = [
   BlockTypeEnum.TABLE,
   // Code
   BlockTypeEnum.CODE_BLOCK,
+  // Layout
+  BlockTypeEnum.DIVIDER,
   // Embeds
   BlockTypeEnum.IMAGE,
   BlockTypeEnum.VIDEO,
