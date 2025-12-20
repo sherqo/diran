@@ -7,12 +7,13 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4003/v
 async function doFetch(endpoint: string, options: RequestInit = {}): Promise<Response> {
     const url = `${API_BASE_URL}${endpoint}`;
 
-    // Only include Content-Type if there's a body
+    // Only include Content-Type if there's a body and it's not FormData
     const headers: Record<string, string> = {
         ...(options.headers as Record<string, string>),
     };
 
-    if (options.body !== undefined) {
+    // Don't set Content-Type for FormData (browser will set it with boundary)
+    if (options.body !== undefined && !(options.body instanceof FormData)) {
         headers['Content-Type'] = 'application/json';
     }
 

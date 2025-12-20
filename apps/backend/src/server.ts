@@ -3,8 +3,6 @@ import fastifyCors from '@fastify/cors';
 import fastifyHelmet from '@fastify/helmet';
 import fastifyCookie from '@fastify/cookie';
 import fastifyRateLimit from '@fastify/rate-limit';
-import fastifySwagger from '@fastify/swagger';
-import fastifySwaggerUi from '@fastify/swagger-ui';
 import fastifyUnderPressure from '@fastify/under-pressure';
 import fastifyWebSocket from '@fastify/websocket';
 import dotenv from 'dotenv';
@@ -32,28 +30,7 @@ app.setSerializerCompiler(serializerCompiler);
 
 // Register plugins
 async function setupPlugins() {
-    // Swagger documentation (register before routes, only in development)
-    if (isDevelopment) {
-        await app.register(fastifySwagger, {
-            openapi: {
-                openapi: '3.1.0',
-                info: {
-                    title: 'Diran API',
-                    description: 'API documentation for Diran backend',
-                    version: '0.1.0',
-                },
-            },
-        });
-
-        await app.register(fastifySwaggerUi, {
-            routePrefix: '/docs',
-            uiConfig: {
-                docExpansion: 'list',
-                deepLinking: true,
-            },
-            staticCSP: true,
-        });
-    }
+    // Swagger removed — no API docs served from the backend in development
 
     // Cookie parser MUST be registered first before other plugins
     // This is critical for cookie parsing to work
@@ -85,12 +62,16 @@ async function setupPlugins() {
 
     // Global rate limiter
     await app.register(fastifyRateLimit, {
-        max: 100,
+        max: 150,
         timeWindow: '1 minute',
     });
 
     // WebSocket support for real-time collaboration
-    await app.register(fastifyWebSocket);
+    await app.register(fastifyWebSocket, {
+        options: {
+            maxPayload: 1024 * 50, // 50KB
+        },
+    });
 
     // request logger (only in development)
     if (isDevelopment) {

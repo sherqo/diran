@@ -29,9 +29,9 @@ interface EditorProps {
     className?: string;
     initialContent?: PartialBlock[];
     pageId: string;
-    editorRef?: React.MutableRefObject<BlockNoteEditor | null>;
+    editorRef?: React.RefObject<BlockNoteEditor | null>;
     onEditorReady?: () => void;
-    isLoadingChildrenRef?: React.MutableRefObject<boolean>;
+    isLoadingChildrenRef?: React.RefObject<boolean>;
 }
 
 export default function Editor({

@@ -10,6 +10,7 @@ import {
     registerPageRoutes,
     registerTeamRoutes,
     registerExtrasRoutes,
+    registerAiRoutes,
 } from '#features';
 import { collaborationRoutes } from '#features/collaboration/routes';
 
@@ -37,6 +38,7 @@ export const registerAllRoutes = async (fastify: FastifyInstance) => {
 
     await fastify.register(registerHealthRoutes, { prefix: '/health' });
     await fastify.register(registerExtrasRoutes, { prefix: '/extras' });
+    await fastify.register(registerAiRoutes, { prefix: '/ai' });
 
     await fastify.register(collaborationRoutes, { prefix: '/ws/collab' }); // i really love u <3
 };

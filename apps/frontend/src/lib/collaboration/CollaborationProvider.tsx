@@ -4,6 +4,7 @@ import React, { createContext, useContext, useMemo, useCallback, useRef } from '
 import { useCollaboration, type TypingInfo } from './useCollaboration';
 import type { BlockOperation, CursorPosition, CollaboratorInfo, ConnectionState } from '@/shared/types/collaboration';
 import type { BlockNoteEditor } from '@blocknote/core';
+import { applyBlockOperations } from '@/lib/editor/applyOperations';
 
 interface CollaborationContextValue {
     // Connection state
@@ -44,45 +45,7 @@ export function CollaborationProvider({ children, pageId, userId, userName, enab
         isApplyingRemoteRef.current = true;
 
         try {
-            switch (operation.op) {
-                case 'insert':
-                    // Insert a new block after the specified block
-                    if (operation.afterBlockId) {
-                        editor.insertBlocks(
-                            [operation.block as Parameters<typeof editor.insertBlocks>[0][0]],
-                            { id: operation.afterBlockId },
-                            'after'
-                        );
-                    } else {
-                        // Insert at the beginning
-                        const firstBlock = editor.document[0];
-                        if (firstBlock) {
-                            editor.insertBlocks([operation.block as Parameters<typeof editor.insertBlocks>[0][0]], firstBlock, 'before');
-                        }
-                    }
-                    break;
-
-                case 'update':
-                    // Update an existing block
-                    editor.updateBlock(operation.blockId, operation.changes as Parameters<typeof editor.updateBlock>[1]);
-                    break;
-
-                case 'delete':
-                    // Remove a block
-                    editor.removeBlocks([{ id: operation.blockId }]);
-                    break;
-
-                case 'move':
-                    // Move requires delete + insert (BlockNote doesn't have direct move)
-                    // This is handled by the bulk-update case or separate delete/insert ops
-                    console.log('[Collab] Move operation - handled via delete/insert');
-                    break;
-
-                case 'bulk-update':
-                    // Replace all blocks (used for initial sync or large changes)
-                    editor.replaceBlocks(editor.document, operation.blocks as Parameters<typeof editor.replaceBlocks>[1]);
-                    break;
-            }
+            applyBlockOperations(editor, [operation], '[Collab]');
         } catch (error) {
             console.error('[Collab] Failed to apply operation:', error);
         } finally {
@@ -95,7 +58,7 @@ export function CollaborationProvider({ children, pageId, userId, userName, enab
 
     // Handle cursor updates from other users
     const handleCursorUpdate = useCallback(
-        (senderId: string, cursor: CursorPosition | null, userInfo: { userName: string; userColor: string }) => {
+        (_senderId: string, cursor: CursorPosition | null, userInfo: { userName: string; userColor: string }) => {
             // TODO: Render cursor indicators in the editor
             // This would require custom BlockNote extensions or overlay elements
             console.log(`[Collab] Cursor update from ${userInfo.userName}:`, cursor);
