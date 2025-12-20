@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import AiPopupModal from './AiPopupModal';
 import { Sparkles } from 'lucide-react';
-import { AiRequest, AiResponseData } from '@diran/shared';
+import { AiRequest, AiResponseData } from '@/shared/types/ai';
 import { apiRequest } from '@/lib/api/helpers';
 import { useBlockNoteEditor } from '@blocknote/react';
 import { applyBlockOperations } from '@/lib/editor/applyOperations';
