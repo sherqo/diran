@@ -101,7 +101,7 @@ export async function uploadImage(
         };
     } catch (error) {
         console.error('[Storage] Failed to upload image:', error);
-        throw new ApiError('Failed to upload image', HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.INTERNAL_SERVER_ERROR);
+        throw new ApiError('Failed to upload image', HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.INTERNAL_ERROR);
     }
 }
 
@@ -135,7 +135,7 @@ export async function getPresignedUrl(key: string, expiresIn = 3600): Promise<st
         return await getSignedUrl(r2Client, command, { expiresIn });
     } catch (error) {
         console.error('[Storage] Failed to generate presigned URL:', error);
-        throw new ApiError('Failed to generate download URL', HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.INTERNAL_SERVER_ERROR);
+        throw new ApiError('Failed to generate download URL', HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.INTERNAL_ERROR);
     }
 }
 

@@ -12,7 +12,7 @@ export async function registerUserRoutes(fastify: FastifyInstance): Promise<void
     await fastify.register(fastifyMultipart, {
         limits: {
             fileSize: 20 * 1024 * 1024, // 20MB max file size
-            files: 3, // Only allow 3 files at a time
+            files: 1, // Only allow 1 files at a time
         },
     });
 

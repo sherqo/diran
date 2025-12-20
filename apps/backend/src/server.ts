@@ -85,7 +85,7 @@ async function setupPlugins() {
 
     // Global rate limiter
     await app.register(fastifyRateLimit, {
-        max: 100,
+        max: 150,
         timeWindow: '1 minute',
     });
 
