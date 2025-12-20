@@ -16,6 +16,7 @@ import {
     Code,
     ImageIcon,
     Video,
+    Minus,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -50,6 +51,8 @@ export const BLOCK_TYPES: readonly BlockTypeConfig[] = [
     // Advanced
     { type: 'table', label: 'Table', group: 'Advanced', icon: Table },
     { type: 'codeBlock', label: 'Code Block', group: 'Advanced', icon: Code },
+    // Layout
+    { type: 'divider', label: 'Divider', group: 'Layout', icon: Minus },
     // Media
     { type: 'image', label: 'Image', group: 'Media', icon: ImageIcon },
     { type: 'video', label: 'Video', group: 'Media', icon: Video },

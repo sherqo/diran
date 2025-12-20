@@ -135,6 +135,7 @@ enum BlockType {
   toggleListItem
   table
   codeBlock
+  divider
   image
   video
 }

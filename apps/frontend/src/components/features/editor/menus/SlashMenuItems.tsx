@@ -19,6 +19,7 @@ import {
     Code,
     ImageIcon,
     Video,
+    Minus,
 } from 'lucide-react';
 
 /**
@@ -36,6 +37,7 @@ const ICONS: Record<string, ReactElement> = {
     'Toggle List': <ChevronRight size={18} />,
     Table: <Table size={18} />,
     'Code Block': <Code size={18} />,
+    Divider: <Minus size={18} />,
     Image: <ImageIcon size={18} />,
     Video: <Video size={18} />,
 };
@@ -55,6 +57,7 @@ const GROUPS: Record<string, string> = {
     'Toggle List': 'Lists',
     Table: 'Advanced',
     'Code Block': 'Advanced',
+    Divider: 'Layout',
     Image: 'Media',
     Video: 'Media',
 };
