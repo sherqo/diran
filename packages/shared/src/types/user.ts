@@ -15,4 +15,8 @@ export interface UpdateProfileResponseData {
   user: User;
 }
 
+export interface UploadProfilePhotoResponseData {
+  user: User;
+}
+
 export type ChangePasswordResponseData = {};
