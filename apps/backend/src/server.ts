@@ -141,6 +141,13 @@ let appBuilt = false;
 export async function buildApp() {
     if (appBuilt) return app;
     await setupPlugins();
+    // Simple ping without DB for Vercel cold-start test (after CORS)
+    app.get('/ping', async (req, reply) => {
+        return { pong: true, time: new Date().toISOString(), vercel: isVercel, ws: ENABLE_WEBSOCKET };
+    });
+    app.get('/', async (req, reply) => {
+        return { hello: 'diran', time: new Date().toISOString(), status: 'ok' };
+    });
     await app.register(registerAllRoutes, { prefix: '/v1' });
     await app.ready();
     appBuilt = true;
