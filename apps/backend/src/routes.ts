@@ -12,6 +12,13 @@ import {
 import { registerUploadRoutes } from '#features/upload/routes';
 import { collaborationRoutes } from '#features/collaboration/routes';
 
+function isEnabled(key: string, defaultValue: boolean): boolean {
+    const val = process.env[key];
+    if (val === undefined || val === '') return defaultValue;
+    return val === 'true' || val === '1';
+}
+const isVercel = process.env.VERCEL === '1';
+
 /**
  * OLD EXPRESS ROUTES STRUCTURE (for reference):
  *
@@ -40,5 +47,13 @@ export const registerAllRoutes = async (fastify: FastifyInstance) => {
     await fastify.register(registerExtrasRoutes, { prefix: '/extras' });
     await fastify.register(registerAiRoutes, { prefix: '/ai' });
 
-    await fastify.register(collaborationRoutes, { prefix: '/ws/collab' }); // i really love u <3
+    // Collaboration WebSocket — gated via ENABLE_COLLABORATION / ENABLE_WEBSOCKET
+    // Disabled by default on Vercel (VERCEL=1) because Vercel Functions don't support persistent WS
+    const enableWebSocket = isEnabled('ENABLE_WEBSOCKET', !isVercel);
+    const enableCollab = isEnabled('ENABLE_COLLABORATION', enableWebSocket);
+    if (enableCollab && enableWebSocket) {
+        await fastify.register(collaborationRoutes, { prefix: '/ws/collab' }); // i really love u <3
+    } else {
+        fastify.log.info(`Collaboration WS disabled (ENABLE_COLLABORATION=${enableCollab} ENABLE_WEBSOCKET=${enableWebSocket})`);
+    }
 };

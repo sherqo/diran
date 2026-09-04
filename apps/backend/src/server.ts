@@ -13,13 +13,41 @@ import { errorHandler, notFoundHandler } from '#lib/middleware/errorHandler';
 import { loggerHook } from '#lib/middleware/logger';
 import { registerAllRoutes } from '#routes';
 
-// Load environment variables
-dotenv.config({ debug: isDevelopment });
+// ---------------------------------------------------------------------------
+// Env helpers for Vercel/serverless toggles
+// Vercel sets VERCEL=1 automatically — we default long-lived features to OFF there
+// Every incompatible feature has its own ENABLE_* flag so it can be toggled per-env
+// ---------------------------------------------------------------------------
+function isEnabled(key: string, defaultValue: boolean): boolean {
+    const val = process.env[key];
+    if (val === undefined || val === '') return defaultValue;
+    return val === 'true' || val === '1';
+}
+
+// Phase 1: check raw VERCEL/ENABLE_DOTENV before loading .env (shell env only)
+const rawIsVercel = process.env.VERCEL === '1';
+const rawDotenvDisabled = process.env.ENABLE_DOTENV === 'false' || process.env.ENABLE_DOTENV === '0';
+
+// Load .env unless explicitly disabled or on Vercel (Vercel injects env via dashboard)
+// We load early so that ENABLE_* flags can also be set via .env for local dev
+if (!rawIsVercel && !rawDotenvDisabled) {
+    dotenv.config({ debug: isDevelopment });
+}
+
+// Phase 2: final flags after dotenv loaded
+const isVercel = process.env.VERCEL === '1';
+
+// Feature flags — each incompatible/long-lived feature has its own env var
+export const ENABLE_DOTENV = isEnabled('ENABLE_DOTENV', !isVercel);
+export const ENABLE_UNDER_PRESSURE = isEnabled('ENABLE_UNDER_PRESSURE', !isVercel);
+export const ENABLE_WEBSOCKET = isEnabled('ENABLE_WEBSOCKET', !isVercel);
+export const ENABLE_GRACEFUL_SHUTDOWN = isEnabled('ENABLE_GRACEFUL_SHUTDOWN', !isVercel);
+export const ENABLE_COLLABORATION = isEnabled('ENABLE_COLLABORATION', ENABLE_WEBSOCKET);
 
 const PORT = Number(process.env.PORT) || 4003;
 
 // Create Fastify instance with Zod type provider for native performance
-const app = Fastify({
+export const app = Fastify({
     logger: isDevelopment,
     bodyLimit: 10485760, // 10MB in bytes
 }).withTypeProvider<ZodTypeProvider>();
@@ -29,20 +57,23 @@ app.setValidatorCompiler(validatorCompiler);
 app.setSerializerCompiler(serializerCompiler);
 
 // Register plugins
-async function setupPlugins() {
+export async function setupPlugins() {
     // Cookie parser MUST be registered first before other plugins
     // This is critical for cookie parsing to work
     await app.register(fastifyCookie);
 
-    // Under pressure - detect server overload
-    await app.register(fastifyUnderPressure, {
-        maxEventLoopDelay: 8000, 
-        maxHeapUsedBytes: 256 * 1024 * 1024, // 256MB
-        maxRssBytes: 512 * 1024 * 1024, // 512MB
-        retryAfter: 5, // seconds
-        message: 'SERVER_NUKED',
-        exposeStatusRoute: false,
-    });
+    // Under pressure - detect server overload (long-lived / memory probe)
+    // Disable on Vercel serverless via ENABLE_UNDER_PRESSURE=false
+    if (ENABLE_UNDER_PRESSURE) {
+        await app.register(fastifyUnderPressure, {
+            maxEventLoopDelay: 8000,
+            maxHeapUsedBytes: 256 * 1024 * 1024, // 256MB
+            maxRssBytes: 512 * 1024 * 1024, // 512MB
+            retryAfter: 5, // seconds
+            message: 'SERVER_NUKED',
+            exposeStatusRoute: false,
+        });
+    }
 
     // Helmet for security headers
     await app.register(fastifyHelmet, {
@@ -64,12 +95,17 @@ async function setupPlugins() {
         timeWindow: '1 minute',
     });
 
-    // WebSocket support
-    await app.register(fastifyWebSocket, {
-        options: {
-            maxPayload: 1024 * 50, // 50KB
-        },
-    });
+    // WebSocket support — NOT supported on Vercel Functions (Fluid)
+    // Disable via ENABLE_WEBSOCKET=false (defaults to false on Vercel)
+    if (ENABLE_WEBSOCKET) {
+        await app.register(fastifyWebSocket, {
+            options: {
+                maxPayload: 1024 * 50, // 50KB
+            },
+        });
+    } else {
+        app.log.info('WebSocket disabled via ENABLE_WEBSOCKET=false');
+    }
 
     // request logger (only in development)
     if (isDevelopment) {
@@ -81,7 +117,7 @@ async function setupPlugins() {
     app.setNotFoundHandler(notFoundHandler);
 }
 
-// Graceful shutdown
+// Graceful shutdown — meaningless on Vercel serverless, toggle via ENABLE_GRACEFUL_SHUTDOWN
 const gracefulShutdown = async () => {
     console.log('🔄 Shutting down gracefully...');
     try {
@@ -95,21 +131,53 @@ const gracefulShutdown = async () => {
     }
 };
 
-process.on('SIGTERM', gracefulShutdown);
-process.on('SIGINT', gracefulShutdown);
+if (ENABLE_GRACEFUL_SHUTDOWN) {
+    process.on('SIGTERM', gracefulShutdown);
+    process.on('SIGINT', gracefulShutdown);
+}
 
-// Start server
+// Build app (plugins + routes) without binding to a port — used by Vercel serverless
+let appBuilt = false;
+export async function buildApp() {
+    if (appBuilt) return app;
+    await setupPlugins();
+    await app.register(registerAllRoutes, { prefix: '/v1' });
+    await app.ready();
+    appBuilt = true;
+    return app;
+}
+
+// Start server — only when NOT on Vercel (or when ENABLE_HTTP_LISTEN explicitly allowed)
+// Vercel's Fastify framework detection intercepts fastify.listen(), but we also support
+// import-as-function via `export default app` for manual vercel.json wiring
 async function start() {
     try {
-        await setupPlugins();
-        await app.register(registerAllRoutes, { prefix: '/v1' });
-
-        await app.listen({ port: PORT, host: '0.0.0.0' });
-        logStartup(PORT, !!db);
+        await buildApp();
+        // On Vercel the function is invoked per-request; no need to bind a port
+        if (!isVercel) {
+            await app.listen({ port: PORT, host: '0.0.0.0' });
+            logStartup(PORT, !!db);
+        } else {
+            // Still log for debugging but don't bind
+            app.log.info(`Built for Vercel (VERCEL=1) — websocket:${ENABLE_WEBSOCKET} under-pressure:${ENABLE_UNDER_PRESSURE} graceful:${ENABLE_GRACEFUL_SHUTDOWN}`);
+        }
     } catch (err) {
         app.log.error(err);
         process.exit(1);
     }
 }
 
-start();
+// Only auto-start if this file is the entrypoint and not imported by Vercel
+// Vercel sets VERCEL=1; locally we always start
+if (!isVercel) {
+    start();
+} else {
+    // In serverless mode, prepare the app eagerly but don't listen
+    // Vercel's framework will use the exported app; we pre-build so cold starts are faster
+    buildApp().catch(err => {
+        console.error('Failed to build app for Vercel:', err);
+        process.exit(1);
+    });
+}
+
+export default app;

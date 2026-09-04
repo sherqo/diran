@@ -1,0 +1,5 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "bun install",
+  "buildCommand": "cd ../.. && bun install && cd packages/shared && bun run build && cd ../../apps/backend && bunx prisma generate && bun run build"
+}
