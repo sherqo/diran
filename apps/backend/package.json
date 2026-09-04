@@ -10,7 +10,7 @@
     },
     "main": "dist/server.js",
     "scripts": {
-        "build": "tsc -p tsconfig.json",
+        "build": "tsc -p tsconfig.json && tsc-alias -p tsconfig.json",
         "dev": "bun --watch src/server.ts",
         "dev:tsx": "tsx watch src/server.ts",
         "format": "prettier --write .",
@@ -58,6 +58,7 @@
         "prettier-plugin-packagejson": "^2.5.19",
         "prettier-plugin-sort-json": "^4.1.1",
         "prisma": "^6.19.0",
+        "tsc-alias": "^1.9.4",
         "tsx": "^4.20.6",
         "typescript": "^5.9.3"
     },
