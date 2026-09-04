@@ -149,30 +149,23 @@ export async function buildApp() {
 
 // Vercel Fastify detection requires a top-level fastify.listen() call
 // It intercepts listen() and converts the app to a Vercel Function.
-// On Vercel we build only (no listen at cold start) – Vercel will invoke the handler per-request.
-// Locally we listen normally.
-buildApp()
-    .then(() => {
-        if (!isVercel) {
-            return app.listen({ port: PORT, host: '0.0.0.0' });
-        }
-        return undefined;
-    })
-    .then(() => {
-        if (!isVercel) {
-            logStartup(PORT, !!db);
-        } else {
-            app.log.info(`Vercel function ready – ws:${ENABLE_WEBSOCKET} pressure:${ENABLE_UNDER_PRESSURE} graceful:${ENABLE_GRACEFUL_SHUTDOWN}`);
-        }
-    })
-    .catch(err => {
-        // Ignore "already listening" when Vercel framework also calls listen
-        if (err?.message?.includes('already listening')) {
-            app.log.warn('Fastify already listening (Vercel framework) – ignoring');
-            return;
-        }
+// Use top-level await for buildApp so the function is ready before handling requests
+// (hangs were caused by exporting app before buildApp completed).
+try {
+    await buildApp();
+    if (!isVercel) {
+        await app.listen({ port: PORT, host: '0.0.0.0' });
+        logStartup(PORT, !!db);
+    } else {
+        app.log.info(`Vercel function ready – ws:${ENABLE_WEBSOCKET} pressure:${ENABLE_UNDER_PRESSURE} graceful:${ENABLE_GRACEFUL_SHUTDOWN}`);
+    }
+} catch (err: any) {
+    if (err?.message?.includes('already listening')) {
+        app.log.warn('Fastify already listening (Vercel framework) – ignoring');
+    } else {
         app.log.error(err);
         process.exit(1);
-    });
+    }
+}
 
 export default app;
