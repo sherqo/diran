@@ -25,14 +25,22 @@ export const addEmailToWaitlist = async (req: FastifyRequest, reply: FastifyRepl
 };
 
 export const getHealth = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
-    // Check database connection
-    await db.$queryRaw`SELECT 1`;
+    // Check database connection with timeout – don't hang Vercel function if DB unreachable
+    let database: GetHealthResponseData['database'] = 'connected';
+    try {
+        await Promise.race([
+            db.$queryRaw`SELECT 1`,
+            new Promise<never>((_, reject) => setTimeout(() => reject(new Error('DB timeout')), 2000)),
+        ]);
+    } catch {
+        database = 'disconnected';
+    }
 
     const data: GetHealthResponseData = {
         status: 'ok',
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
-        database: 'connected',
+        database,
     };
 
     sendSuccess(reply, data);
