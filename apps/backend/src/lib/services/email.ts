@@ -8,7 +8,7 @@ const schema = z.object({
 });
 
 const API_KEY = process.env.RESEND_API_KEY!;
-const EMAIL_DOMAIN = process.env.EMAIL_DOMAIN! || '@mail.diran.app';
+const EMAIL_DOMAIN = process.env.EMAIL_DOMAIN! || '@m.diran.sherqo.me';
 const NAME = process.env.APP_NAME || 'Diran AI';
 
 const resend = new Resend(API_KEY);

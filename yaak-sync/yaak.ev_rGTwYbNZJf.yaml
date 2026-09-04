@@ -10,16 +10,16 @@ base: true
 parentModel: workspace
 parentId: null
 variables:
-- enabled: true
-  name: base_url
-  value: http://localhost:4003/v1
-  id: AUiXrsEmdj
-- enabled: true
-  name: remote_url
-  value: https://api.diran.app/v1
-  id: 7PPwJDXKps
-- enabled: true
-  name: test
-  value: http://localhost:4003
-  id: g9AFYDzYWj
+  - enabled: true
+    name: base_url
+    value: http://localhost:4003/v1
+    id: AUiXrsEmdj
+  - enabled: true
+    name: remote_url
+    value: https://api.diran.sherqo.me/v1
+    id: 7PPwJDXKps
+  - enabled: true
+    name: test
+    value: http://localhost:4003
+    id: g9AFYDzYWj
 color: null

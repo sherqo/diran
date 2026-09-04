@@ -14,7 +14,7 @@ Allow: /sitemap.xml
 Allow: /robots.txt
 
 # Sitemap location
-Sitemap: https://www.diran.app/sitemap.xml
+Sitemap: https://diran.sherqo.me/sitemap.xml
 
 # Crawl-delay (optional - be careful with this)
 # Crawl-delay: 1

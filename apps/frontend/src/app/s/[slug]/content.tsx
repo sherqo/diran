@@ -156,9 +156,7 @@ export function PublishedPageContent({ page }: PublishedPageContentProps) {
                         © 2025 <span className="font-clash">Diran</span>
                     </p>
                     <div className="flex items-center gap-4">
-                        <a
-                            href="mailto:sharqawy@diran.app"
-                            className="text-muted-foreground hover:text-foreground text-sm transition-colors">
+                        <a href="mailto:sherqo@sherqo.me" className="text-muted-foreground hover:text-foreground text-sm transition-colors">
                             Contact
                         </a>
                         <Link href="/privacy" className="text-muted-foreground hover:text-foreground text-sm transition-colors">

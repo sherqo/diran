@@ -5,7 +5,7 @@ A short, human-friendly reference for the most-used Diran API endpoints. This fi
 Base URL
 
 - Local: `http://localhost:4003/v1`
-- Production: `https://api.diran.app/v1`
+- Production: `https://api.diran.sherqo.me/v1`
 
 ## Auth
 
@@ -50,7 +50,7 @@ Base URL
 - DELETE /block/{id} — auth — delete block
 - GET /block/{id}/children — auth — direct children
 - GET /block/{id}/tree — auth — nested children tree
-  - Permissions: `/block/{id}/permissions` (GET/POST/PUT/DELETE) — auth + owner role
+    - Permissions: `/block/{id}/permissions` (GET/POST/PUT/DELETE) — auth + owner role
 
 ## Page
 

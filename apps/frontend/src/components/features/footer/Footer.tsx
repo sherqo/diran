@@ -9,7 +9,7 @@ const Footer = () => {
                 {/* First row - Links */}
                 <div className="flex items-center space-x-4">
                     <a
-                        href="mailto:sharqawy@diran.app"
+                        href="mailto:sherqo@sherqo.me"
                         className="text-muted-foreground hover:text-foreground cursor-pointer text-sm transition-colors">
                         Contact
                     </a>

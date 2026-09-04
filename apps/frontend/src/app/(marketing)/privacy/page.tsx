@@ -113,8 +113,8 @@ export default function PrivacyPage() {
                     <p className="mb-4 text-gray-700">Have questions or want your data removed?</p>
                     <p className="text-gray-700">
                         Email:{' '}
-                        <a href="mailto:sharqawy@diran.app" className="text-orange-600 underline hover:text-orange-700">
-                            sharqawy@diran.app
+                        <a href="mailto:sherqo@sherqo.me" className="text-orange-600 underline hover:text-orange-700">
+                            sherqo@sherqo.me
                         </a>
                     </p>
                 </section>

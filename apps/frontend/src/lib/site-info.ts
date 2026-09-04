@@ -1,6 +1,6 @@
 export const SITE_NAME = 'Diran AI';
 export const SITE_SHORT_NAME = 'Diran AI';
-export const SITE_URL = 'https://www.diran.app';
+export const SITE_URL = 'https://diran.sherqo.me';
 export const DEFAULT_TITLE = `${SITE_NAME} - One Button. Better Decisions.`;
 export const DEFAULT_DESCRIPTION =
     'AI that watches your life patterns, predicts burnout, and helps you make better decisions before you crash. No fluff, just action.';
