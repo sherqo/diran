@@ -1,4 +1,4 @@
-import type { ErrorResponse, SuccessResponse } from '@diran/shared/types/api';
+import type { ErrorResponse, SuccessResponse } from '@diran/shared/types/api.js';
 import { FastifyReply } from 'fastify';
 
 export type ApiResponse<T = any> = SuccessResponse<T> | ErrorResponse<T>;

@@ -3,7 +3,7 @@ import { AuthenticatedRequest } from '#lib/middleware/auth';
 import { uploadFile as uploadFileToStorage } from '#lib/services/storage';
 import { sendSuccess } from '#lib/utils/response';
 import { ApiError } from '#lib/middleware/errorHandler';
-import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors';
+import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors.js';
 
 /**
  * Upload a file (image or video)

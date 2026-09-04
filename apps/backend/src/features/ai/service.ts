@@ -1,7 +1,7 @@
 import { AiRequest, AiResponseData } from '@diran/shared';
-import type { BlockOperation } from '@diran/shared/types/collaboration';
+import type { BlockOperation } from '@diran/shared/types/collaboration.js';
 import { ApiError } from '#lib/middleware/errorHandler';
-import { HttpStatus, ErrorCode } from '@diran/shared/constants/errors';
+import { HttpStatus, ErrorCode } from '@diran/shared/constants/errors.js';
 
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent';
 

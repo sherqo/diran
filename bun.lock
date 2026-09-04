@@ -131,6 +131,7 @@
       },
       "devDependencies": {
         "@types/ws": "^8.18.1",
+        "tsc-alias": "^1.9.4",
         "typescript": "^5.4.0",
       },
     },

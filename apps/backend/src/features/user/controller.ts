@@ -4,8 +4,8 @@ import { db } from '#lib/database/connection';
 import { comparePassword, hashPassword } from '#lib/utils/auth';
 import { sendSuccess } from '#lib/utils/response';
 import { ApiError } from '#lib/middleware/errorHandler';
-import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors';
-import { ChangePasswordInput, UpdateProfileInput } from '@diran/shared/validation/user';
+import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors.js';
+import { ChangePasswordInput, UpdateProfileInput } from '@diran/shared/validation/user.js';
 import {
     GetProfileResponseData,
     UpdateProfileResponseData,

@@ -7,9 +7,9 @@ import type {
     ClientInfo,
     BlockOperation,
     CursorPosition,
-} from '@diran/shared/types/collaboration';
+} from '@diran/shared/types/collaboration.js';
 import { verifyAccessToken } from '#lib/utils/auth.js';
-import type { AuthUser } from '@diran/shared/types/auth';
+import type { AuthUser } from '@diran/shared/types/auth.js';
 
 // In-memory room storage (for production, use Redis)
 const rooms = new Map<string, CollaborationRoom>();

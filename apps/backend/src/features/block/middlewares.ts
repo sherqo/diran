@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply, preHandlerHookHandler } from 'fastify';
 import { ApiError } from '#lib/middleware/errorHandler';
-import { HttpStatus, ErrorCode } from '@diran/shared/constants/errors';
+import { HttpStatus, ErrorCode } from '@diran/shared/constants/errors.js';
 import { AuthenticatedRequest } from '#lib/middleware/auth';
 import { RoleType } from '@prisma/client';
 import { getRoleWithInheritance } from '#lib/services/permission';

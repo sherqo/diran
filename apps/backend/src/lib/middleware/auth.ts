@@ -1,8 +1,8 @@
 import { verifyAccessToken } from '#lib/utils/auth';
 import { FastifyRequest, FastifyReply, preHandlerHookHandler } from 'fastify';
 import { ApiError } from './errorHandler';
-import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors';
-import { AuthUser } from '@diran/shared/types/auth';
+import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors.js';
+import { AuthUser } from '@diran/shared/types/auth.js';
 import { RoleType } from '@prisma/client';
 
 export interface AuthenticatedRequest extends FastifyRequest {

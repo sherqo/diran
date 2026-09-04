@@ -14,7 +14,7 @@ import {
     verifyEmailVerificationToken,
 } from '#lib/utils/auth.js';
 import { setAccessTokenCookie, clearAuthCookies } from '#lib/services/cookies.js';
-import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors';
+import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors.js';
 import type {
     SignupBodyInput,
     LoginBodyInput,
@@ -22,7 +22,7 @@ import type {
     ResetPasswordBodyInput,
     VerifyEmailBodyInput,
     ResendOTPBodyInput,
-} from '@diran/shared/validation/auth';
+} from '@diran/shared/validation/auth.js';
 import {
     SignupResponseData,
     LoginResponseData,

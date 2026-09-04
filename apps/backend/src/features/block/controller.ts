@@ -8,11 +8,11 @@ import {
     UpdateBlockParamInput,
     GetBlockDirectChildrenParamInput,
     GetBlockChildrenTreeInput,
-} from '@diran/shared/validation/block';
+} from '@diran/shared/validation/block.js';
 import { db } from '#lib/database/connection';
 import { sendSuccess } from '#lib/utils/response';
 import { ApiError } from '#lib/middleware/errorHandler';
-import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors';
+import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors.js';
 import { RoleType, BlockType } from '@prisma/client';
 import { generateKeyBetween } from 'fractional-indexing';
 import { canWrite } from './middlewares';

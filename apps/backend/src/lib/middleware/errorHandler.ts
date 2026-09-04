@@ -1,7 +1,7 @@
 import { sendError } from '#lib/utils/response';
 import { FastifyRequest, FastifyReply, FastifyError } from 'fastify';
 import { isDevelopment } from '#lib/utils/common';
-import { HttpStatus, ErrorCode } from '@diran/shared/constants/errors';
+import { HttpStatus, ErrorCode } from '@diran/shared/constants/errors.js';
 import { Prisma } from '@prisma/client';
 
 // Custom error class for API errors

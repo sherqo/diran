@@ -6,7 +6,7 @@ import { ApiError } from '#lib/middleware/errorHandler.js';
 import { generateAccessToken, generateRefreshToken } from '#lib/utils/auth.js';
 import { setAccessTokenCookie, setRefreshTokenCookie } from '#lib/services/cookies.js';
 import ms from 'ms';
-import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors';
+import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors.js';
 
 const sendVerificationOTP = async (userId: string, email: string): Promise<void> => {
     // Generate OTP

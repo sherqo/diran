@@ -2,7 +2,7 @@ import { FastifyRequest, FastifyReply, preHandlerHookHandler } from 'fastify';
 import { ZodSchema } from 'zod';
 import { validateData } from '@diran/shared';
 import { ApiError } from './errorHandler';
-import { HttpStatus, ErrorCode } from '@diran/shared/constants/errors';
+import { HttpStatus, ErrorCode } from '@diran/shared/constants/errors.js';
 
 export const validateRequest = ({
     bodySchema,
