@@ -1,7 +1,7 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { sendVerificationOTP, sendPasswordResetToken, clearRefreshTokenSession, createUserSession } from '#features/auth/service.js';
-import { ApiError } from '#lib/middleware/errorHandler';
-import { sendSuccess } from '#lib/utils/response';
+import { ApiError } from '#lib/middleware/errorHandler.js';
+import { sendSuccess } from '#lib/utils/response.js';
 import { db } from '#lib/database/connection.js';
 import {
     hashPassword,

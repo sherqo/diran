@@ -8,9 +8,9 @@ import {
     registerTeamRoutes,
     registerExtrasRoutes,
     registerAiRoutes,
-} from '#features';
-import { registerUploadRoutes } from '#features/upload/routes';
-import { collaborationRoutes } from '#features/collaboration/routes';
+} from '#features.js';
+import { registerUploadRoutes } from '#features/upload/routes.js';
+import { collaborationRoutes } from '#features/collaboration/routes.js';
 
 function isEnabled(key: string, defaultValue: boolean): boolean {
     const val = process.env[key];

@@ -1,5 +1,5 @@
-import { db } from '#lib/database/connection';
-import { sendError, sendSuccess } from '#lib/utils/response';
+import { db } from '#lib/database/connection.js';
+import { sendError, sendSuccess } from '#lib/utils/response.js';
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { GetHealthResponseData } from '@diran/shared';
 

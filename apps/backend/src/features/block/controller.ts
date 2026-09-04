@@ -1,5 +1,5 @@
 import { FastifyReply } from 'fastify';
-import { AuthenticatedRequest } from '#lib/middleware/auth';
+import { AuthenticatedRequest } from '#lib/middleware/auth.js';
 import {
     CreateBlockBodyInput,
     GetBlockParamInput,
@@ -9,15 +9,15 @@ import {
     GetBlockDirectChildrenParamInput,
     GetBlockChildrenTreeInput,
 } from '@diran/shared/validation/block.js';
-import { db } from '#lib/database/connection';
-import { sendSuccess } from '#lib/utils/response';
-import { ApiError } from '#lib/middleware/errorHandler';
+import { db } from '#lib/database/connection.js';
+import { sendSuccess } from '#lib/utils/response.js';
+import { ApiError } from '#lib/middleware/errorHandler.js';
 import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors.js';
 import { RoleType, BlockType } from '@prisma/client';
 import { generateKeyBetween } from 'fractional-indexing';
 import { canWrite } from './middlewares';
-import { getRoleWithInheritance } from '#lib/services/permission';
-import { extractPlainTextFromContent } from '#lib/utils/content';
+import { getRoleWithInheritance } from '#lib/services/permission.js';
+import { extractPlainTextFromContent } from '#lib/utils/content.js';
 
 // CREATE
 // !note: today is 27-Nov-2025, 3:42 AM. i'm keeping these comments for remebering how i thought about the creation process :)

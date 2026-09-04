@@ -1,8 +1,8 @@
 import { FastifyReply } from 'fastify';
-import { AuthenticatedRequest } from '#lib/middleware/auth';
-import { uploadFile as uploadFileToStorage } from '#lib/services/storage';
-import { sendSuccess } from '#lib/utils/response';
-import { ApiError } from '#lib/middleware/errorHandler';
+import { AuthenticatedRequest } from '#lib/middleware/auth.js';
+import { uploadFile as uploadFileToStorage } from '#lib/services/storage.js';
+import { sendSuccess } from '#lib/utils/response.js';
+import { ApiError } from '#lib/middleware/errorHandler.js';
 import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors.js';
 
 /**

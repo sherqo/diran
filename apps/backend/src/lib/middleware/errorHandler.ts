@@ -1,6 +1,6 @@
-import { sendError } from '#lib/utils/response';
+import { sendError } from '#lib/utils/response.js';
 import { FastifyRequest, FastifyReply, FastifyError } from 'fastify';
-import { isDevelopment } from '#lib/utils/common';
+import { isDevelopment } from '#lib/utils/common.js';
 import { HttpStatus, ErrorCode } from '@diran/shared/constants/errors.js';
 import { Prisma } from '@prisma/client';
 

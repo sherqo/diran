@@ -1,9 +1,9 @@
 import { FastifyReply } from 'fastify';
-import { AuthenticatedRequest } from '#lib/middleware/auth';
-import { db } from '#lib/database/connection';
-import { comparePassword, hashPassword } from '#lib/utils/auth';
-import { sendSuccess } from '#lib/utils/response';
-import { ApiError } from '#lib/middleware/errorHandler';
+import { AuthenticatedRequest } from '#lib/middleware/auth.js';
+import { db } from '#lib/database/connection.js';
+import { comparePassword, hashPassword } from '#lib/utils/auth.js';
+import { sendSuccess } from '#lib/utils/response.js';
+import { ApiError } from '#lib/middleware/errorHandler.js';
 import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors.js';
 import { ChangePasswordInput, UpdateProfileInput } from '@diran/shared/validation/user.js';
 import {
@@ -12,7 +12,7 @@ import {
     ChangePasswordResponseData,
     UploadProfilePhotoResponseData,
 } from '@diran/shared';
-import { uploadImage, deleteImage, extractKeyFromUrl } from '#lib/services/storage';
+import { uploadImage, deleteImage, extractKeyFromUrl } from '#lib/services/storage.js';
 
 const getProfile = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     const user = await db.user.findUnique({

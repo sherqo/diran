@@ -7,11 +7,11 @@ import fastifyUnderPressure from '@fastify/under-pressure';
 import fastifyWebSocket from '@fastify/websocket';
 import { serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
 import dotenv from 'dotenv';
-import { db } from '#lib/database/connection';
-import { isDevelopment, logStartup } from '#lib/utils/common';
-import { errorHandler, notFoundHandler } from '#lib/middleware/errorHandler';
-import { loggerHook } from '#lib/middleware/logger';
-import { registerAllRoutes } from '#routes';
+import { db } from '#lib/database/connection.js';
+import { isDevelopment, logStartup } from '#lib/utils/common.js';
+import { errorHandler, notFoundHandler } from '#lib/middleware/errorHandler.js';
+import { loggerHook } from '#lib/middleware/logger.js';
+import { registerAllRoutes } from '#routes.js';
 
 // ---------------------------------------------------------------------------
 // Env helpers for Vercel/serverless toggles

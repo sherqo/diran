@@ -1,4 +1,4 @@
-import { db } from '#lib/database/connection';
+import { db } from '#lib/database/connection.js';
 import { RoleType } from '@prisma/client';
 
 /**
