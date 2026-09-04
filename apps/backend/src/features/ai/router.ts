@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import { handleAiRequest } from './controller';
+import { handleAiRequest } from './controller.js';
 import { validateRequest } from '../../lib/middleware/validation.js';
 import { aiRequestSchema } from '@diran/shared';
 

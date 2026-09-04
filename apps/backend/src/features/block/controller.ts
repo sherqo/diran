@@ -15,7 +15,7 @@ import { ApiError } from '../../lib/middleware/errorHandler.js';
 import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors.js';
 import { RoleType, BlockType } from '@prisma/client';
 import { generateKeyBetween } from 'fractional-indexing';
-import { canWrite } from './middlewares';
+import { canWrite } from './middlewares.js';
 import { getRoleWithInheritance } from '../../lib/services/permission.js';
 import { extractPlainTextFromContent } from '../../lib/utils/content.js';
 
