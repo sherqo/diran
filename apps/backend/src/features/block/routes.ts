@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
-import { validateRequest as vr } from '#lib/middleware/validation.js';
-import { authenticate as auth } from '#lib/middleware/auth.js';
+import { validateRequest as vr } from '../../lib/middleware/validation.js';
+import { authenticate as auth } from '../../lib/middleware/auth.js';
 import { requireReadPermission, requireWritePermission, requireParentPermission } from './middlewares.js';
 import { createBlock, getBlock, updateBlock, deleteBlock, getDirectChildrenBlocks, getChildrenTree, searchBlocks } from './controller.js';
 import { registerPermissionRoutes } from './permission/routes.js';

@@ -8,7 +8,7 @@ import type {
     BlockOperation,
     CursorPosition,
 } from '@diran/shared/types/collaboration.js';
-import { verifyAccessToken } from '#lib/utils/auth.js';
+import { verifyAccessToken } from '../../lib/utils/auth.js';
 import type { AuthUser } from '@diran/shared/types/auth.js';
 
 // In-memory room storage (for production, use Redis)

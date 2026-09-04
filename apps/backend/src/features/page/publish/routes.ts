@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
-import { validateRequest as vr } from '#lib/middleware/validation.js';
-import { authenticate as auth } from '#lib/middleware/auth.js';
-import { requireOwnerRole } from '#features/block/permission/middleware.js';
+import { validateRequest as vr } from '../../../lib/middleware/validation.js';
+import { authenticate as auth } from '../../../lib/middleware/auth.js';
+import { requireOwnerRole } from '../../block/permission/middleware.js';
 import { getPublish, createPublish, updatePublish, deletePublish } from './controller.js';
 import { publishBlockIdParamSchema, createPublishBodySchema, updatePublishBodySchema } from '@diran/shared/validation/publish.js';
 

@@ -1,8 +1,8 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { sendVerificationOTP, sendPasswordResetToken, clearRefreshTokenSession, createUserSession } from '#features/auth/service.js';
-import { ApiError } from '#lib/middleware/errorHandler.js';
-import { sendSuccess } from '#lib/utils/response.js';
-import { db } from '#lib/database/connection.js';
+import { sendVerificationOTP, sendPasswordResetToken, clearRefreshTokenSession, createUserSession } from './service.js';
+import { ApiError } from '../../lib/middleware/errorHandler.js';
+import { sendSuccess } from '../../lib/utils/response.js';
+import { db } from '../../lib/database/connection.js';
 import {
     hashPassword,
     generateAccessToken,
@@ -12,8 +12,8 @@ import {
     hashResetToken,
     generateEmailVerificationToken,
     verifyEmailVerificationToken,
-} from '#lib/utils/auth.js';
-import { setAccessTokenCookie, clearAuthCookies } from '#lib/services/cookies.js';
+} from '../../lib/utils/auth.js';
+import { setAccessTokenCookie, clearAuthCookies } from '../../lib/services/cookies.js';
 import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors.js';
 import type {
     SignupBodyInput,

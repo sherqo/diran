@@ -1,5 +1,5 @@
 import { FastifyReply } from 'fastify';
-import { isDevelopment } from '#lib/utils/common.js';
+import { isDevelopment } from '../utils/common.js';
 import ms from 'ms';
 
 const JWT_ACCESS_EXPIRES_IN = process.env.JWT_ACCESS_EXPIRES_IN || '5m';

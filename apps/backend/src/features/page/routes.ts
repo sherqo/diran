@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
-import { authenticate as auth } from '#lib/middleware/auth.js';
-import { validateRequest as vr } from '#lib/middleware/validation.js';
+import { authenticate as auth } from '../../lib/middleware/auth.js';
+import { validateRequest as vr } from '../../lib/middleware/validation.js';
 import { getAllPages } from './controller.js';
 import { registerPublishRoutes } from './publish/routes.js';
 import { getPublishedPage } from './publish/controller.js';

@@ -1,4 +1,4 @@
-import { isDevelopment } from '#lib/utils/common.js';
+import { isDevelopment } from '../utils/common.js';
 import { PrismaClient } from '@prisma/client';
 
 const globalForPrisma = globalThis as unknown as {

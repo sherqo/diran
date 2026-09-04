@@ -1,4 +1,4 @@
-import { ApiError } from '#lib/middleware/errorHandler.js';
+import { ApiError } from '../middleware/errorHandler.js';
 import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors.js';
 import { Resend } from 'resend';
 import { z } from 'zod';

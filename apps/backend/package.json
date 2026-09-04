@@ -4,10 +4,6 @@
     "private": true,
     "description": "Diran AI Backend - Express.js + PostgreSQL with Prisma ORM",
     "type": "module",
-    "imports": {
-        "#*": "./src/*",
-        "#shared/*": "@diran/shared/src/*"
-    },
     "main": "dist/server.js",
     "scripts": {
         "build": "tsc -p tsconfig.json && tsc-alias -p tsconfig.json --resolve-full-paths --resolve-full-extension .js",

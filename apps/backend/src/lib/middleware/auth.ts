@@ -1,4 +1,4 @@
-import { verifyAccessToken } from '#lib/utils/auth.js';
+import { verifyAccessToken } from '../utils/auth.js';
 import { FastifyRequest, FastifyReply, preHandlerHookHandler } from 'fastify';
 import { ApiError } from './errorHandler';
 import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors.js';

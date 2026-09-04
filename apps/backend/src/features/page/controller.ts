@@ -1,7 +1,7 @@
 import { FastifyReply } from 'fastify';
-import { db } from '#lib/database/connection.js';
-import { AuthenticatedRequest } from '#lib/middleware/auth.js';
-import { sendSuccess } from '#lib/utils/response.js';
+import { db } from '../../lib/database/connection.js';
+import { AuthenticatedRequest } from '../../lib/middleware/auth.js';
+import { sendSuccess } from '../../lib/utils/response.js';
 
 /**
  * Get all root pages the user has access to (owned + shared).

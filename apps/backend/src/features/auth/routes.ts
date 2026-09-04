@@ -1,8 +1,8 @@
 import { FastifyInstance } from 'fastify';
 import fastifyRateLimit from '@fastify/rate-limit';
-import { validateRequest as vr } from '#lib/middleware/validation.js';
+import { validateRequest as vr } from '../../lib/middleware/validation.js';
 import { signup, login, forgotPassword, resetPassword, refresh, logout, verifyEmail, resendOTP } from './controller.js';
-import { authRateLimiters as rl } from '#lib/middleware/rateLimiter.js';
+import { authRateLimiters as rl } from '../../lib/middleware/rateLimiter.js';
 import {
     forgotPasswordBodySchema,
     loginBodySchema,

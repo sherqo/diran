@@ -1,4 +1,4 @@
-import { sendSuccess } from '#lib/utils/response.js';
+import { sendSuccess } from '../../lib/utils/response.js';
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { AiRequest } from '@diran/shared';
 import { callAi } from './service';

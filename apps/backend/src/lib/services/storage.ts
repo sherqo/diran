@@ -1,7 +1,7 @@
 import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import crypto from 'crypto';
-import { ApiError } from '#lib/middleware/errorHandler.js';
+import { ApiError } from '../middleware/errorHandler.js';
 import { HttpStatus, ErrorCode } from '@diran/shared/constants/errors.js';
 
 // Initialize R2 client

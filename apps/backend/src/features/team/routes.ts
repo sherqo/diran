@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
-import { authenticate as auth } from '#lib/middleware/auth.js';
-import { validateRequest as vr } from '#lib/middleware/validation.js';
+import { authenticate as auth } from '../../lib/middleware/auth.js';
+import { validateRequest as vr } from '../../lib/middleware/validation.js';
 import { listTeams, getTeam, createTeam, updateTeam, deleteTeam, getTeamPages, createTeamPage } from './controller.js';
 import { registerMemberRoutes } from './member/routes.js';
 import { teamIdParamSchema, createTeamBodySchema, updateTeamBodySchema, createTeamPageBodySchema } from '@diran/shared/validation/team.js';

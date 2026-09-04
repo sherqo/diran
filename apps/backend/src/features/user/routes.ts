@@ -1,11 +1,11 @@
 import { FastifyInstance } from 'fastify';
 import fastifyRateLimit from '@fastify/rate-limit';
 import fastifyMultipart from '@fastify/multipart';
-import { validateRequest as vr } from '#lib/middleware/validation.js';
-import { authenticate as auth } from '#lib/middleware/auth.js';
+import { validateRequest as vr } from '../../lib/middleware/validation.js';
+import { authenticate as auth } from '../../lib/middleware/auth.js';
 import { getProfile, updateProfile, changePassword, uploadProfilePhoto } from './controller.js';
 import { updateProfileSchema, changePasswordSchema } from '@diran/shared/validation/user.js';
-import { profileRateLimiter as rl } from '#lib/middleware/rateLimiter.js';
+import { profileRateLimiter as rl } from '../../lib/middleware/rateLimiter.js';
 
 export async function registerUserRoutes(fastify: FastifyInstance): Promise<void> {
     // Register multipart support for file uploads

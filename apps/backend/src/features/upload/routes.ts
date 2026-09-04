@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import fastifyRateLimit from '@fastify/rate-limit';
 import fastifyMultipart from '@fastify/multipart';
-import { authenticate as auth } from '#lib/middleware/auth.js';
+import { authenticate as auth } from '../../lib/middleware/auth.js';
 import { uploadFile } from './controller.js';
 
 export async function registerUploadRoutes(fastify: FastifyInstance): Promise<void> {
