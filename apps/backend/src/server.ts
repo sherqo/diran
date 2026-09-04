@@ -150,17 +150,19 @@ export async function buildApp() {
 // Vercel Fastify detection requires a top-level fastify.listen() call
 // It intercepts listen() and converts the app to a Vercel Function.
 // Keep it unconditional so the framework can find it – Vercel will not actually bind a port.
-try {
-    await buildApp();
-    await app.listen({ port: PORT, host: '0.0.0.0' });
-    if (!isVercel) {
-        logStartup(PORT, !!db);
-    } else {
-        app.log.info(`Vercel function ready – ws:${ENABLE_WEBSOCKET} pressure:${ENABLE_UNDER_PRESSURE} graceful:${ENABLE_GRACEFUL_SHUTDOWN}`);
-    }
-} catch (err) {
-    app.log.error(err);
-    process.exit(1);
-}
+// Use promise chain (no top-level await) so the module exports immediately and doesn't block cold start.
+buildApp()
+    .then(() => app.listen({ port: PORT, host: '0.0.0.0' }))
+    .then(() => {
+        if (!isVercel) {
+            logStartup(PORT, !!db);
+        } else {
+            app.log.info(`Vercel function ready – ws:${ENABLE_WEBSOCKET} pressure:${ENABLE_UNDER_PRESSURE} graceful:${ENABLE_GRACEFUL_SHUTDOWN}`);
+        }
+    })
+    .catch(err => {
+        app.log.error(err);
+        process.exit(1);
+    });
 
 export default app;
