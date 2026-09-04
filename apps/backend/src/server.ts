@@ -147,37 +147,20 @@ export async function buildApp() {
     return app;
 }
 
-// Start server — only when NOT on Vercel (or when ENABLE_HTTP_LISTEN explicitly allowed)
-// Vercel's Fastify framework detection intercepts fastify.listen(), but we also support
-// import-as-function via `export default app` for manual vercel.json wiring
-async function start() {
-    try {
-        await buildApp();
-        // On Vercel the function is invoked per-request; no need to bind a port
-        if (!isVercel) {
-            await app.listen({ port: PORT, host: '0.0.0.0' });
-            logStartup(PORT, !!db);
-        } else {
-            // Still log for debugging but don't bind
-            app.log.info(`Built for Vercel (VERCEL=1) — websocket:${ENABLE_WEBSOCKET} under-pressure:${ENABLE_UNDER_PRESSURE} graceful:${ENABLE_GRACEFUL_SHUTDOWN}`);
-        }
-    } catch (err) {
-        app.log.error(err);
-        process.exit(1);
+// Vercel Fastify detection requires a top-level fastify.listen() call
+// It intercepts listen() and converts the app to a Vercel Function.
+// Keep it unconditional so the framework can find it – Vercel will not actually bind a port.
+try {
+    await buildApp();
+    await app.listen({ port: PORT, host: '0.0.0.0' });
+    if (!isVercel) {
+        logStartup(PORT, !!db);
+    } else {
+        app.log.info(`Vercel function ready – ws:${ENABLE_WEBSOCKET} pressure:${ENABLE_UNDER_PRESSURE} graceful:${ENABLE_GRACEFUL_SHUTDOWN}`);
     }
-}
-
-// Only auto-start if this file is the entrypoint and not imported by Vercel
-// Vercel sets VERCEL=1; locally we always start
-if (!isVercel) {
-    start();
-} else {
-    // In serverless mode, prepare the app eagerly but don't listen
-    // Vercel's framework will use the exported app; we pre-build so cold starts are faster
-    buildApp().catch(err => {
-        console.error('Failed to build app for Vercel:', err);
-        process.exit(1);
-    });
+} catch (err) {
+    app.log.error(err);
+    process.exit(1);
 }
 
 export default app;
