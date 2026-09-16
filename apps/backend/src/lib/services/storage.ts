@@ -4,15 +4,25 @@ import crypto from 'crypto';
 import { ApiError } from '../middleware/errorHandler.js';
 import { HttpStatus, ErrorCode } from '@diran/shared/constants/errors.js';
 
-// Initialize R2 client
-const r2Client = new S3Client({
-    region: 'auto',
-    endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-    credentials: {
-        accessKeyId: process.env.R2_ACCESS_KEY_ID!,
-        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
-    },
-});
+// Lazily created so a missing R2 config can never crash the whole function
+// at import time (Vercel: FUNCTION_INVOCATION_FAILED on every route).
+let r2Client: S3Client | null = null;
+function getR2Client(): S3Client {
+    if (!r2Client) {
+        const accountId = process.env.R2_ACCOUNT_ID;
+        const accessKeyId = process.env.R2_ACCESS_KEY_ID;
+        const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
+        if (!accountId || !accessKeyId || !secretAccessKey) {
+            throw new ApiError('Storage service not configured', HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.STORAGE_NOT_CONFIGURED);
+        }
+        r2Client = new S3Client({
+            region: 'auto',
+            endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
+            credentials: { accessKeyId, secretAccessKey },
+        });
+    }
+    return r2Client;
+}
 
 const BUCKET_NAME = process.env.R2_BUCKET_NAME || 'diran-storage';
 const PUBLIC_URL = process.env.R2_PUBLIC_URL;
@@ -111,7 +121,7 @@ export async function uploadFile(
             ContentType: mimetype,
         });
 
-        await r2Client.send(command);
+        await getR2Client().send(command);
 
         return {
             key,
@@ -133,7 +143,7 @@ export async function deleteFile(key: string): Promise<void> {
             Key: key,
         });
 
-        await r2Client.send(command);
+        await getR2Client().send(command);
     } catch (error) {
         console.error('[Storage] Failed to delete file:', error);
         // Don't throw error, just log it (cleanup is not critical)
@@ -154,7 +164,7 @@ export async function getPresignedUrl(key: string, expiresIn = 3600): Promise<st
             Key: key,
         });
 
-        return await getSignedUrl(r2Client, command, { expiresIn });
+        return await getSignedUrl(getR2Client(), command, { expiresIn });
     } catch (error) {
         console.error('[Storage] Failed to generate presigned URL:', error);
         throw new ApiError('Failed to generate download URL', HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.INTERNAL_ERROR);

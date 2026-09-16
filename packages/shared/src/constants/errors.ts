@@ -61,6 +61,9 @@ export enum ErrorCode {
   // Email
   EMAIL_SEND_FAILED = 'EMAIL_SEND_FAILED',
 
+  // Storage
+  STORAGE_NOT_CONFIGURED = 'STORAGE_NOT_CONFIGURED',
+
   // Unexpected
   UNEXPECTED_ERROR = 'UNEXPECTED_ERROR',
 

@@ -7,11 +7,23 @@ const schema = z.object({
     email: z.email(),
 });
 
-const API_KEY = process.env.RESEND_API_KEY!;
 const EMAIL_DOMAIN = process.env.EMAIL_DOMAIN! || '@m.diran.sherqo.me';
 const NAME = process.env.APP_NAME || 'Diran AI';
 
-const resend = new Resend(API_KEY);
+// Lazily created: `new Resend()` throws when the API key is missing, so
+// constructing it at import time would crash the whole function (Vercel:
+// FUNCTION_INVOCATION_FAILED on every route, even /ping).
+let resend: Resend | null = null;
+function getResend(): Resend {
+    if (!resend) {
+        const key = process.env.RESEND_API_KEY;
+        if (!key) {
+            throw new ApiError('Email service not configured', HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.EMAIL_SEND_FAILED);
+        }
+        resend = new Resend(key);
+    }
+    return resend;
+}
 
 // Email templates
 export const emailTemplates = {
@@ -52,7 +64,7 @@ export const sendMail = async ({ to, subject, html }: SendMailParams, retries = 
 
     for (let attempt = 1; attempt <= retries; attempt++) {
         try {
-            const result = await resend.emails.send({
+            const result = await getResend().emails.send({
                 from: formatPerson(NAME, 'noreply'),
                 replyTo: formatPerson(NAME, 'support'),
                 to,
