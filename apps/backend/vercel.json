@@ -1,5 +1,10 @@
 {
     "$schema": "https://openapi.vercel.sh/vercel.json",
-    "buildCommand": "cd ../.. && bun install && cd packages/shared && bun run build && cd ../../apps/backend && bunx prisma generate && bun run build",
-    "installCommand": "bun install"
+    "installCommand": "cd ../.. && bun install",
+    "buildCommand": "bun run vercel-build",
+    "functions": {
+        "src/server.ts": {
+            "maxDuration": 15
+        }
+    }
 }

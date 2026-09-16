@@ -155,24 +155,30 @@ export async function buildApp() {
     return app;
 }
 
-// Vercel Fastify detection requires a top-level fastify.listen() call
-// It intercepts listen() and converts the app to a Vercel Function.
+// Vercel Fastify detection requires a top-level fastify.listen() call.
+// It intercepts listen() and converts the app to a Vercel Function, so the
+// call MUST run unconditionally (gating it behind `!isVercel` means Vercel
+// never intercepts it and every request hangs until FUNCTION_INVOCATION_TIMEOUT).
 // Use top-level await for buildApp so the function is ready before handling requests
 // (hangs were caused by exporting app before buildApp completed).
 try {
     await buildApp();
+    await app.listen({ port: PORT, host: '0.0.0.0' });
     if (!isVercel) {
-        await app.listen({ port: PORT, host: '0.0.0.0' });
         logStartup(PORT, !!db);
     } else {
         app.log.info(`Vercel function ready – ws:${ENABLE_WEBSOCKET} pressure:${ENABLE_UNDER_PRESSURE} graceful:${ENABLE_GRACEFUL_SHUTDOWN}`);
     }
 } catch (err: any) {
-    if (err?.message?.includes('already listening')) {
+    const msg: string = err?.message ?? '';
+    if (msg.includes('already listening') || msg.includes('EADDRINUSE')) {
         app.log.warn('Fastify already listening (Vercel framework) – ignoring');
     } else {
         app.log.error(err);
-        process.exit(1);
+        // Never process.exit() on Vercel: killing the function without a
+        // response turns every request into a timeout instead of a 500.
+        if (!isVercel) process.exit(1);
+        throw err;
     }
 }
 
