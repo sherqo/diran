@@ -4,6 +4,9 @@
   "workspaces": {
     "": {
       "name": "diran-app",
+      "dependencies": {
+        "@prisma/client": "6.19.0",
+      },
       "devDependencies": {
         "tsc-alias": "^1.9.4",
       },

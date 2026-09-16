@@ -7,7 +7,7 @@
     "main": "dist/server.js",
     "scripts": {
         "build": "tsc -p tsconfig.json && tsc-alias -p tsconfig.json --resolve-full-paths --resolve-full-extension .js",
-        "vercel-build": "cd ../../packages/shared && bun run build && cd ../../apps/backend && bunx prisma generate && bun run build && bun run vendor-vercel-deps",
+        "vercel-build": "cd ../../packages/shared && bun run build && cd ../.. && bunx prisma generate --schema apps/backend/prisma/schema.prisma && cd apps/backend && bun run build && bun run vendor-vercel-deps",
         "vendor-vercel-deps": "mkdir -p node_modules/@diran/shared node_modules/@prisma node_modules/.prisma && cp -r ../../packages/shared/dist node_modules/@diran/shared/dist && cp ../../packages/shared/package.json node_modules/@diran/shared/package.json && cp -r ../../node_modules/.prisma/. node_modules/.prisma/ && rm -rf node_modules/@prisma/client && cp -r ../../node_modules/@prisma/client node_modules/@prisma/client && echo 'vendored @diran/shared + @prisma/client for Vercel Root=apps/backend'",
         "dev": "bun --watch src/server.ts",
         "dev:tsx": "tsx watch src/server.ts",
