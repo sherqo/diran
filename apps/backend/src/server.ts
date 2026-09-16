@@ -54,5 +54,3 @@ fastify.get('/', async () => {
 fastify.register(registerAllRoutes, { prefix: '/v1' });
 
 fastify.listen({ port: 3000 });
-
-export default fastify;
