@@ -1,9 +1,9 @@
 import { FastifyInstance } from 'fastify';
-import { authenticate as auth } from '../../lib/middleware/auth.js';
-import { validateRequest as vr } from '../../lib/middleware/validation.js';
-import { getAllPages } from './controller.js';
-import { registerPublishRoutes } from './publish/routes.js';
-import { getPublishedPage } from './publish/controller.js';
+import { authenticate as auth } from '#lib/middleware/auth.js';
+import { validateRequest as vr } from '#lib/middleware/validation.js';
+import { getAllPages } from '#features/page/controller.js';
+import { registerPublishRoutes } from '#features/page/publish/routes.js';
+import { getPublishedPage } from '#features/page/publish/controller.js';
 import { getPublishedPageParamSchema } from '@diran/shared/validation/publish.js';
 
 /**

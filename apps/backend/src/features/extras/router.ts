@@ -1,9 +1,9 @@
 import { FastifyInstance } from 'fastify';
-import { addEmailToWaitlist } from './controller.js';
+import { addEmailToWaitlist } from '#features/extras/controller.js';
 
 import fastifyRateLimit from '@fastify/rate-limit';
-import { healthCheckRateLimiterConfig as rl } from '../../lib/middleware/rateLimiter.js';
-import { getHealth } from './controller.js';
+import { healthCheckRateLimiterConfig as rl } from '#lib/middleware/rateLimiter.js';
+import { getHealth } from '#features/extras/controller.js';
 
 export async function registerExtrasRoutes(fastify: FastifyInstance): Promise<void> {
     fastify.post('/waitlist', {

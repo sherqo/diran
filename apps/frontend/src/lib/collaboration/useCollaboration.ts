@@ -10,6 +10,11 @@ import type {
 
 const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:4003/v1/ws/collab';
 
+// Realtime collaboration requires a long-lived server with WebSocket support.
+// It is disabled on serverless hosts (Vercel). Set NEXT_PUBLIC_COLLAB_ENABLED=true
+// only when pointing at a backend that serves /v1/ws/collab.
+const COLLAB_ENABLED = process.env.NEXT_PUBLIC_COLLAB_ENABLED === 'true';
+
 // Generate a random color for this user (stable per session)
 const generateUserColor = (): string => {
     const colors = [
@@ -187,6 +192,10 @@ export function useCollaboration({
 
     // Connect to WebSocket
     const connect = useCallback(() => {
+        if (!COLLAB_ENABLED) {
+            return;
+        }
+
         if (wsRef.current?.readyState === WebSocket.OPEN) {
             return;
         }

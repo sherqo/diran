@@ -5,6 +5,9 @@
     "description": "Diran AI Backend - Express.js + PostgreSQL with Prisma ORM",
     "type": "module",
     "main": "dist/server.js",
+    "imports": {
+        "#*": "./src/*"
+    },
     "scripts": {
         "build": "tsc -p tsconfig.json && tsc-alias -p tsconfig.json --resolve-full-paths --resolve-full-extension .js",
         "vercel-build": "cd ../../packages/shared && bun run build && cd ../.. && bunx prisma generate --schema apps/backend/prisma/schema.prisma && cd apps/backend && bun run build && bun run vendor-vercel-deps",
@@ -31,7 +34,6 @@
         "@fastify/multipart": "^9.3.0",
         "@fastify/rate-limit": "^10.3.0",
         "@prisma/client": "^6.19.0",
-        "@railway/cli": "^4.11.1",
         "bcryptjs": "^3.0.3",
         "chalk": "^5.6.2",
         "dotenv": "^17.2.3",

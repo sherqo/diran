@@ -1,6 +1,6 @@
-import { verifyAccessToken } from '../utils/auth.js';
+import { verifyAccessToken } from '#lib/utils/auth.js';
 import { FastifyRequest, FastifyReply, preHandlerHookHandler } from 'fastify';
-import { ApiError } from './errorHandler.js';
+import { ApiError } from '#lib/middleware/errorHandler.js';
 import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors.js';
 import { AuthUser } from '@diran/shared/types/auth.js';
 import { RoleType } from '@prisma/client';

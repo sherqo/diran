@@ -70,7 +70,9 @@ Base URL
 
 ## Collab (Realtime)
 
-- WebSocket: `GET /ws/collab` (upgrade to websocket; include `Authorization` header during handshake)
+- Disabled on serverless hosts (Vercel Functions don't support persistent WebSockets).
+  The implementation lives in git history (`bea91c9^:apps/backend/src/features/collaboration`)
+  for use on a long-lived server. The frontend gates it behind `NEXT_PUBLIC_COLLAB_ENABLED`.
 
 ## Notes
 

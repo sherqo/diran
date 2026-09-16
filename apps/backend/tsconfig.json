@@ -3,7 +3,8 @@
         "baseUrl": ".",
         "paths": {
             "@diran/shared": ["../../packages/shared/dist"],
-            "@diran/shared/*": ["../../packages/shared/dist/*"]
+            "@diran/shared/*": ["../../packages/shared/dist/*"],
+            "#*": ["./src/*"]
         },
 
         "moduleResolution": "node",

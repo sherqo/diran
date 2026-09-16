@@ -4,8 +4,15 @@ import fastifyHelmet from '@fastify/helmet';
 import fastifyCookie from '@fastify/cookie';
 import fastifyRateLimit from '@fastify/rate-limit';
 import { serializerCompiler, validatorCompiler, type ZodTypeProvider } from 'fastify-type-provider-zod';
-import { errorHandler, notFoundHandler } from './lib/middleware/errorHandler.js';
-import { registerAllRoutes } from './routes.js';
+import dotenv from 'dotenv';
+import { errorHandler, notFoundHandler } from '#lib/middleware/errorHandler.js';
+import { registerAllRoutes } from '#routes.js';
+
+// Local dev only: load .env. On Vercel env comes from the dashboard.
+// (Import-time side effect only — does not affect Fastify detection.)
+if (process.env.VERCEL !== '1') {
+    dotenv.config();
+}
 
 // Vercel-only entrypoint. Kept in the exact shape of Vercel's Fastify
 // template: instance named `fastify`, routes registered synchronously,

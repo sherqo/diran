@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
-import { authenticate as auth } from '../../../lib/middleware/auth.js';
-import { validateRequest as vr } from '../../../lib/middleware/validation.js';
-import { addMember, updateMember, removeMember, leaveTeam } from './controller.js';
+import { authenticate as auth } from '#lib/middleware/auth.js';
+import { validateRequest as vr } from '#lib/middleware/validation.js';
+import { addMember, updateMember, removeMember, leaveTeam } from '#features/team/member/controller.js';
 import { teamIdParamSchema, teamMemberIdParamSchema, addMemberBodySchema, updateMemberBodySchema } from '@diran/shared/validation/team.js';
 
 /**

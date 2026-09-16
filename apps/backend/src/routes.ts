@@ -8,8 +8,8 @@ import {
     registerTeamRoutes,
     registerExtrasRoutes,
     registerAiRoutes,
-} from './features/index.js';
-import { registerUploadRoutes } from './features/upload/routes.js';
+} from '#features/index.js';
+import { registerUploadRoutes } from '#features/upload/routes.js';
 
 /**
  * OLD EXPRESS ROUTES STRUCTURE (for reference):

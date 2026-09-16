@@ -1,8 +1,8 @@
 import { FastifyInstance } from 'fastify';
-import { validateRequest as vr } from '../../../lib/middleware/validation.js';
-import { authenticate as auth } from '../../../lib/middleware/auth.js';
-import { requireOwnerRole } from './middleware.js';
-import { listPermissions, addPermission, updatePermission, removePermission } from './controller.js';
+import { validateRequest as vr } from '#lib/middleware/validation.js';
+import { authenticate as auth } from '#lib/middleware/auth.js';
+import { requireOwnerRole } from '#features/block/permission/middleware.js';
+import { listPermissions, addPermission, updatePermission, removePermission } from '#features/block/permission/controller.js';
 import {
     blockIdParamSchema,
     permissionIdParamSchema,
