@@ -2,7 +2,18 @@
 
 import { createBlockApi, deleteBlockApi, updateBlockApi } from '@/lib/api/block';
 import { BlockTypeEnum, EmbeddedBlockContent } from '@/shared/types/block';
+import { ErrorCode } from '@/shared/constants/errors';
 import { BlocksChanged, Block } from '@blocknote/core';
+
+/**
+ * Verbose per-change / per-request logging freezes the UI on large pastes
+ * (full-document dumps on every keystroke). Enable only when debugging sync:
+ * NEXT_PUBLIC_DEBUG_SYNC=true
+ */
+const DEBUG_SYNC = process.env.NEXT_PUBLIC_DEBUG_SYNC === 'true';
+const debugLog = (...args: unknown[]) => {
+    if (DEBUG_SYNC) console.log(...args);
+};
 
 // ================ Changes Engine ================
 /**
@@ -27,14 +38,125 @@ export type SyncStatus = 'saved' | 'saving' | 'error';
 
 type StatusListener = (status: SyncStatus) => void;
 
+// Result of pushing one operation to the server.
+export type SendResult = { ok: true } | { ok: false; rateLimited: boolean; retryable: boolean };
+
+// Failures that will never succeed on retry (don't burn retries / block the queue).
+const NON_RETRYABLE_CODES = new Set<string>([
+    ErrorCode.VALIDATION_ERROR,
+    ErrorCode.INVALID_INPUT,
+    ErrorCode.NOT_FOUND,
+    ErrorCode.PERMISSION_DENIED,
+    ErrorCode.INVALID_PARENT_ID,
+]);
+
+/**
+ * Pure operation merge: folds a new op into an existing queued op for the same block.
+ * Returns null when the ops cancel each other out. Used for BOTH maps so a queued
+ * (possibly failed, not-yet-sent) op is never clobbered by a newer one.
+ */
+export function resolveOperation(existingOp: ChangeOperation, newOp: ChangeOperation): ChangeOperation | null {
+    debugLog(`[Resolver] Resolving: ${existingOp.type} + ${newOp.type}`);
+
+    // Case 1: create + update → create (with merged data)
+    if (existingOp.type === 'create' && newOp.type === 'update') {
+        return {
+            type: 'create',
+            data: {
+                ...existingOp.data,
+                ...newOp.data,
+            },
+        };
+    }
+
+    // Case 2: create + delete → null (cancel both - block never existed on server)
+    if (existingOp.type === 'create' && newOp.type === 'delete') {
+        return null;
+    }
+
+    // Case 3: update + update → update (merge data)
+    if (existingOp.type === 'update' && newOp.type === 'update') {
+        return {
+            type: 'update',
+            blockId: newOp.blockId,
+            data: {
+                ...existingOp.data,
+                ...newOp.data,
+            },
+        };
+    }
+
+    // Case 4: update + delete → delete (skip update, just delete)
+    if (existingOp.type === 'update' && newOp.type === 'delete') {
+        return newOp;
+    }
+
+    // Case 5: delete + anything → delete (block is already deleted, ignore new ops)
+    if (existingOp.type === 'delete') {
+        return existingOp;
+    }
+
+    // Default: return new operation (shouldn't reach here normally)
+    console.warn(`[Resolver] Unhandled case: ${existingOp.type} + ${newOp.type}`);
+    return newOp;
+}
+
+/**
+ * Pushes one operation to the server and classifies the outcome.
+ * NOTE: apiRequest() resolves (does NOT throw) on HTTP errors like 429/500,
+ * so `result.success` MUST be checked — previously failures were silently
+ * dropped from the queue (data loss on fast pastes hitting the rate limit).
+ */
+export async function sendOperation(blockId: string, operation: ChangeOperation): Promise<SendResult> {
+    try {
+        let result: unknown;
+        switch (operation.type) {
+            case 'create':
+                result = await createBlockApi(operation.data);
+                break;
+            case 'update':
+                result = await updateBlockApi(operation.blockId, operation.data);
+                break;
+            case 'delete':
+                result = await deleteBlockApi(operation.blockId);
+                break;
+        }
+
+        if ((result as { success?: boolean } | null)?.success === true) {
+            return { ok: true };
+        }
+
+        const code = (result as { error?: { code?: string } } | null)?.error?.code;
+        const status = (result as { statusCode?: number } | null)?.statusCode;
+        // @fastify/rate-limit errors don't use our {success,error} envelope — detect via status too.
+        const rateLimited = code === ErrorCode.TOO_MANY_REQUESTS || status === 429;
+        const retryable = rateLimited || !code || !NON_RETRYABLE_CODES.has(code);
+        console.error(`❌ [Sync] ${operation.type} failed for block ${blockId}:`, code ?? status ?? 'unknown');
+        return { ok: false, rateLimited, retryable };
+    } catch (error) {
+        // Network throw — always retryable.
+        console.error(`❌ [Sync] ${operation.type} threw for block ${blockId}:`, error);
+        return { ok: false, rateLimited: false, retryable: true };
+    }
+}
+
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 class ChangesEngine {
     private mapA: Map<string, ChangeOperation> = new Map(); // active buffer
     private mapB: Map<string, ChangeOperation> = new Map(); // sync queue
     private isSyncing: boolean = false;
     private debounceTimer: NodeJS.Timeout | null = null;
+    private autoRetryTimer: NodeJS.Timeout | null = null;
+    private failCounts: Map<string, number> = new Map(); // poison-pill guard per block
     private readonly DEBOUNCE_MS = 1000;
     private readonly MAX_RETRIES = 3;
     private readonly RETRY_DELAY_MS = 1000;
+    private readonly SYNC_CONCURRENCY = 4; // parallel requests per flush (paste = many creates)
+    private readonly RATE_LIMIT_PAUSE_MS = 60_000; // global limiter window is 1 minute
+    private readonly MAX_RATE_LIMIT_PAUSES = 2;
+    private readonly MAX_OP_FAILURES = 5; // drop poison pills so one bad block can't wedge the queue
+    private readonly AUTO_RETRY_MS = 60_000; // re-flush leftovers even with no further typing
     private currentStatus: SyncStatus = 'saved';
     private listeners: Set<StatusListener> = new Set();
 
@@ -57,8 +179,9 @@ class ChangesEngine {
     }
 
     addChange(blockId: string, operation: ChangeOperation) {
-        // Resolve operation with existing one (if any)
-        const resolved = this.resolveOperation(blockId, operation);
+        // Resolve operation with existing one (if any) — one op per block in Map A
+        const existingOp = this.mapA.get(blockId);
+        const resolved = existingOp ? resolveOperation(existingOp, operation) : operation;
 
         if (resolved === null) {
             // operations cancelled each other => remove from Map A
@@ -74,59 +197,6 @@ class ChangesEngine {
         this.resetDebounce();
     }
 
-    private resolveOperation(blockId: string, newOp: ChangeOperation): ChangeOperation | null {
-        const existingOp = this.mapA.get(blockId); // we should only have one operation per block in Map A
-
-        if (!existingOp) {
-            // no conflict
-            return newOp;
-        }
-
-        console.log(`[Resolver] Resolving: ${existingOp.type} + ${newOp.type} for block ${blockId}`);
-
-        // Case 1: create + update → create (with merged data)
-        if (existingOp.type === 'create' && newOp.type === 'update') {
-            return {
-                type: 'create',
-                data: {
-                    ...existingOp.data,
-                    ...newOp.data,
-                },
-            };
-        }
-
-        // Case 2: create + delete → null (cancel both - block never existed on server)
-        if (existingOp.type === 'create' && newOp.type === 'delete') {
-            return null;
-        }
-
-        // Case 3: update + update → update (merge data)
-        if (existingOp.type === 'update' && newOp.type === 'update') {
-            return {
-                type: 'update',
-                blockId: newOp.blockId,
-                data: {
-                    ...existingOp.data,
-                    ...newOp.data,
-                },
-            };
-        }
-
-        // Case 4: update + delete → delete (skip update, just delete)
-        if (existingOp.type === 'update' && newOp.type === 'delete') {
-            return newOp;
-        }
-
-        // Case 5: delete + anything → delete (block is already deleted, ignore new ops)
-        if (existingOp.type === 'delete') {
-            return existingOp;
-        }
-
-        // Default: return new operation (shouldn't reach here normally)
-        console.warn(`[Resolver] Unhandled case: ${existingOp.type} + ${newOp.type}`);
-        return newOp;
-    }
-
     private resetDebounce() {
         if (this.debounceTimer) {
             clearTimeout(this.debounceTimer);
@@ -140,7 +210,7 @@ class ChangesEngine {
     private moveAtoB() {
         // cannot move if Map B is syncing - skill issue ^_^
         if (this.isSyncing) {
-            console.log('⚠️ [MapA→MapB] Blocked: Map B is syncing');
+            debugLog('⚠️ [MapA→MapB] Blocked: Map B is syncing');
             // reschedule later
             this.resetDebounce();
             return;
@@ -151,17 +221,47 @@ class ChangesEngine {
             return;
         }
 
-        // Move all items from A to B
+        // Move all items from A to B, MERGING with any still-queued op for the
+        // same block (e.g. a failed create awaiting retry). Overwriting here used
+        // to turn create→update for blocks that don't exist server-side yet,
+        // failing forever.
         this.mapA.forEach((operation, blockId) => {
-            this.mapB.set(blockId, operation);
+            const existingOp = this.mapB.get(blockId);
+            const resolved = existingOp ? resolveOperation(existingOp, operation) : operation;
+            if (resolved === null) {
+                this.mapB.delete(blockId);
+                this.failCounts.delete(blockId);
+            } else {
+                this.mapB.set(blockId, resolved);
+            }
         });
 
         this.mapA.clear();
 
-        this.syncMapB();
+        void this.syncMapB();
     }
 
-    private async syncMapB(retryCount: number = 0) {
+    private clearAutoRetry() {
+        if (this.autoRetryTimer) {
+            clearTimeout(this.autoRetryTimer);
+            this.autoRetryTimer = null;
+        }
+    }
+
+    private scheduleAutoRetry() {
+        // Leftover queue must not sit until the next keystroke (reload = data loss).
+        this.clearAutoRetry();
+        this.autoRetryTimer = setTimeout(() => {
+            this.autoRetryTimer = null;
+            if (this.mapB.size > 0 && !this.isSyncing) {
+                debugLog(`🔔 [MapB] Auto-retrying ${this.mapB.size} leftover operations`);
+                this.setStatus('saving');
+                void this.syncMapB();
+            }
+        }, this.AUTO_RETRY_MS);
+    }
+
+    private async syncMapB(retryCount: number = 0, rateLimitPauses: number = 0) {
         if (this.mapB.size === 0) {
             return;
         }
@@ -171,70 +271,88 @@ class ChangesEngine {
         }
 
         this.isSyncing = true;
+        this.clearAutoRetry();
 
         const operations = Array.from(this.mapB.entries());
         let hasErrors = false;
+        let sawRateLimit = false;
 
-        // Execute all operations
-        for (const [blockId, operation] of operations) {
-            // 🔍 DEBUG: Log what's being sent to server
-            console.log(`\n🚀 [SYNC] Sending to server:`);
-            console.log(`   Block ID: ${blockId}`);
-            console.log(`   Operation: ${operation.type}`);
-            if (operation.type === 'create') {
-                console.log(`   Data:`, JSON.stringify(operation.data, null, 2));
-            } else if (operation.type === 'update') {
-                console.log(`   Update Data:`, JSON.stringify(operation.data, null, 2));
-            }
-            console.log(`\n`);
+        // Worker pool: a fast paste queues hundreds of creates — strictly
+        // sequential requests take minutes on serverless. Map order is preserved
+        // at dispatch; per-block order is safe (one merged op per block).
+        let cursor = 0;
+        const workerCount = Math.min(this.SYNC_CONCURRENCY, operations.length);
+        const worker = async () => {
+            while (cursor < operations.length) {
+                const entry = operations[cursor++];
+                if (!entry) break;
+                const [blockId, operation] = entry;
+                // Skip if a newer flush already replaced this exact op object.
+                if (this.mapB.get(blockId) !== operation) continue;
 
-            try {
-                switch (operation.type) {
-                    case 'create':
-                        await createBlockApi(operation.data);
-                        break;
-                    case 'update':
-                        await updateBlockApi(operation.blockId, operation.data);
-                        break;
-                    case 'delete':
-                        await deleteBlockApi(operation.blockId);
-                        break;
+                const result = await sendOperation(blockId, operation);
+                if (result.ok) {
+                    if (this.mapB.get(blockId) === operation) this.mapB.delete(blockId);
+                    this.failCounts.delete(blockId);
+                } else if (!result.retryable) {
+                    // Poison pill (validation/permission/404): drop so one bad block
+                    // can't wedge the whole queue; surfaced via console + error status.
+                    console.error(`💥 [MapB] Dropping non-retryable ${operation.type} for block ${blockId}`);
+                    this.mapB.delete(blockId);
+                    this.failCounts.delete(blockId);
+                    hasErrors = true;
+                } else {
+                    if (result.rateLimited) {
+                        sawRateLimit = true;
+                    } else {
+                        hasErrors = true;
+                    }
+                    const fails = (this.failCounts.get(blockId) ?? 0) + 1;
+                    if (fails >= this.MAX_OP_FAILURES) {
+                        console.error(`💥 [MapB] Dropping block ${blockId} after ${fails} failures`);
+                        this.mapB.delete(blockId);
+                        this.failCounts.delete(blockId);
+                    } else {
+                        this.failCounts.set(blockId, fails);
+                    }
                 }
-                // Remove successful operation
-                this.mapB.delete(blockId);
-            } catch (error) {
-                console.error(`❌ [MapB] Failed for block ${blockId}:`, error);
-                hasErrors = true;
             }
-        }
+        };
+        await Promise.all(Array.from({ length: workerCount }, () => worker()));
 
-        // Check if we have errors and should retry
-        if (hasErrors) {
-            if (retryCount < this.MAX_RETRIES) {
-                console.log(`🔄 [MapB] Retrying in ${this.RETRY_DELAY_MS}ms (attempt ${retryCount + 1}/${this.MAX_RETRIES})`);
+        this.isSyncing = false;
 
-                // Keep isSyncing=true during retry delay (blocks Map A)
-                await new Promise(resolve => setTimeout(resolve, this.RETRY_DELAY_MS));
-
-                // Retry
-                await this.syncMapB(retryCount + 1);
-            } else {
-                console.error(`💥 [MapB] Max retries reached. ${this.mapB.size} operations remain in queue`);
-                this.isSyncing = false;
-                this.setStatus('error');
-            }
-        } else {
+        if (this.mapB.size === 0) {
             // All successful
-            console.log('✅ [MapB] Sync complete, all operations successful');
-            this.isSyncing = false;
+            debugLog('✅ [MapB] Sync complete, all operations successful');
+            this.failCounts.clear();
 
             // Check if Map A accumulated changes during sync
             if (this.mapA.size > 0) {
-                console.log(`🔔 [MapB] Map A has ${this.mapA.size} pending changes, will move after debounce`);
+                debugLog(`🔔 [MapB] Map A has ${this.mapA.size} pending changes, will move after debounce`);
                 this.setStatus('saving');
             } else {
                 this.setStatus('saved');
             }
+            return;
+        }
+
+        // Queue still has items — decide how to retry.
+        if (sawRateLimit && rateLimitPauses < this.MAX_RATE_LIMIT_PAUSES) {
+            // Global limiter window is 1 minute: pause past it, then resume without
+            // burning the normal retry budget.
+            debugLog(`⏳ [MapB] Rate-limited, pausing ${this.RATE_LIMIT_PAUSE_MS}ms (pause ${rateLimitPauses + 1}/${this.MAX_RATE_LIMIT_PAUSES})`);
+            this.setStatus('saving');
+            await sleep(this.RATE_LIMIT_PAUSE_MS);
+            await this.syncMapB(0, rateLimitPauses + 1);
+        } else if (retryCount < this.MAX_RETRIES) {
+            debugLog(`🔄 [MapB] Retrying in ${this.RETRY_DELAY_MS}ms (attempt ${retryCount + 1}/${this.MAX_RETRIES})`);
+            await sleep(this.RETRY_DELAY_MS);
+            await this.syncMapB(retryCount + 1, rateLimitPauses);
+        } else {
+            console.error(`💥 [MapB] Max retries reached. ${this.mapB.size} operations remain in queue — will auto-retry`);
+            this.setStatus('error');
+            this.scheduleAutoRetry();
         }
     }
 
@@ -260,7 +378,12 @@ export const onSyncStatusChange = (listener: StatusListener) => {
 export const handleChanges = (changes: BlocksChanged, document: Block[], pageId: string) => {
     if (changes.length === 0) return;
 
-    console.log('📝 Document changed! Total changes:', changes.length);
+    debugLog('📝 Document changed! Total changes:', changes.length);
+
+    // A fast paste yields one insert per pasted block in a single call.
+    // Walking the whole tree per insert is O(paste × doc) — build the position
+    // index once per call instead.
+    const positionIndex = changes.some(c => c.type === 'insert' || c.type === 'move') ? buildPositionIndex(document, pageId) : null;
 
     changes.forEach(change => {
         const newBlock = change.block;
@@ -269,28 +392,22 @@ export const handleChanges = (changes: BlocksChanged, document: Block[], pageId:
         const changeType = change.type;
         switch (changeType) {
             case 'insert':
-                console.log('i got into insert function');
-                handleInsert(document, newBlock, pageId);
+                handleInsert(newBlock, pageId, positionIndex);
                 break;
             case 'delete':
-                console.log('i got into delete function');
                 handleDelete(newBlock.id);
                 break;
             case 'update':
-                console.log('i got into update function');
                 handleUpdate(oldBlock!, newBlock);
                 break;
             case 'move':
-                console.log('i got into move function');
                 const isParentChanged = change.currentParent?.id !== change.prevParent?.id;
-                handleMove(document, newBlock, pageId, isParentChanged);
+                handleMove(newBlock, pageId, isParentChanged, positionIndex);
                 break;
             default:
                 console.warn('Unknown change type:', changeType);
         }
     });
-
-    console.log('\n📄 Full document:', document);
 };
 
 // ================ helpers for props handling ================
@@ -312,8 +429,8 @@ const embedPropsInContent = (block: Block): EmbeddedBlockContent => {
 
 // ================ changes handlers ================
 // insert is kinda ez, just create the block with its data and send to the backend...
-const handleInsert = (currentDocument: Block[], newBlock: Block, pageId: string) => {
-    const posInfo = getBlockPositionInfo(currentDocument, newBlock.id, pageId);
+const handleInsert = (newBlock: Block, pageId: string, positionIndex: Map<string, BlockPosition> | null) => {
+    const posInfo = getPositionForBlock(positionIndex, newBlock.id, pageId);
 
     changesEngine.addChange(newBlock.id, {
         type: 'create',
@@ -358,8 +475,8 @@ const handleUpdate = (oldBlock: Block, newBlock: Block) => {
     }
 };
 
-const handleMove = (currentDocument: Block[], movedBlock: Block, pageId: string, isParentChanged: boolean) => {
-    const posInfo = getBlockPositionInfo(currentDocument, movedBlock.id, pageId);
+const handleMove = (movedBlock: Block, pageId: string, isParentChanged: boolean, positionIndex: Map<string, BlockPosition> | null) => {
+    const posInfo = getPositionForBlock(positionIndex, movedBlock.id, pageId);
 
     changesEngine.addChange(movedBlock.id, {
         type: 'update',
@@ -374,40 +491,48 @@ const handleMove = (currentDocument: Block[], movedBlock: Block, pageId: string,
 
 // ================ helpers ================
 
+interface BlockPosition {
+    blockId: string;
+    beforeBlockId: string | null;
+    afterBlockId: string | null;
+    parentId: string;
+}
+
 /**
- * Recursively searches for a block in the document tree
- * Returns the block's parent, siblings, and position info
+ * Single-pass walk of the document tree → id → position info.
+ * A paste reports one insert per pasted block; looking each one up with a
+ * full tree search is O(paste × doc). Build once per handleChanges call.
  */
-function findBlockInTree(
-    blocks: Block[],
-    targetId: string,
-    parent: Block | null = null
-): {
-    block: Block;
-    parent: Block | null;
-    siblings: Block[];
-    index: number;
-} | null {
-    for (let i = 0; i < blocks.length; i++) {
-        const block = blocks[i];
+export function buildPositionIndex(document: Block[], pageId: string): Map<string, BlockPosition> {
+    const index = new Map<string, BlockPosition>();
+    const walk = (blocks: Block[], parentId: string) => {
+        blocks.forEach((block, i) => {
+            index.set(block.id, {
+                blockId: block.id,
+                beforeBlockId: i > 0 ? blocks[i - 1]!.id : null,
+                afterBlockId: i < blocks.length - 1 ? blocks[i + 1]!.id : null,
+                parentId,
+            });
+            if (block.children && block.children.length > 0) {
+                walk(block.children, block.id);
+            }
+        });
+    };
+    walk(document, pageId);
+    return index;
+}
 
-        if (block.id === targetId) {
-            return {
-                block,
-                parent,
-                siblings: blocks,
-                index: i,
-            };
-        }
-
-        // Search in children
-        if (block.children && block.children.length > 0) {
-            const found = findBlockInTree(block.children, targetId, block);
-            if (found) return found;
-        }
-    }
-
-    return null;
+/**
+ * Position lookup for a block. Prefers the prebuilt per-call index;
+ * falls back to building one (kept cheap — single walk either way).
+ */
+function getPositionForBlock(positionIndex: Map<string, BlockPosition> | null, blockId: string, pageId: string): BlockPosition {
+    const hit = positionIndex?.get(blockId);
+    if (hit) return hit;
+    // Shouldn't normally happen (index covers the whole document) — a block
+    // deleted mid-flush is the usual case; anchor it to the page root.
+    console.warn(`[Position] Block ${blockId} not in index, defaulting to page root`);
+    return { blockId, beforeBlockId: null, afterBlockId: null, parentId: pageId };
 }
 
 /**
@@ -416,23 +541,5 @@ function findBlockInTree(
  * Returns the IDs of blocks before and after, plus parent info
  */
 export function getBlockPositionInfo(document: Block[], blockId: string, pageId: string) {
-    const result = findBlockInTree(document, blockId);
-
-    if (!result) {
-        throw new Error(`Block with ID ${blockId} not found in document`);
-    }
-
-    const { parent, siblings, index } = result;
-
-    const beforeBlockId = index > 0 ? siblings[index - 1].id : null;
-    const afterBlockId = index < siblings.length - 1 ? siblings[index + 1].id : null;
-    const parentId = parent ? parent.id : pageId;
-
-    return {
-        blockId,
-        beforeBlockId,
-        afterBlockId,
-        parentId,
-        index,
-    };
+    return getPositionForBlock(buildPositionIndex(document, pageId), blockId, pageId);
 }
