@@ -36,7 +36,7 @@ curl http://localhost:3000/v1/health
 
 - `POST /v1/auth/*` — signup, login, refresh, logout, forgot/reset-password, verify-email, resend-otp
 - `GET|PATCH /v1/user/profile`, `POST /v1/user/profile/photo`, `POST /v1/user/change-password`
-- `/v1/team/*`, `/v1/block/*`, `/v1/page/*`, `POST /v1/ai`, `POST /v1/extras/waitlist`, `GET /v1/health`
+- `/v1/team/*`, `/v1/block/*` (incl. `POST /v1/block/bulk` — up to 500 ordered ops per sync flush, per-op results), `/v1/page/*`, `POST /v1/ai`, `POST /v1/extras/waitlist`, `GET /v1/health`
 
 Realtime collab (`/v1/ws/collab`) is **removed** on serverless — history only (`bea91c9^`). Frontend gates it behind `NEXT_PUBLIC_COLLAB_ENABLED` (default off).
 

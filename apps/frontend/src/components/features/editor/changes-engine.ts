@@ -1,8 +1,9 @@
 // this file is responsible for managing the changes and pushing them to the backend
 
-import { createBlockApi, deleteBlockApi, updateBlockApi } from '@/lib/api/block';
+import { bulkBlockApi, createBlockApi, deleteBlockApi, updateBlockApi } from '@/lib/api/block';
 import { BlockTypeEnum, EmbeddedBlockContent } from '@/shared/types/block';
 import { ErrorCode } from '@/shared/constants/errors';
+import type { BulkBlockOpInput } from '@/shared/validation/block';
 import { BlocksChanged, Block } from '@blocknote/core';
 
 /**
@@ -102,10 +103,22 @@ export function resolveOperation(existingOp: ChangeOperation, newOp: ChangeOpera
 }
 
 /**
+ * Classifies a non-success API result. NOTE: apiRequest() resolves (does NOT
+ * throw) on HTTP errors like 429/500, so `result.success` MUST be checked —
+ * previously failures were silently dropped from the queue (data loss on fast
+ * pastes hitting the rate limit).
+ */
+export function classifyApiFailure(result: unknown): { rateLimited: boolean; retryable: boolean } {
+    const code = (result as { error?: { code?: string } } | null)?.error?.code;
+    const status = (result as { statusCode?: number } | null)?.statusCode;
+    // @fastify/rate-limit errors don't use our {success,error} envelope — detect via status too.
+    const rateLimited = code === ErrorCode.TOO_MANY_REQUESTS || status === 429;
+    const retryable = rateLimited || !code || !NON_RETRYABLE_CODES.has(code);
+    return { rateLimited, retryable };
+}
+
+/**
  * Pushes one operation to the server and classifies the outcome.
- * NOTE: apiRequest() resolves (does NOT throw) on HTTP errors like 429/500,
- * so `result.success` MUST be checked — previously failures were silently
- * dropped from the queue (data loss on fast pastes hitting the rate limit).
  */
 export async function sendOperation(blockId: string, operation: ChangeOperation): Promise<SendResult> {
     try {
@@ -126,17 +139,29 @@ export async function sendOperation(blockId: string, operation: ChangeOperation)
             return { ok: true };
         }
 
+        const { rateLimited, retryable } = classifyApiFailure(result);
         const code = (result as { error?: { code?: string } } | null)?.error?.code;
         const status = (result as { statusCode?: number } | null)?.statusCode;
-        // @fastify/rate-limit errors don't use our {success,error} envelope — detect via status too.
-        const rateLimited = code === ErrorCode.TOO_MANY_REQUESTS || status === 429;
-        const retryable = rateLimited || !code || !NON_RETRYABLE_CODES.has(code);
         console.error(`❌ [Sync] ${operation.type} failed for block ${blockId}:`, code ?? status ?? 'unknown');
         return { ok: false, rateLimited, retryable };
     } catch (error) {
         // Network throw — always retryable.
         console.error(`❌ [Sync] ${operation.type} threw for block ${blockId}:`, error);
         return { ok: false, rateLimited: false, retryable: true };
+    }
+}
+
+/**
+ * Maps an engine queue op to the bulk endpoint's op shape.
+ */
+export function toBulkOp(operation: ChangeOperation): BulkBlockOpInput {
+    switch (operation.type) {
+        case 'create':
+            return { op: 'create', ...operation.data };
+        case 'update':
+            return { op: 'update', blockId: operation.blockId, ...operation.data };
+        case 'delete':
+            return { op: 'delete', blockId: operation.blockId };
     }
 }
 
@@ -153,6 +178,8 @@ class ChangesEngine {
     private readonly MAX_RETRIES = 3;
     private readonly RETRY_DELAY_MS = 1000;
     private readonly SYNC_CONCURRENCY = 4; // parallel requests per flush (paste = many creates)
+    private readonly BULK_CHUNK_SIZE = 200; // bulk cap is 500 — stay well under it
+    private bulkUnsupported = false; // set when /block/bulk 404s (old backend) → individual sends
     private readonly RATE_LIMIT_PAUSE_MS = 60_000; // global limiter window is 1 minute
     private readonly MAX_RATE_LIMIT_PAUSES = 2;
     private readonly MAX_OP_FAILURES = 5; // drop poison pills so one bad block can't wedge the queue
@@ -261,6 +288,131 @@ class ChangesEngine {
         }, this.AUTO_RETRY_MS);
     }
 
+    /**
+     * Applies one op's send outcome to the queue. Returns how the flush-level
+     * flags should be updated. Shared by the bulk and individual paths.
+     */
+    private applySendResult(
+        blockId: string,
+        operation: ChangeOperation,
+        result: SendResult
+    ): { failed: boolean; rateLimited: boolean } {
+        // Skip if a newer flush already replaced this exact op object.
+        if (this.mapB.get(blockId) !== operation) return { failed: false, rateLimited: false };
+
+        if (result.ok) {
+            this.mapB.delete(blockId);
+            this.failCounts.delete(blockId);
+            return { failed: false, rateLimited: false };
+        }
+
+        if (!result.retryable) {
+            // Poison pill (validation/permission/404): drop so one bad block
+            // can't wedge the whole queue; surfaced via console + error status.
+            console.error(`💥 [MapB] Dropping non-retryable ${operation.type} for block ${blockId}`);
+            this.mapB.delete(blockId);
+            this.failCounts.delete(blockId);
+            return { failed: true, rateLimited: false };
+        }
+
+        const fails = (this.failCounts.get(blockId) ?? 0) + 1;
+        if (fails >= this.MAX_OP_FAILURES) {
+            console.error(`💥 [MapB] Dropping block ${blockId} after ${fails} failures`);
+            this.mapB.delete(blockId);
+            this.failCounts.delete(blockId);
+        } else {
+            this.failCounts.set(blockId, fails);
+        }
+        return { failed: true, rateLimited: result.rateLimited };
+    }
+
+    /**
+     * Worker-pool individual sends. Used for single-op flushes and as the
+     * precise fallback when bulk is unavailable or fails at transport level.
+     */
+    private async syncEntriesIndividually(
+        entries: Array<[string, ChangeOperation]>
+    ): Promise<{ hasErrors: boolean; sawRateLimit: boolean }> {
+        let hasErrors = false;
+        let sawRateLimit = false;
+
+        let cursor = 0;
+        const workerCount = Math.min(this.SYNC_CONCURRENCY, entries.length);
+        const worker = async () => {
+            while (cursor < entries.length) {
+                const entry = entries[cursor++];
+                if (!entry) break;
+                const [blockId, operation] = entry;
+                if (this.mapB.get(blockId) !== operation) continue;
+
+                const outcome = this.applySendResult(blockId, operation, await sendOperation(blockId, operation));
+                hasErrors = hasErrors || outcome.failed;
+                sawRateLimit = sawRateLimit || outcome.rateLimited;
+            }
+        };
+        await Promise.all(Array.from({ length: workerCount }, () => worker()));
+
+        return { hasErrors, sawRateLimit };
+    }
+
+    /**
+     * Bulk-path flush: chunks of ops → POST /block/bulk each (sequential chunks
+     * preserve parent-before-child order for paste chains). `handled: false`
+     * means the caller should run the individual fallback over leftovers.
+     */
+    private async syncEntriesViaBulk(
+        entries: Array<[string, ChangeOperation]>
+    ): Promise<{ handled: boolean; hasErrors: boolean; sawRateLimit: boolean }> {
+        let hasErrors = false;
+        let sawRateLimit = false;
+
+        if (this.bulkUnsupported) return { handled: false, hasErrors, sawRateLimit };
+
+        for (let i = 0; i < entries.length; i += this.BULK_CHUNK_SIZE) {
+            const chunk = entries.slice(i, i + this.BULK_CHUNK_SIZE);
+            const result = await bulkBlockApi({ operations: chunk.map(([, operation]) => toBulkOp(operation)) });
+
+            if ((result as { success?: boolean } | null)?.success === true) {
+                const byId = new Map(chunk);
+                const results = (result as { data: { results: Array<{ blockId: string; ok: boolean; error?: { message: string; code?: string } }> } }).data
+                    .results;
+                for (const item of results) {
+                    const operation = byId.get(item.blockId);
+                    if (!operation) continue;
+                    if (!item.ok) {
+                        console.error(`❌ [Bulk] ${operation.type} failed for block ${item.blockId}:`, item.error?.code ?? item.error?.message ?? 'unknown');
+                    }
+                    const outcome = this.applySendResult(
+                        item.blockId,
+                        operation,
+                        item.ok ? { ok: true } : { ok: false, ...classifyApiFailure({ error: item.error }) }
+                    );
+                    hasErrors = hasErrors || outcome.failed;
+                    sawRateLimit = sawRateLimit || outcome.rateLimited;
+                }
+                continue;
+            }
+
+            // Transport-level failure (no per-op detail).
+            const status = (result as { statusCode?: number } | null)?.statusCode;
+            const code = (result as { error?: { code?: string } } | null)?.error?.code;
+            if (status === 404 && !code) {
+                // Route doesn't exist on this backend (rolled back / old prod).
+                debugLog('[Bulk] /block/bulk unavailable, falling back to individual sends');
+                this.bulkUnsupported = true;
+                return { handled: false, hasErrors, sawRateLimit };
+            }
+            if (code === ErrorCode.TOO_MANY_REQUESTS || status === 429) {
+                sawRateLimit = true;
+                continue; // whole chunk stays queued for the pause-and-resume tail
+            }
+            // Other infra failure — individual sends give precise per-op outcomes.
+            return { handled: false, hasErrors, sawRateLimit };
+        }
+
+        return { handled: true, hasErrors, sawRateLimit };
+    }
+
     private async syncMapB(retryCount: number = 0, rateLimitPauses: number = 0) {
         if (this.mapB.size === 0) {
             return;
@@ -277,48 +429,25 @@ class ChangesEngine {
         let hasErrors = false;
         let sawRateLimit = false;
 
-        // Worker pool: a fast paste queues hundreds of creates — strictly
-        // sequential requests take minutes on serverless. Map order is preserved
-        // at dispatch; per-block order is safe (one merged op per block).
-        let cursor = 0;
-        const workerCount = Math.min(this.SYNC_CONCURRENCY, operations.length);
-        const worker = async () => {
-            while (cursor < operations.length) {
-                const entry = operations[cursor++];
-                if (!entry) break;
-                const [blockId, operation] = entry;
-                // Skip if a newer flush already replaced this exact op object.
-                if (this.mapB.get(blockId) !== operation) continue;
-
-                const result = await sendOperation(blockId, operation);
-                if (result.ok) {
-                    if (this.mapB.get(blockId) === operation) this.mapB.delete(blockId);
-                    this.failCounts.delete(blockId);
-                } else if (!result.retryable) {
-                    // Poison pill (validation/permission/404): drop so one bad block
-                    // can't wedge the whole queue; surfaced via console + error status.
-                    console.error(`💥 [MapB] Dropping non-retryable ${operation.type} for block ${blockId}`);
-                    this.mapB.delete(blockId);
-                    this.failCounts.delete(blockId);
-                    hasErrors = true;
-                } else {
-                    if (result.rateLimited) {
-                        sawRateLimit = true;
-                    } else {
-                        hasErrors = true;
-                    }
-                    const fails = (this.failCounts.get(blockId) ?? 0) + 1;
-                    if (fails >= this.MAX_OP_FAILURES) {
-                        console.error(`💥 [MapB] Dropping block ${blockId} after ${fails} failures`);
-                        this.mapB.delete(blockId);
-                        this.failCounts.delete(blockId);
-                    } else {
-                        this.failCounts.set(blockId, fails);
-                    }
-                }
+        // Multi-op flushes (paste bursts) go through POST /block/bulk: one round
+        // trip + one rate-limit token instead of hundreds. Single-op flushes
+        // (normal typing) keep the direct single-op call.
+        if (operations.length > 1) {
+            const bulk = await this.syncEntriesViaBulk(operations);
+            hasErrors = bulk.hasErrors;
+            sawRateLimit = bulk.sawRateLimit;
+            if (!bulk.handled) {
+                // Bulk unavailable/failed at transport level — precise per-op
+                // fallback over whatever is still queued.
+                const indiv = await this.syncEntriesIndividually(Array.from(this.mapB.entries()));
+                hasErrors = hasErrors || indiv.hasErrors;
+                sawRateLimit = sawRateLimit || indiv.sawRateLimit;
             }
-        };
-        await Promise.all(Array.from({ length: workerCount }, () => worker()));
+        } else {
+            const indiv = await this.syncEntriesIndividually(operations);
+            hasErrors = indiv.hasErrors;
+            sawRateLimit = indiv.sawRateLimit;
+        }
 
         this.isSyncing = false;
 

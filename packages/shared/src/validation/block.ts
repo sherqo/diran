@@ -114,30 +114,29 @@ const QuoteContentSchema = z.object({
 
 // ================ Block Validation Schemas ================
 
-export const createBlockBodySchema = z
-  .object({
-    id: z.uuid().optional(),
-    type: BlockTypeEnumSchema,
-    parentId: z.uuid().optional().nullable(),
-    prevId: z.uuid().optional().nullable(),
-    nextId: z.uuid().optional().nullable(),
-    content: z.any(), // Using z.any() for flexibility; content structure varies by block type
-  })
-  .refine(
-    data => {
-      const hasParent = typeof data.parentId === 'string' && data.parentId.trim() !== '';
-      // no need for the id if it's a parent page
-      if (data.type === BlockTypeEnum.PAGE && !hasParent) {
-        return !data.id;
-      }
+const createBlockBaseSchema = z.object({
+  id: z.uuid().optional(),
+  type: BlockTypeEnumSchema,
+  parentId: z.uuid().optional().nullable(),
+  prevId: z.uuid().optional().nullable(),
+  nextId: z.uuid().optional().nullable(),
+  content: z.any(), // Using z.any() for flexibility; content structure varies by block type
+});
 
-      return hasParent || data.type === BlockTypeEnum.PAGE;
-    },
-    {
-      message: "parentId is required unless type='page'",
-      path: ['parentId'],
-    }
-  );
+const checkCreateParentRequirement = (data: { type: string; parentId?: string | null; id?: string }) => {
+  const hasParent = typeof data.parentId === 'string' && data.parentId.trim() !== '';
+  // no need for the id if it's a parent page
+  if (data.type === BlockTypeEnum.PAGE && !hasParent) {
+    return !data.id;
+  }
+
+  return hasParent || data.type === BlockTypeEnum.PAGE;
+};
+
+export const createBlockBodySchema = createBlockBaseSchema.refine(checkCreateParentRequirement, {
+  message: "parentId is required unless type='page'",
+  path: ['parentId'],
+});
 
 export const getBlockParamSchema = z.object({
   id: z.uuid(),
@@ -159,6 +158,34 @@ export const deleteBlockParamSchema = z.object({
   id: z.uuid(),
 });
 
+// ================ Bulk Operations ================
+// One HTTP round trip for a whole sync flush (paste = hundreds of creates).
+// Each op reuses the single-op field schemas so validation can't drift.
+
+const bulkCreateOpSchema = createBlockBaseSchema
+  .extend({ op: z.literal('create') })
+  .refine(checkCreateParentRequirement, {
+    message: "parentId is required unless type='page'",
+    path: ['parentId'],
+  });
+
+const bulkUpdateOpSchema = updateBlockBodySchema.extend({
+  op: z.literal('update'),
+  blockId: z.uuid(),
+});
+
+const bulkDeleteOpSchema = z.object({
+  op: z.literal('delete'),
+  blockId: z.uuid(),
+});
+
+export const bulkBlockBodySchema = z.object({
+  operations: z
+    .array(z.discriminatedUnion('op', [bulkCreateOpSchema, bulkUpdateOpSchema, bulkDeleteOpSchema]))
+    .min(1, 'At least one operation is required')
+    .max(500, 'At most 500 operations per bulk request'),
+});
+
 export const getBlockDirectChildrenParamSchema = z.object({
   id: z.uuid(),
 });
@@ -170,6 +197,8 @@ export const getBlockChildrenTreeSchema = z.object({
 // ================ Exported Types ================
 
 export type CreateBlockBodyInput = z.infer<typeof createBlockBodySchema>;
+export type BulkBlockBodyInput = z.infer<typeof bulkBlockBodySchema>;
+export type BulkBlockOpInput = BulkBlockBodyInput['operations'][number];
 export type GetBlockParamInput = z.infer<typeof getBlockParamSchema>;
 export type UpdateBlockParamInput = z.infer<typeof updateBlockParamSchema>;
 export type UpdateBlockBodyInput = z.infer<typeof updateBlockBodySchema>;

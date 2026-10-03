@@ -1,6 +1,7 @@
 import { FastifyReply } from 'fastify';
 import { AuthenticatedRequest } from '#lib/middleware/auth.js';
 import {
+    BulkBlockBodyInput,
     CreateBlockBodyInput,
     GetBlockParamInput,
     UpdateBlockBodyInput,
@@ -14,10 +15,10 @@ import { sendSuccess } from '#lib/utils/response.js';
 import { ApiError } from '#lib/middleware/errorHandler.js';
 import { ErrorCode, HttpStatus } from '@diran/shared/constants/errors.js';
 import { RoleType, BlockType } from '@prisma/client';
-import { generateKeyBetween } from 'fractional-indexing';
 import { canWrite } from '#features/block/middlewares.js';
 import { getRoleWithInheritance } from '#lib/services/permission.js';
-import { extractPlainTextFromContent } from '#lib/utils/content.js';
+import { createBlockRecord, updateBlockRecord, deleteBlockRecord } from '#features/block/service.js';
+import type { BulkOperationResult } from '@diran/shared/types/block.js';
 
 // CREATE
 // !note: today is 27-Nov-2025, 3:42 AM. i'm keeping these comments for remebering how i thought about the creation process :)
@@ -134,79 +135,13 @@ import { extractPlainTextFromContent } from '#lib/utils/content.js';
 // our new style create function that let the server handle the order generation
 // CREATE - creates a new block, an important and complex function
 const createBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
-    const { id, type, content, parentId, prevId, nextId }: CreateBlockBodyInput = req.body as CreateBlockBodyInput;
+    const input = req.body as CreateBlockBodyInput;
 
-    const result = await db.$transaction(async tx => {
-        // Fetch prev and next block orders if IDs are provided
-        const prevOrder = prevId ? ((await tx.block.findUnique({ where: { id: prevId }, select: { order: true } }))?.order ?? null) : null;
-        const nextOrder = nextId ? ((await tx.block.findUnique({ where: { id: nextId }, select: { order: true } }))?.order ?? null) : null;
+    const block = await db.$transaction(tx => createBlockRecord(tx, req.user!.id, input));
 
-        // Generate order between prev and next (handles nulls for first/last positions)
-        const order = generateKeyBetween(prevOrder, nextOrder);
+    const message = !block.parentId ? 'Page (very parent block) created successfully' : 'Child block created successfully';
 
-        // Extract plain text for search indexing
-        const contentText = extractPlainTextFromContent(content);
-
-        // Create the block
-        const created = await tx.block.create({
-            data: {
-                ...(id && { id }), // Only include id if it exists
-                type: type as BlockType,
-                parentId: parentId ?? null,
-                order,
-                content,
-                contentText: contentText || null,
-            },
-            select: {
-                id: true,
-                type: true,
-                parentId: true,
-                order: true,
-                content: true,
-                createdAt: true,
-                updatedAt: true,
-            },
-        });
-
-        const block = {
-            id: created.id,
-            type: created.type,
-            parentId: created.parentId,
-            order: created.order,
-            content: created.content,
-            createdAt: created.createdAt.toISOString(),
-            updatedAt: created.updatedAt.toISOString(),
-        };
-
-        // only the page with no parent
-        if (!parentId) {
-            await tx.permission.create({
-                data: {
-                    userId: req.user!.id,
-                    blockId: created.id,
-                    role: RoleType.OWNER,
-                },
-            });
-        }
-
-        // If creating a PAGE, also create a default empty paragraph block as first child
-        if (type === BlockType.page) {
-            await tx.block.create({
-                data: {
-                    type: BlockType.paragraph,
-                    parentId: created.id,
-                    order: generateKeyBetween(null, null),
-                    content: [],
-                },
-            });
-        }
-
-        return { block };
-    });
-
-    const message = !result.block.parentId ? 'Page (very parent block) created successfully' : 'Child block created successfully';
-
-    sendSuccess(reply, { block: result.block }, message, HttpStatus.CREATED); // TODO: should i return the block? i think the id and order or just id maybe enough
+    sendSuccess(reply, { block }, message, HttpStatus.CREATED); // TODO: should i return the block? i think the id and order or just id maybe enough
 };
 
 // ====== Just placeholder(s) for now ======
@@ -267,121 +202,88 @@ const updateBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Prom
     const { id } = req.params as UpdateBlockParamInput;
     const payload = req.body as Partial<UpdateBlockBodyInput>;
 
-    const existing = await db.block.findUnique({ where: { id } });
-    if (!existing) {
-        throw new ApiError('Block not found', HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND);
-    }
+    const block = await db.$transaction(tx => updateBlockRecord(tx, req.user!.id, id, payload));
 
-    // Check permission on new parent if parentId is being changed
-    if ('parentId' in payload && payload.parentId !== existing.parentId) {
-        const newParentId = payload.parentId;
-
-        // If moving to a new parent (not making it a root), check write permission on new parent
-        if (newParentId) {
-            const role = await getRoleWithInheritance(req.user!.id, newParentId);
-
-            if (!role || role === RoleType.NONE || !canWrite(role)) {
-                throw new ApiError(
-                    'Access denied: No write permission on new parent block',
-                    HttpStatus.FORBIDDEN,
-                    ErrorCode.PERMISSION_DENIED
-                );
-            }
-        }
-    }
-
-    const result = await db.$transaction(async tx => {
-        // Prepare update data
-        const dataToUpdate: any = {};
-
-        // Handle basic fields
-        if (payload.type !== undefined) dataToUpdate.type = payload.type;
-        if (payload.content !== undefined) {
-            dataToUpdate.content = payload.content;
-            // Update content_text for search indexing
-            dataToUpdate.contentText = extractPlainTextFromContent(payload.content) || null;
-        }
-
-        // Handle parentId (null is valid)
-        if ('parentId' in payload) {
-            dataToUpdate.parentId = payload.parentId ?? null;
-        }
-
-        // Handle order changes (moving blocks)
-        if ('prevId' in payload || 'nextId' in payload) {
-            const [prevBlock, nextBlock] = await Promise.all([
-                payload.prevId ? tx.block.findUnique({ where: { id: payload.prevId }, select: { order: true } }) : null,
-                payload.nextId ? tx.block.findUnique({ where: { id: payload.nextId }, select: { order: true } }) : null,
-            ]);
-
-            const prevOrder = prevBlock?.order ?? null;
-            const nextOrder = nextBlock?.order ?? null;
-            dataToUpdate.order = generateKeyBetween(prevOrder, nextOrder);
-        }
-
-        // Perform the update
-        const updated = await tx.block.update({
-            where: { id },
-            data: dataToUpdate,
-            select: {
-                id: true,
-                type: true,
-                parentId: true,
-                order: true,
-                content: true,
-                createdAt: true,
-                updatedAt: true,
-            },
-        });
-
-        return {
-            block: {
-                ...updated,
-                createdAt: updated.createdAt.toISOString(),
-                updatedAt: updated.updatedAt.toISOString(),
-            },
-        };
-    });
-
-    sendSuccess(reply, result, 'Block updated successfully');
+    sendSuccess(reply, { block }, 'Block updated successfully');
 };
 
 // DELETE - remove a block and all its children recursively (cascade delete)
 const deleteBlock = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
     const { id } = req.params as DeleteBlockParamInput;
 
-    const block = await db.block.findUnique({ where: { id } });
-    if (!block) {
-        throw new ApiError('Block not found', HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND);
-    }
-
-    await db.$transaction(async tx => {
-        // Use recursive CTE to get all descendants in a single query
-        // This is WAY more efficient than N+1 queries
-        const allBlockIds: string[] = await tx.$queryRaw`
-            WITH RECURSIVE descendants AS (
-                -- Base case: the block we want to delete
-                SELECT id FROM blocks WHERE id = ${id}::uuid
-                
-                UNION ALL
-                
-                -- Recursive case: children of blocks we've already found
-                SELECT b.id
-                FROM blocks b
-                INNER JOIN descendants d ON b.parent_id = d.id
-            )
-            SELECT id FROM descendants
-        `;
-
-        const blockIds = allBlockIds.map((row: any) => row.id);
-
-        // Delete blocks - permissions will cascade delete automatically
-        await tx.block.deleteMany({
-            where: { id: { in: blockIds } },
-        });
-    });
+    await db.$transaction(tx => deleteBlockRecord(tx, id));
 
     sendSuccess(reply, {}, 'Block and all children deleted successfully');
+};
+
+// BULK - apply many creates/updates/deletes in request order in a single HTTP call.
+// Designed for sync flushes (a fast paste queues hundreds of creates): one round
+// trip + one rate-limit token instead of hundreds. Each op runs in its own
+// transaction and commits before the next op, so later ops can reference blocks
+// created earlier in the same bulk (paste prevId chains). Partial success is
+// normal — per-op results tell the client what to retry.
+const bulkBlocks = async (req: AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
+    const { operations } = req.body as BulkBlockBodyInput;
+    const userId = req.user!.id;
+
+    // Role lookups repeat across ops on the same page — cache per request.
+    const roleCache = new Map<string, RoleType | undefined>();
+    const getRole = async (blockId: string): Promise<RoleType | undefined> => {
+        if (!roleCache.has(blockId)) {
+            roleCache.set(blockId, await getRoleWithInheritance(userId, blockId));
+        }
+        return roleCache.get(blockId);
+    };
+    const requireWrite = async (blockId: string, what: string): Promise<void> => {
+        const role = await getRole(blockId);
+        if (!role || role === RoleType.NONE || !canWrite(role)) {
+            throw new ApiError(`Access denied: No write permission on ${what}`, HttpStatus.FORBIDDEN, ErrorCode.PERMISSION_DENIED);
+        }
+    };
+
+    const toError = (err: unknown): { message: string; code?: string } => {
+        if (err instanceof ApiError) {
+            return { message: err.message, ...(err.code && { code: err.code }) };
+        }
+        return { message: 'Internal server error', code: ErrorCode.INTERNAL_ERROR };
+    };
+
+    const results: BulkOperationResult[] = [];
+
+    for (const op of operations) {
+        if (op.op === 'create') {
+            // Mirrors requireParentPermission: parentless create = root page (allowed).
+            try {
+                if (op.parentId) {
+                    await requireWrite(op.parentId, 'parent block');
+                }
+                const created = await db.$transaction(tx => createBlockRecord(tx, userId, op));
+                results.push({ blockId: op.id ?? created.id, ok: true });
+            } catch (err) {
+                results.push({ blockId: op.id ?? '', ok: false, error: toError(err) });
+            }
+        } else if (op.op === 'update') {
+            try {
+                await requireWrite(op.blockId, 'block');
+                const { blockId, ...payload } = op;
+                await db.$transaction(tx => updateBlockRecord(tx, userId, blockId, payload));
+                results.push({ blockId, ok: true });
+            } catch (err) {
+                results.push({ blockId: op.blockId, ok: false, error: toError(err) });
+            }
+        } else {
+            try {
+                await requireWrite(op.blockId, 'block');
+                await db.$transaction(tx => deleteBlockRecord(tx, op.blockId));
+                results.push({ blockId: op.blockId, ok: true });
+            } catch (err) {
+                results.push({ blockId: op.blockId, ok: false, error: toError(err) });
+            }
+        }
+    }
+
+    const failed = results.filter(r => !r.ok).length;
+    sendSuccess(reply, { results }, failed === 0 ? 'All bulk operations succeeded' : `${results.length - failed}/${results.length} bulk operations succeeded`);
 };
 
 // GET DIRECT CHILDREN BLOCKS - gets all direct children blocks of a parent block (needs permission)
@@ -607,4 +509,13 @@ const searchBlocks = async (req: AuthenticatedRequest, reply: FastifyReply): Pro
     sendSuccess(reply, { results: searchResults }, 'Search results');
 };
 
-export { createBlock, getBlock, updateBlock, deleteBlock, getDirectChildrenBlocks, getChildrenTree, searchBlocks };
+export {
+    createBlock,
+    getBlock,
+    updateBlock,
+    deleteBlock,
+    bulkBlocks,
+    getDirectChildrenBlocks,
+    getChildrenTree,
+    searchBlocks,
+};
