@@ -44,6 +44,7 @@ Base URL
 ## Block
 
 - POST /block — auth — create block
+- POST /block/bulk — auth — apply up to 500 creates/updates/deletes in request order, per-op results (sync flushes use this)
 - GET /block/search?q=... — auth — search blocks
 - GET /block/{id} — auth — get block
 - PUT /block/{id} — auth — update block

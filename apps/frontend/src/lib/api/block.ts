@@ -1,5 +1,6 @@
 import { apiRequest } from './helpers';
 import type {
+    BulkBlockResponseData,
     CreateBlockResponseData,
     GetBlockResponseData,
     UpdateBlockResponseData,
@@ -8,7 +9,7 @@ import type {
     SearchBlocksResponseData,
     ApiBlock,
 } from '@/shared/types/block';
-import type { CreateBlockBodyInput, UpdateBlockBodyInput } from '@/shared/validation/block';
+import type { BulkBlockBodyInput, CreateBlockBodyInput, UpdateBlockBodyInput } from '@/shared/validation/block';
 
 /**
  * Create a new block
@@ -39,6 +40,16 @@ export const updateBlockApi = (id: string, data: Partial<UpdateBlockBodyInput>) 
 export const deleteBlockApi = (id: string) =>
     apiRequest<DeleteBlockResponseData>(`/block/${id}`, {
         method: 'DELETE',
+    });
+
+/**
+ * Apply many creates/updates/deletes in request order in a single HTTP call.
+ * Returns per-operation results — partial success is normal, retry failures.
+ */
+export const bulkBlockApi = (data: BulkBlockBodyInput) =>
+    apiRequest<BulkBlockResponseData>('/block/bulk', {
+        method: 'POST',
+        body: JSON.stringify(data),
     });
 
 /**

@@ -2,9 +2,19 @@ import { FastifyInstance } from 'fastify';
 import { validateRequest as vr } from '#lib/middleware/validation.js';
 import { authenticate as auth } from '#lib/middleware/auth.js';
 import { requireReadPermission, requireWritePermission, requireParentPermission } from '#features/block/middlewares.js';
-import { createBlock, getBlock, updateBlock, deleteBlock, getDirectChildrenBlocks, getChildrenTree, searchBlocks } from '#features/block/controller.js';
+import {
+    createBlock,
+    getBlock,
+    updateBlock,
+    deleteBlock,
+    bulkBlocks,
+    getDirectChildrenBlocks,
+    getChildrenTree,
+    searchBlocks,
+} from '#features/block/controller.js';
 import { registerPermissionRoutes } from '#features/block/permission/routes.js';
 import {
+    bulkBlockBodySchema,
     createBlockBodySchema,
     getBlockParamSchema,
     updateBlockParamSchema,
@@ -28,6 +38,14 @@ export async function registerBlockRoutes(fastify: FastifyInstance): Promise<voi
     fastify.get('/search', {
         preHandler: [auth],
         handler: searchBlocks,
+    });
+
+    // Bulk apply creates/updates/deletes in request order — one round trip per
+    // sync flush. Per-op permissions mirror the single-op routes; per-op
+    // results tell the client what to retry.
+    fastify.post('/bulk', {
+        preHandler: [vr({ bodySchema: bulkBlockBodySchema }), auth],
+        handler: bulkBlocks,
     });
 
     // Create block - requires parent permission if parentId is provided

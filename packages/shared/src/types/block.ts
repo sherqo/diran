@@ -159,6 +159,19 @@ export interface UpdateBlockResponseData {
 
 export interface DeleteBlockResponseData {}
 
+export interface BulkOperationResult {
+  blockId: string;
+  ok: boolean;
+  error?: {
+    message: string;
+    code?: string;
+  };
+}
+
+export interface BulkBlockResponseData {
+  results: BulkOperationResult[];
+}
+
 export interface GetBlockChildrenResponseData {
   children: ApiBlock[];
 }
