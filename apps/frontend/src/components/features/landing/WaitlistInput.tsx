@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { apiUrl } from '@/lib/api/config';
 
 export function WaitlistInput() {
     const [value, setValue] = useState('');
@@ -15,7 +16,7 @@ export function WaitlistInput() {
         setMessage('');
 
         try {
-            await fetch(`${process.env.NEXT_PUBLIC_API_URL}/extras/waitlist`, {
+            await fetch(apiUrl('/extras/waitlist'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

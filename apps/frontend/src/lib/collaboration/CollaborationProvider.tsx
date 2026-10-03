@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useMemo, useCallback, useRef } from 'react';
-import { useCollaboration, type TypingInfo } from './useCollaboration';
+import { useCollaboration, COLLAB_ENABLED, type TypingInfo } from './useCollaboration';
 import type { BlockOperation, CursorPosition, CollaboratorInfo, ConnectionState } from '@/shared/types/collaboration';
 import type { BlockNoteEditor } from '@blocknote/core';
 import { applyBlockOperations } from '@/lib/editor/applyOperations';
@@ -66,11 +66,12 @@ export function CollaborationProvider({ children, pageId, userId, userName, enab
         []
     );
 
+    const effectiveEnabled = enabled && COLLAB_ENABLED;
     const { connectionState, collaborators, typingUsers, version, sendOperation, sendCursor, sendTyping } = useCollaboration({
         pageId,
         userId,
         userName,
-        enabled,
+        enabled: effectiveEnabled,
         onOperation: handleOperation,
         onCursorUpdate: handleCursorUpdate,
     });

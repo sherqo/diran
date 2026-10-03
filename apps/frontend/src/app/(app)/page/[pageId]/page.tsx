@@ -8,7 +8,7 @@ import { PageHeader } from '@/components/page-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Editor } from '@/components/features/editor/DynamicEditor';
 import { EditablePageTitle } from '@/components/features/editable-page-title';
-import { CollaborationProvider } from '@/lib/collaboration';
+import { CollaborationProvider, COLLAB_ENABLED } from '@/lib/collaboration';
 import type { PartialBlock, BlockNoteEditor } from '@blocknote/core';
 import type { EmbeddedBlockContent, ApiBlock } from '@/shared/types/block';
 import { getBlockTreeApi } from '@/lib/api/block';
@@ -139,7 +139,11 @@ export default function PageView() {
     }
 
     return (
-        <CollaborationProvider pageId={pageId} userId={user?.id || 'anonymous'} userName={user?.name || 'Anonymous'} enabled={!!user}>
+        <CollaborationProvider
+            pageId={pageId}
+            userId={user?.id || 'anonymous'}
+            userName={user?.name || 'Anonymous'}
+            enabled={!!user && COLLAB_ENABLED}>
             <PageHeader title={pageTitle} icon={pageIcon} pageId={pageId} role={currentPage.role} isTeamPage={currentPage.isTeamPage}>
                 <CollaboratorsPresence />
             </PageHeader>

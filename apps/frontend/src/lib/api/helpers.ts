@@ -1,11 +1,10 @@
 import { ErrorCode } from '@/shared/constants/errors';
 import { ApiResult, ErrorResponse, SuccessResponse } from '@/shared/types/api';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4003/v1';
+import { apiUrl } from './config';
 
 // --- Helpers ---
 async function doFetch(endpoint: string, options: RequestInit = {}): Promise<Response> {
-    const url = `${API_BASE_URL}${endpoint}`;
+    const url = apiUrl(endpoint);
 
     // Only include Content-Type if there's a body and it's not FormData
     const headers: Record<string, string> = {

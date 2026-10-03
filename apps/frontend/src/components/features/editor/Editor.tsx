@@ -21,7 +21,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 import { handleChanges } from './changes-engine';
 import { SlashMenu, getSlashMenuItems, filterSlashMenuItems, CustomFormattingToolbar, CustomSideMenu } from './menus';
-import { useCollaborativeEditor } from '@/lib/collaboration';
+import { useCollaborativeEditor, COLLAB_ENABLED } from '@/lib/collaboration';
 import { CursorOverlay } from '@/components/features/collaboration/CursorOverlay';
 import { uploadEditorFileApi } from '@/lib/api/upload';
 import { showToast } from '@/lib/toast';
@@ -49,8 +49,9 @@ export default function Editor({
     const { resolvedTheme } = useTheme();
     const colorScheme = resolvedTheme === 'dark' ? 'dark' : 'light';
 
-    // Enable real-time collaboration
-    useCollaborativeEditor({ editor });
+    // Realtime collaboration is gated off on serverless (see COLLAB_ENABLED).
+    // Hook itself early-returns a static disconnected state when disabled.
+    useCollaborativeEditor({ editor, enabled: COLLAB_ENABLED });
 
     // Create new editor for each page
     useEffect(() => {

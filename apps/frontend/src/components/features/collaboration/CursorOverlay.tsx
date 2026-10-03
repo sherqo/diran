@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState, useRef } from 'react';
-import { useCollaborationContext } from '@/lib/collaboration';
+import { useCollaborationContext, COLLAB_ENABLED } from '@/lib/collaboration';
 import type { BlockNoteEditor } from '@blocknote/core';
 
 interface CursorOverlayProps {
@@ -21,6 +21,7 @@ export function CursorOverlay({ editor }: CursorOverlayProps) {
     const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
+        if (!COLLAB_ENABLED) return;
         if (!editor || !collaboration) return;
 
         const updateCursors = () => {
@@ -62,6 +63,8 @@ export function CursorOverlay({ editor }: CursorOverlayProps) {
             clearInterval(interval);
         };
     }, [editor, collaboration]);
+
+    if (!COLLAB_ENABLED) return null;
 
     return (
         <div ref={containerRef} className="pointer-events-none absolute inset-0 overflow-hidden">

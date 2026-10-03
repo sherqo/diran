@@ -1,3 +1,5 @@
+import { apiUrl } from './config';
+
 interface UploadFileResponseData {
     url: string;
 }
@@ -12,7 +14,7 @@ export const uploadEditorFileApi = async (
     formData.append('file', file);
 
     try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/upload`, {
+        const response = await fetch(apiUrl('/upload'), {
             method: 'POST',
             body: formData,
             credentials: 'include', // Include cookies for authentication

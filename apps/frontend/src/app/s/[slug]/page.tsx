@@ -8,10 +8,10 @@ interface PublishedPageProps {
 
 // Fetch page data from API
 async function getPublishedPage(slug: string) {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+    const { apiUrl } = await import('@/lib/api/config');
 
     try {
-        const res = await fetch(`${apiUrl}/page/s/${slug}`, {
+        const res = await fetch(apiUrl(`/page/s/${slug}`), {
             next: { revalidate: 60 }, // Cache for 60 seconds
         });
 
