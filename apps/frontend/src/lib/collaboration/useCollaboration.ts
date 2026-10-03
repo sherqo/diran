@@ -8,12 +8,17 @@ import type {
     ConnectionState,
 } from '@/shared/types/collaboration';
 
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:4003/v1/ws/collab';
+const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:3000/v1/ws/collab';
 
 // Realtime collaboration requires a long-lived server with WebSocket support.
 // It is disabled on serverless hosts (Vercel). Set NEXT_PUBLIC_COLLAB_ENABLED=true
 // only when pointing at a backend that serves /v1/ws/collab.
-const COLLAB_ENABLED = process.env.NEXT_PUBLIC_COLLAB_ENABLED === 'true';
+// Default off — callers must route through this flag (see VERCEL_FOLLOWUP_PLAN.md).
+export const COLLAB_ENABLED = process.env.NEXT_PUBLIC_COLLAB_ENABLED === 'true';
+
+export function isCollabEnabled(): boolean {
+    return COLLAB_ENABLED;
+}
 
 // Generate a random color for this user (stable per session)
 const generateUserColor = (): string => {
@@ -91,8 +96,9 @@ export function useCollaboration({
     const reconnectAttemptsRef = useRef(0);
     const maxReconnectAttempts = 5;
 
-    // Send a message to the server
+    // Send a message to the server (noop when collab is gated off)
     const sendMessage = useCallback((message: ClientMessage) => {
+        if (!COLLAB_ENABLED) return;
         if (wsRef.current?.readyState === WebSocket.OPEN) {
             wsRef.current.send(JSON.stringify(message));
         }
@@ -234,8 +240,9 @@ export function useCollaboration({
         };
     }, [pageId, userId, userName, sendMessage, handleMessage]);
 
-    // Handle reconnection
+    // Handle reconnection (disabled entirely when collab is gated off)
     useEffect(() => {
+        if (!COLLAB_ENABLED) return;
         if (connectionState === 'disconnected' && enabled && reconnectAttemptsRef.current < maxReconnectAttempts) {
             const delay = Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current), 30000);
             console.log(`[Collab] Reconnecting in ${delay}ms...`);
@@ -269,32 +276,39 @@ export function useCollaboration({
         setCollaborators(new Map());
     }, [sendMessage]);
 
-    // Send a block operation
+    // Send a block operation (noop when gated off)
     const sendOperation = useCallback(
         (operation: BlockOperation) => {
+            if (!COLLAB_ENABLED) return;
             sendMessage({ type: 'operation', operation });
         },
         [sendMessage]
     );
 
-    // Send cursor position
+    // Send cursor position (noop when gated off)
     const sendCursor = useCallback(
         (cursor: CursorPosition | null) => {
+            if (!COLLAB_ENABLED) return;
             sendMessage({ type: 'cursor', cursor });
         },
         [sendMessage]
     );
 
-    // Send typing indicator
+    // Send typing indicator (noop when gated off)
     const sendTyping = useCallback(
         (blockId: string | null) => {
+            if (!COLLAB_ENABLED) return;
             sendMessage({ type: 'typing', blockId });
         },
         [sendMessage]
     );
 
-    // Connect on mount, disconnect on unmount
+    // Connect on mount, disconnect on unmount (noop when gated off — static disconnected)
     useEffect(() => {
+        if (!COLLAB_ENABLED) {
+            disconnect();
+            return;
+        }
         if (enabled && pageId) {
             // Use setTimeout to avoid direct setState in effect body
             const timeoutId = setTimeout(() => {
@@ -311,6 +325,22 @@ export function useCollaboration({
             disconnect();
         };
     }, [enabled, pageId, connect, disconnect]);
+
+    // Static disconnected state when gated off (VERCEL_FOLLOWUP_PLAN §1):
+    // no sockets, no timers, no errors — callers render offline UI only.
+    if (!COLLAB_ENABLED) {
+        return {
+            connectionState: 'disconnected' as ConnectionState,
+            collaborators: new Map<string, CollaboratorInfo>(),
+            typingUsers: new Map<string, TypingInfo>(),
+            version: 0,
+            sendOperation,
+            sendCursor,
+            sendTyping,
+            connect: () => {},
+            disconnect,
+        };
+    }
 
     return {
         connectionState,

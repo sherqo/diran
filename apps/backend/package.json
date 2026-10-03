@@ -2,7 +2,7 @@
     "name": "@diran/backend",
     "version": "0.1.0",
     "private": true,
-    "description": "Diran AI Backend - Express.js + PostgreSQL with Prisma ORM",
+    "description": "Diran AI Backend - Fastify + PostgreSQL with Prisma ORM",
     "type": "module",
     "main": "dist/server.js",
     "imports": {

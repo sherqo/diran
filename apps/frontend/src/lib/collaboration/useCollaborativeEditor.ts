@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useCallback } from 'react';
-import { useCollaborationContext } from '@/lib/collaboration';
+import { useCollaborationContext } from '@/lib/collaboration/CollaborationProvider';
+import { COLLAB_ENABLED } from './useCollaboration';
 import type { BlockNoteEditor, Block } from '@blocknote/core';
 import type { BlockOperation } from '@/shared/types/collaboration';
 
@@ -22,6 +23,7 @@ const TYPING_TIMEOUT = 2000;
  * 3. The provider handles applying remote changes
  */
 export function useCollaborativeEditor({ editor, enabled = true }: UseCollaborativeEditorOptions) {
+    const effectiveEnabled = enabled && COLLAB_ENABLED;
     const collaboration = useCollaborationContext();
     const lastDocumentRef = useRef<Block[]>([]);
     const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -32,9 +34,10 @@ export function useCollaborativeEditor({ editor, enabled = true }: UseCollaborat
     // eslint-disable-next-line react-hooks/refs
     collaborationRef.current = collaboration;
 
-    // Send typing indicator with debounce
+    // Send typing indicator with debounce (noop when gated off)
     const sendTypingIndicator = useCallback(
         (blockId: string | null) => {
+            if (!COLLAB_ENABLED) return;
             const collab = collaborationRef.current;
             if (!collab) return;
 
@@ -69,19 +72,21 @@ export function useCollaborativeEditor({ editor, enabled = true }: UseCollaborat
         };
     }, []); // Empty deps - only runs on unmount
 
-    // Bind editor to collaboration provider
+    // Bind editor to collaboration provider (noop when gated off)
     useEffect(() => {
-        if (!collaboration || !enabled) return;
+        if (!COLLAB_ENABLED) return;
+        if (!collaboration || !effectiveEnabled) return;
         collaboration.bindEditor(editor);
 
         return () => {
             collaboration.bindEditor(null);
         };
-    }, [editor, collaboration, enabled]);
+    }, [editor, collaboration, effectiveEnabled]);
 
     // Listen to editor changes and broadcast them
     useEffect(() => {
-        if (!editor || !collaboration || !enabled) return;
+        if (!COLLAB_ENABLED) return;
+        if (!editor || !collaboration || !effectiveEnabled) return;
 
         // Store initial document state
         lastDocumentRef.current = editor.document;
@@ -150,11 +155,12 @@ export function useCollaborativeEditor({ editor, enabled = true }: UseCollaborat
         });
 
         return unsubscribe;
-    }, [editor, collaboration, enabled, sendTypingIndicator]);
+    }, [editor, collaboration, effectiveEnabled, sendTypingIndicator]);
 
     // Track cursor position and send updates
     useEffect(() => {
-        if (!editor || !collaboration || !enabled) return;
+        if (!COLLAB_ENABLED) return;
+        if (!editor || !collaboration || !effectiveEnabled) return;
 
         // BlockNote doesn't have a direct cursor API,
         // but we can track selection changes via the underlying Tiptap editor
@@ -188,12 +194,21 @@ export function useCollaborativeEditor({ editor, enabled = true }: UseCollaborat
         return () => {
             tiptap.off('selectionUpdate', handleSelectionUpdate);
         };
-    }, [editor, collaboration, enabled]);
+    }, [editor, collaboration, effectiveEnabled]);
+
+    if (!COLLAB_ENABLED) {
+        return {
+            connectionState: 'disconnected' as const,
+            collaborators: new Map(),
+            typingUsers: new Map(),
+            isCollaborating: false,
+        };
+    }
 
     return {
         connectionState: collaboration?.connectionState ?? 'disconnected',
         collaborators: collaboration?.collaborators ?? new Map(),
         typingUsers: collaboration?.typingUsers ?? new Map(),
-        isCollaborating: enabled && collaboration?.connectionState === 'connected',
+        isCollaborating: effectiveEnabled && collaboration?.connectionState === 'connected',
     };
 }

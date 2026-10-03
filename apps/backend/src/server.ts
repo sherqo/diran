@@ -34,8 +34,14 @@ fastify.register(fastifyHelmet, {
     contentSecurityPolicy: false, // Disable CSP for API
 });
 
+const ALLOWED_ORIGINS: string[] = (process.env.FRONTEND_URL || 'http://localhost:3000')
+    .split(',')
+    .map(o => o.trim())
+    .filter((o): o is string => o.length > 0);
+const corsOrigin: string | string[] = ALLOWED_ORIGINS.length > 1 ? ALLOWED_ORIGINS : (ALLOWED_ORIGINS[0] ?? 'http://localhost:3000');
+
 fastify.register(fastifyCors, {
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: corsOrigin,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -60,4 +66,7 @@ fastify.get('/', async () => {
 
 fastify.register(registerAllRoutes, { prefix: '/v1' });
 
-fastify.listen({ port: 3000 });
+// PORT is honored locally (`bun run dev` / `dist/server.js`).
+// On Vercel this call is intercepted and turned into the serverless function,
+// so the value here does not affect production.
+fastify.listen({ port: Number(process.env.PORT || 3000) });

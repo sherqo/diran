@@ -4,8 +4,8 @@ A short, human-friendly reference for the most-used Diran API endpoints. This fi
 
 Base URL
 
-- Local: `http://localhost:4003/v1`
-- Production: `https://api.diran.sherqo.me/v1`
+- Local: `http://localhost:3000/v1` (or `$PORT/v1` when `PORT` is set)
+- Production: `https://diran-backend.vercel.app/v1` (custom domain `https://api.diran.sherqo.me/v1` when configured)
 
 ## Auth
 
@@ -76,5 +76,5 @@ Base URL
 
 ## Notes
 
-- This is a concise reference; for a more detailed, interactive spec see `docs/openapi.yaml` and open `docs/index.html` (ReDoc) or run `bunx run docs:serve`.
-- If you want any specific example requests added here, tell me which endpoints and I’ll add one-liners.
+- Health (no DB, Vercel-safe): `GET /ping`, `GET /`, `GET /v1/health`.
+- If you want any specific example requests added here, tell me which endpoints and I'll add one-liners.

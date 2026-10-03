@@ -7,7 +7,8 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "cd packages/shared && bun run build && cd ../../apps/backend && bun run build && cd ../frontend && bun run build",
+    "dev": "cd packages/shared && bun run build && cd ../../apps/backend && bun run dev",
+    "dev:frontend": "bun --filter @diran/frontend dev",
     "build": "cd packages/shared && bun run build && cd ../../apps/backend && bun run build && cd ../frontend && bun run build",
     "start": "cd apps/backend && bun run start"
   },

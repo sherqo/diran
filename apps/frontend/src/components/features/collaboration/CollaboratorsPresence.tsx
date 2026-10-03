@@ -1,6 +1,6 @@
 'use client';
 
-import { useCollaborationContext } from '@/lib/collaboration';
+import { useCollaborationContext, COLLAB_ENABLED } from '@/lib/collaboration';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
@@ -15,6 +15,9 @@ interface CollaboratorsPresenceProps {
  * Shows avatars of users currently editing the same page
  */
 export function CollaboratorsPresence({ className, maxVisible = 5 }: CollaboratorsPresenceProps) {
+    // Gated off on serverless — render nothing instead of a permanent "Offline".
+    if (!COLLAB_ENABLED) return null;
+
     const collaboration = useCollaborationContext();
 
     if (!collaboration) {
