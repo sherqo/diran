@@ -1,5 +1,8 @@
 import { db } from '#lib/database/connection.js';
-import { RoleType } from '@prisma/client';
+import { Prisma, RoleType } from '@prisma/client';
+
+// The shared client, or a transaction when called from inside one.
+type DbClient = Prisma.TransactionClient;
 
 /**
  * Role priority for resolving conflicts (higher = more access).
@@ -39,8 +42,8 @@ export const getRole = async (userId: string, blockId: string): Promise<RoleType
 /**
  * Get user's team IDs (teams they own or are members of).
  */
-export const getUserTeamIds = async (userId: string): Promise<string[]> => {
-    const rows = await db.$queryRaw<Array<{ id: string }>>`
+export const getUserTeamIds = async (userId: string, client: DbClient = db): Promise<string[]> => {
+    const rows = await client.$queryRaw<Array<{ id: string }>>`
         SELECT t.id
         FROM teams t
         WHERE t.owner_id = ${userId}::uuid
@@ -57,9 +60,9 @@ export const getUserTeamIds = async (userId: string): Promise<string[]> => {
  * Checks direct user permission first, then team permissions, then traverses up the parent chain.
  * Returns the highest role found between user and team permissions.
  */
-export const getRoleWithInheritance = async (userId: string, blockId: string): Promise<RoleType | undefined> => {
+export const getRoleWithInheritance = async (userId: string, blockId: string, client: DbClient = db): Promise<RoleType | undefined> => {
     // First, try the direct user permission (fast path)
-    const directPermission = await db.permission.findUnique({
+    const directPermission = await client.permission.findUnique({
         where: {
             userId_blockId: {
                 userId,
@@ -75,12 +78,12 @@ export const getRoleWithInheritance = async (userId: string, blockId: string): P
     }
 
     // Get user's team IDs
-    const teamIds = await getUserTeamIds(userId);
+    const teamIds = await getUserTeamIds(userId, client);
 
     // Check direct team permission on this block
     let teamRole: RoleType | undefined;
     if (teamIds.length > 0) {
-        const teamPermissions = await db.permission.findMany({
+        const teamPermissions = await client.permission.findMany({
             where: {
                 blockId,
                 teamId: { in: teamIds },
@@ -101,7 +104,7 @@ export const getRoleWithInheritance = async (userId: string, blockId: string): P
 
     // No direct permission, check inheritance via parent chain
     // Build a single query that checks both user and team permissions
-    const rows = await db.$queryRaw<Array<{ depth: number; role: RoleType }>>`
+    const rows = await client.$queryRaw<Array<{ depth: number; role: RoleType }>>`
         WITH RECURSIVE ancestors AS (
             SELECT id, parent_id, 0 AS depth
             FROM blocks
@@ -110,6 +113,7 @@ export const getRoleWithInheritance = async (userId: string, blockId: string): P
             SELECT b.id, b.parent_id, a.depth + 1
             FROM blocks b
             INNER JOIN ancestors a ON b.id = a.parent_id
+            WHERE a.depth < 1000 -- stops a cycle left in old data from looping forever
         )
         SELECT a.depth, p.role
         FROM ancestors a

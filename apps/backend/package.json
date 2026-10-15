@@ -22,7 +22,8 @@
         "prisma:pull": "bunx prisma db pull",
         "prisma:push": "bunx prisma db push",
         "start": "bun run dist/server.js",
-        "studio": "bunx prisma studio"
+        "studio": "bunx prisma studio",
+        "test": "bun test"
     },
     "dependencies": {
         "@aws-sdk/client-s3": "^3.955.0",
