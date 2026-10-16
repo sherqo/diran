@@ -18,6 +18,7 @@ export const aiRequestSchema = z.object({
         content: z.any(),
       })
     )
+    .max(10, 'Too many context blocks')
     .optional(),
 });
 

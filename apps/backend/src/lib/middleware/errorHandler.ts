@@ -102,6 +102,12 @@ export const errorHandler = (error: FastifyError | any, request: FastifyRequest,
         return;
     }
 
+    // Other client errors raised by Fastify itself (e.g. 413 body too large)
+    if (error.statusCode >= 400 && error.statusCode < 500) {
+        sendError(reply, error.message, error.statusCode, ErrorCode.INVALID_INPUT);
+        return;
+    }
+
     // Generic errors
     sendError(reply, 'Internal server error', HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.INTERNAL_ERROR);
 };
